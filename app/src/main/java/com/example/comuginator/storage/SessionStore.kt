@@ -29,6 +29,10 @@ class SessionStore(context: Context) {
         get() = prefs.getString("deviceName", null)
         set(value) = prefs.edit().putString("deviceName", value).apply()
 
+    fun isConnected(): Boolean = !token.isNullOrBlank()
+
+    fun authHeader(): String? = token?.let { "Bearer $it" }
+
     fun clear() {
         prefs.edit().clear().apply()
     }

@@ -1,6 +1,6 @@
 package com.example.comuginator.ui
 
-import android.os.Build
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
@@ -29,14 +29,15 @@ class MainActivity : AppCompatActivity() {
     private lateinit var etUserName: EditText
     private lateinit var etDeviceName: EditText
     private lateinit var etInviteCode: EditText
-    private lateinit var layoutChoice: LinearLayout
-    private lateinit var layoutJoin: LinearLayout
-    private lateinit var tvStatus: TextView
 
     private lateinit var btnNext: Button
     private lateinit var btnCreateFamily: Button
     private lateinit var btnShowJoin: Button
     private lateinit var btnJoinFamily: Button
+
+    private lateinit var tvStatus: TextView
+    private lateinit var layoutChoice: LinearLayout
+    private lateinit var layoutJoin: LinearLayout
 
     private lateinit var stableDeviceId: String
 
@@ -45,36 +46,52 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         store = SessionStore(this)
-        stableDeviceId = getOrCreateStableDeviceId()
 
         etUserName = findViewById(R.id.etUserName)
         etDeviceName = findViewById(R.id.etDeviceName)
         etInviteCode = findViewById(R.id.etInviteCode)
-        layoutChoice = findViewById(R.id.layoutChoice)
-        layoutJoin = findViewById(R.id.layoutJoin)
-        tvStatus = findViewById(R.id.tvStatus)
 
         btnNext = findViewById(R.id.btnNext)
         btnCreateFamily = findViewById(R.id.btnCreateFamily)
         btnShowJoin = findViewById(R.id.btnShowJoin)
         btnJoinFamily = findViewById(R.id.btnJoinFamily)
 
-        val defaultDeviceName = "${Build.MANUFACTURER} ${Build.MODEL}".trim()
+        tvStatus = findViewById(R.id.tvStatus)
+        layoutChoice = findViewById(R.id.layoutChoice)
+        layoutJoin = findViewById(R.id.layoutJoin)
 
-        etUserName.setText(store.userName ?: "")
-        etDeviceName.setText(store.deviceName ?: defaultDeviceName)
+        stableDeviceId = store.deviceId ?: UUID.randomUUID().toString().also {
+            store.deviceId = it
+        }
+
+        val existingToken = store.token
+        if (!existingToken.isNullOrBlank()) {
+            openFamilyScreen()
+            return
+        }
+
+        layoutChoice.visibility = View.GONE
+        layoutJoin.visibility = View.GONE
+
+        if (!store.userName.isNullOrBlank()) {
+            etUserName.setText(store.userName)
+        }
+
+        if (!store.deviceName.isNullOrBlank()) {
+            etDeviceName.setText(store.deviceName)
+        }
 
         btnNext.setOnClickListener {
             val userName = etUserName.text.toString().trim()
             val deviceName = etDeviceName.text.toString().trim()
 
             if (userName.isBlank()) {
-                tvStatus.text = "Enter user name"
+                tvStatus.text = "User name is required"
                 return@setOnClickListener
             }
 
             if (deviceName.isBlank()) {
-                tvStatus.text = "Enter device name"
+                tvStatus.text = "Device name is required"
                 return@setOnClickListener
             }
 
@@ -82,12 +99,12 @@ class MainActivity : AppCompatActivity() {
             store.deviceName = deviceName
 
             layoutChoice.visibility = View.VISIBLE
-            tvStatus.text = "Choose what to do next"
+            tvStatus.text = "Choose: create family group or join family group"
         }
 
         btnShowJoin.setOnClickListener {
-            layoutJoin.visibility = View.VISIBLE
-            tvStatus.text = "Enter invite code"
+            layoutJoin.visibility =
+                if (layoutJoin.visibility == View.VISIBLE) View.GONE else View.VISIBLE
         }
 
         btnCreateFamily.setOnClickListener {
@@ -97,20 +114,31 @@ class MainActivity : AppCompatActivity() {
         btnJoinFamily.setOnClickListener {
             joinFamily()
         }
+    }
 
-        val existingToken = store.token
-        if (!existingToken.isNullOrBlank()) {
-            tvStatus.text = "Already connected. Token exists for device $stableDeviceId"
-            layoutChoice.visibility = View.VISIBLE
-        }
+    private fun setButtonsEnabled(enabled: Boolean) {
+        btnNext.isEnabled = enabled
+        btnCreateFamily.isEnabled = enabled
+        btnShowJoin.isEnabled = enabled
+        btnJoinFamily.isEnabled = enabled
+    }
+
+    private fun openFamilyScreen() {
+        startActivity(Intent(this, FamilyActivity::class.java))
+        finish()
     }
 
     private fun createFamily() {
         val userName = etUserName.text.toString().trim()
         val deviceName = etDeviceName.text.toString().trim()
 
-        if (userName.isBlank() || deviceName.isBlank()) {
-            runOnUiThread { tvStatus.text = "Fill in user name and device name" }
+        if (userName.isBlank()) {
+            tvStatus.text = "User name is required"
+            return
+        }
+
+        if (deviceName.isBlank()) {
+            tvStatus.text = "Device name is required"
             return
         }
 
@@ -125,8 +153,7 @@ class MainActivity : AppCompatActivity() {
                     CreateFamilyRequest(
                         userName = userName,
                         deviceName = deviceName,
-                        deviceId = stableDeviceId,
-                        familyName = "$userName family"
+                        deviceId = stableDeviceId
                     )
                 )
 
@@ -141,10 +168,11 @@ class MainActivity : AppCompatActivity() {
                     tvStatus.text =
                         "Family created.\nFamily ID: ${response.familyId}\nRole: ${response.role}\nDevice ID: ${response.deviceId}"
                     setButtonsEnabled(true)
+                    openFamilyScreen()
                 }
             } catch (e: Exception) {
                 runOnUiThread {
-                    tvStatus.text = "Create family failed: $e"
+                    tvStatus.text = "Create family failed: ${e.message}"
                     setButtonsEnabled(true)
                 }
             }
@@ -156,13 +184,18 @@ class MainActivity : AppCompatActivity() {
         val deviceName = etDeviceName.text.toString().trim()
         val code = etInviteCode.text.toString().trim().uppercase()
 
-        if (userName.isBlank() || deviceName.isBlank()) {
-            runOnUiThread { tvStatus.text = "Fill in user name and device name" }
+        if (userName.isBlank()) {
+            tvStatus.text = "User name is required"
+            return
+        }
+
+        if (deviceName.isBlank()) {
+            tvStatus.text = "Device name is required"
             return
         }
 
         if (code.isBlank()) {
-            runOnUiThread { tvStatus.text = "Enter invite code" }
+            tvStatus.text = "Invite code is required"
             return
         }
 
@@ -193,30 +226,15 @@ class MainActivity : AppCompatActivity() {
                     tvStatus.text =
                         "Joined family.\nFamily ID: ${response.familyId}\nRole: ${response.role}\nUser created: ${response.userCreated}"
                     setButtonsEnabled(true)
+                    openFamilyScreen()
                 }
             } catch (e: Exception) {
                 runOnUiThread {
-                    tvStatus.text = "Join family failed: $e"
+                    tvStatus.text = "Join family failed: ${e.message}"
                     setButtonsEnabled(true)
                 }
             }
         }
-    }
-
-    private fun setButtonsEnabled(enabled: Boolean) {
-        btnNext.isEnabled = enabled
-        btnCreateFamily.isEnabled = enabled
-        btnShowJoin.isEnabled = enabled
-        btnJoinFamily.isEnabled = enabled
-    }
-
-    private fun getOrCreateStableDeviceId(): String {
-        val existing = store.deviceId
-        if (!existing.isNullOrBlank()) return existing
-
-        val newId = UUID.randomUUID().toString()
-        store.deviceId = newId
-        return newId
     }
 
     override fun onDestroy() {

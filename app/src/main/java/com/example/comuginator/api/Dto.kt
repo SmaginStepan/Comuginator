@@ -32,6 +32,7 @@ data class JoinFamilyResponse(
 )
 
 data class CreateInviteRequest(
+    val role: String,
     val expiresInMinutes: Int = 60
 )
 
@@ -40,39 +41,13 @@ data class CreateInviteResponse(
     val expiresAt: String
 )
 
-data class DeviceStateDto(
-    val batteryPercent: Int?,
-    val isCharging: Boolean?,
-    val reportedAt: String?
+data class FamilyMeResponse(
+    val family: FamilyDto,
+    val me: MeDto,
+    val users: List<UserDto>
 )
 
-data class DeviceDto(
-    val id: String,
-    val deviceId: String,
-    val userId: String,
-    val name: String?,
-    val platform: String?,
-    val model: String?,
-    val osVersion: String?,
-    val appVersion: String?,
-    val createdAt: String,
-    val updatedAt: String,
-    val lastSeenAt: String?,
-    val state: DeviceStateDto?
-)
-
-data class UserDto(
-    val id: String,
-    val familyId: String,
-    val role: String,
-    val name: String?,
-    val avatarUrl: String?,
-    val createdAt: String,
-    val updatedAt: String,
-    val devices: List<DeviceDto>
-)
-
-data class FamilyInfoDto(
+data class FamilyDto(
     val id: String,
     val name: String?
 )
@@ -83,20 +58,42 @@ data class MeDto(
     val role: String
 )
 
-data class FamilyMeResponse(
-    val family: FamilyInfoDto,
-    val me: MeDto,
-    val users: List<UserDto>
+data class UserDto(
+    val id: String,
+    val familyId: String,
+    val role: String,
+    val name: String?,
+    val devices: List<DeviceDto>
+)
+
+data class DeviceDto(
+    val id: String,
+    val deviceId: String,
+    val name: String?,
+    val createdAt: String,
+    val lastSeenAt: String?,
+    val platform: String?,
+    val model: String?,
+    val osVersion: String?,
+    val appVersion: String?,
+    val state: DeviceStateDto?
+)
+
+data class DeviceStateDto(
+    val deviceId: String,
+    val batteryPercent: Int?,
+    val isCharging: Boolean?,
+    val reportedAt: String?
 )
 
 data class HeartbeatRequest(
-    val batteryPercent: Int? = null,
-    val isCharging: Boolean? = null,
-    val reportedAt: String? = null,
-    val platform: String? = null,
-    val model: String? = null,
-    val osVersion: String? = null,
-    val appVersion: String? = null
+    val batteryPercent: Int?,
+    val isCharging: Boolean?,
+    val reportedAt: String?,
+    val platform: String?,
+    val model: String?,
+    val osVersion: String?,
+    val appVersion: String?
 )
 
 data class HeartbeatResponse(
