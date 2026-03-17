@@ -1,0 +1,156 @@
+package com.example.comuginator.service
+
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.Service
+import android.content.Context
+import android.content.Intent
+import android.os.Build
+import android.os.IBinder
+import androidx.core.app.NotificationCompat
+import com.example.comuginator.R
+import com.example.comuginator.api.ApiClient
+import com.example.comuginator.api.HeartbeatRequest
+import com.example.comuginator.storage.SessionStore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+
+class ConnectionService : Service() {
+
+    companion object {
+        private const val CHANNEL_ID = "comuginator_connection"
+        private const val CHANNEL_NAME = "Comuginator connection"
+        private const val NOTIFICATION_ID = 1001
+        private const val HEARTBEAT_INTERVAL_MS = 30_000L
+
+        fun start(context: Context) {
+            val intent = Intent(context, ConnectionService::class.java)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                context.startForegroundService(intent)
+            } else {
+                context.startService(intent)
+            }
+        }
+
+        fun stop(context: Context) {
+            val intent = Intent(context, ConnectionService::class.java)
+            context.stopService(intent)
+        }
+    }
+
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    private lateinit var sessionStore: SessionStore
+
+    @Volatile
+    private var loopStarted: Boolean = false
+
+    override fun onCreate() {
+        super.onCreate()
+        sessionStore = SessionStore(this)
+        createNotificationChannel()
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val token = sessionStore.token
+        if (token.isNullOrBlank()) {
+            stopSelf()
+            return START_NOT_STICKY
+        }
+
+        startForeground(
+            NOTIFICATION_ID,
+            buildNotification("Connection active")
+        )
+
+        if (!loopStarted) {
+            loopStarted = true
+            startHeartbeatLoop()
+        }
+
+        return START_STICKY
+    }
+
+    private fun startHeartbeatLoop() {
+        serviceScope.launch {
+            while (isActive) {
+                try {
+                    sendHeartbeatOnce()
+                    updateNotification("Last heartbeat: OK")
+                } catch (e: Exception) {
+                    updateNotification("Heartbeat error: ${e.message ?: "unknown"}")
+                }
+
+                delay(HEARTBEAT_INTERVAL_MS)
+            }
+        }
+    }
+
+    private suspend fun sendHeartbeatOnce() {
+        val token = sessionStore.token ?: return
+
+        val battery = DeviceInfoProvider.getBatterySnapshot(this)
+
+        ApiClient.api.heartbeat(
+            auth = "Bearer $token",
+            body = HeartbeatRequest(
+                batteryPercent = battery.batteryPercent,
+                isCharging = battery.isCharging,
+                reportedAt = java.text.SimpleDateFormat(
+                    "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+                    java.util.Locale.US
+                ).apply {
+                    timeZone = java.util.TimeZone.getTimeZone("UTC")
+                }.format(java.util.Date()),
+                platform = DeviceInfoProvider.getPlatform(),
+                model = DeviceInfoProvider.getModel(),
+                osVersion = DeviceInfoProvider.getOsVersion(),
+                appVersion = DeviceInfoProvider.getAppVersion(this)
+            )
+        )
+    }
+
+    private fun buildNotification(text: String): Notification {
+        return NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle("Comuginator")
+            .setContentText(text)
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setOngoing(true)
+            .setOnlyAlertOnce(true)
+            .build()
+    }
+
+    private fun updateNotification(text: String) {
+        val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        manager.notify(NOTIFICATION_ID, buildNotification(text))
+    }
+
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+
+        val manager = getSystemService(NotificationManager::class.java)
+        val channel = NotificationChannel(
+            CHANNEL_ID,
+            CHANNEL_NAME,
+            NotificationManager.IMPORTANCE_LOW
+        ).apply {
+            description = "Keeps Comuginator connection alive"
+        }
+
+        manager.createNotificationChannel(channel)
+    }
+
+    override fun onDestroy() {
+        loopStarted = false
+        serviceScope.cancel()
+        super.onDestroy()
+    }
+
+    override fun onBind(intent: Intent?): IBinder? = null
+}

@@ -12,6 +12,7 @@ import com.example.comuginator.R
 import com.example.comuginator.api.ApiClient
 import com.example.comuginator.api.CreateFamilyRequest
 import com.example.comuginator.api.JoinFamilyRequest
+import com.example.comuginator.service.ConnectionService
 import com.example.comuginator.storage.SessionStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -66,6 +67,7 @@ class MainActivity : AppCompatActivity() {
 
         val existingToken = store.token
         if (!existingToken.isNullOrBlank()) {
+            ConnectionService.start(this)
             openFamilyScreen()
             return
         }
@@ -164,6 +166,8 @@ class MainActivity : AppCompatActivity() {
                 store.userName = userName
                 store.deviceName = deviceName
 
+                ConnectionService.start(this@MainActivity)
+
                 runOnUiThread {
                     tvStatus.text =
                         "Family created.\nFamily ID: ${response.familyId}\nRole: ${response.role}\nDevice ID: ${response.deviceId}"
@@ -221,6 +225,8 @@ class MainActivity : AppCompatActivity() {
                 store.deviceId = response.deviceId
                 store.userName = userName
                 store.deviceName = deviceName
+
+                ConnectionService.start(this@MainActivity)
 
                 runOnUiThread {
                     tvStatus.text =
