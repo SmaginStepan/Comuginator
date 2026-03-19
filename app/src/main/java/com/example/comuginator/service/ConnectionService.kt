@@ -3,6 +3,7 @@ package com.example.comuginator.service
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -13,6 +14,7 @@ import com.example.comuginator.R
 import com.example.comuginator.api.ApiClient
 import com.example.comuginator.api.HeartbeatRequest
 import com.example.comuginator.storage.SessionStore
+import com.example.comuginator.ui.MainActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -20,6 +22,9 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class ConnectionService : Service() {
 
@@ -45,7 +50,6 @@ class ConnectionService : Service() {
     }
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-
     private lateinit var sessionStore: SessionStore
 
     @Volatile
@@ -82,7 +86,7 @@ class ConnectionService : Service() {
             while (isActive) {
                 try {
                     sendHeartbeatOnce()
-                    updateNotification("Last heartbeat: OK")
+                    updateNotification("Last heartbeat OK: ${nowLocalTime()}")
                 } catch (e: Exception) {
                     updateNotification("Heartbeat error: ${e.message ?: "unknown"}")
                 }
@@ -94,7 +98,6 @@ class ConnectionService : Service() {
 
     private suspend fun sendHeartbeatOnce() {
         val token = sessionStore.token ?: return
-
         val battery = DeviceInfoProvider.getBatterySnapshot(this)
 
         ApiClient.api.heartbeat(
@@ -102,12 +105,7 @@ class ConnectionService : Service() {
             body = HeartbeatRequest(
                 batteryPercent = battery.batteryPercent,
                 isCharging = battery.isCharging,
-                reportedAt = java.text.SimpleDateFormat(
-                    "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
-                    java.util.Locale.US
-                ).apply {
-                    timeZone = java.util.TimeZone.getTimeZone("UTC")
-                }.format(java.util.Date()),
+                reportedAt = DeviceInfoProvider.getReportedAtIsoUtc(),
                 platform = DeviceInfoProvider.getPlatform(),
                 model = DeviceInfoProvider.getModel(),
                 osVersion = DeviceInfoProvider.getOsVersion(),
@@ -117,12 +115,22 @@ class ConnectionService : Service() {
     }
 
     private fun buildNotification(text: String): Notification {
+        val openAppIntent = Intent(this, MainActivity::class.java)
+        val pendingIntent = PendingIntent.getActivity(
+            this,
+            0,
+            openAppIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or pendingIntentImmutableFlag()
+        )
+
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("Comuginator")
             .setContentText(text)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setContentIntent(pendingIntent)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
+            .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
             .build()
     }
 
@@ -141,9 +149,22 @@ class ConnectionService : Service() {
             NotificationManager.IMPORTANCE_LOW
         ).apply {
             description = "Keeps Comuginator connection alive"
+            setShowBadge(false)
         }
 
         manager.createNotificationChannel(channel)
+    }
+
+    private fun nowLocalTime(): String {
+        return SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
+    }
+
+    private fun pendingIntentImmutableFlag(): Int {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            PendingIntent.FLAG_IMMUTABLE
+        } else {
+            0
+        }
     }
 
     override fun onDestroy() {

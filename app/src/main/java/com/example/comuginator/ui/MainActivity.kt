@@ -79,8 +79,11 @@ class MainActivity : AppCompatActivity() {
             etUserName.setText(store.userName)
         }
 
-        if (!store.deviceName.isNullOrBlank()) {
-            etDeviceName.setText(store.deviceName)
+        val savedDeviceName = store.deviceName
+        if (!savedDeviceName.isNullOrBlank()) {
+            etDeviceName.setText(savedDeviceName)
+        } else {
+            etDeviceName.setText(android.os.Build.BRAND + " " + android.os.Build.MODEL ?: "")
         }
 
         btnNext.setOnClickListener {

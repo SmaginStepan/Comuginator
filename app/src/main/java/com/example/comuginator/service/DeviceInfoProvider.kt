@@ -33,8 +33,12 @@ object DeviceInfoProvider {
             if (level >= 0 && scale > 0) ((level * 100) / scale) else null
 
         val status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1)
-        val isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
-                status == BatteryManager.BATTERY_STATUS_FULL
+        val plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1)
+
+        val isCharging =
+            (status == BatteryManager.BATTERY_STATUS_CHARGING ||
+                    status == BatteryManager.BATTERY_STATUS_FULL) &&
+                    (plugged != 0)
 
         return BatterySnapshot(
             batteryPercent = batteryPercent,
@@ -51,5 +55,13 @@ object DeviceInfoProvider {
     fun getAppVersion(context: Context): String {
         val pkg = context.packageManager.getPackageInfo(context.packageName, 0)
         return pkg.versionName ?: "1.0"
+    }
+    fun getReportedAtIsoUtc(): String {
+        return java.text.SimpleDateFormat(
+            "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+            java.util.Locale.US
+        ).apply {
+            timeZone = java.util.TimeZone.getTimeZone("UTC")
+        }.format(java.util.Date())
     }
 }
