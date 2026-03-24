@@ -1,19 +1,28 @@
 package com.example.comuginator.ui
 
+import android.Manifest
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.example.comuginator.R
 import com.example.comuginator.api.ApiClient
 import com.example.comuginator.api.CreateFamilyRequest
 import com.example.comuginator.api.JoinFamilyRequest
 import com.example.comuginator.service.ConnectionService
 import com.example.comuginator.storage.SessionStore
+import com.example.comuginator.ui.base.BaseActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -21,7 +30,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import java.util.UUID
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : BaseActivity() {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -65,13 +74,6 @@ class MainActivity : AppCompatActivity() {
             store.deviceId = it
         }
 
-        val existingToken = store.token
-        if (!existingToken.isNullOrBlank()) {
-            ConnectionService.start(this)
-            openFamilyScreen()
-            return
-        }
-
         layoutChoice.visibility = View.GONE
         layoutJoin.visibility = View.GONE
 
@@ -83,7 +85,7 @@ class MainActivity : AppCompatActivity() {
         if (!savedDeviceName.isNullOrBlank()) {
             etDeviceName.setText(savedDeviceName)
         } else {
-            etDeviceName.setText(android.os.Build.BRAND + " " + android.os.Build.MODEL ?: "")
+            etDeviceName.setText("${android.os.Build.BRAND} ${android.os.Build.MODEL}")
         }
 
         btnNext.setOnClickListener {
@@ -119,6 +121,12 @@ class MainActivity : AppCompatActivity() {
         btnJoinFamily.setOnClickListener {
             joinFamily()
         }
+
+        ensureInitialized()
+    }
+
+    override fun onInitialized() {
+        openFamilyScreen()
     }
 
     private fun setButtonsEnabled(enabled: Boolean) {
@@ -168,8 +176,6 @@ class MainActivity : AppCompatActivity() {
                 store.deviceId = response.deviceId
                 store.userName = userName
                 store.deviceName = deviceName
-
-                ConnectionService.start(this@MainActivity)
 
                 runOnUiThread {
                     tvStatus.text =
@@ -228,8 +234,6 @@ class MainActivity : AppCompatActivity() {
                 store.deviceId = response.deviceId
                 store.userName = userName
                 store.deviceName = deviceName
-
-                ConnectionService.start(this@MainActivity)
 
                 runOnUiThread {
                     tvStatus.text =

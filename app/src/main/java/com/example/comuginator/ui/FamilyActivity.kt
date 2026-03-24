@@ -11,13 +11,14 @@ import com.example.comuginator.api.DeviceDto
 import com.example.comuginator.api.FamilyMeResponse
 import com.example.comuginator.api.UserDto
 import com.example.comuginator.storage.SessionStore
+import com.example.comuginator.ui.base.BaseActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
-class FamilyActivity : AppCompatActivity() {
+class FamilyActivity : BaseActivity() {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -53,6 +54,10 @@ class FamilyActivity : AppCompatActivity() {
         btnInviteParent.setOnClickListener { createInvite("PARENT") }
         btnInviteChild.setOnClickListener { createInvite("CHILD") }
 
+        ensureInitialized()
+    }
+
+    override fun onInitialized() {
         loadFamily()
     }
 
