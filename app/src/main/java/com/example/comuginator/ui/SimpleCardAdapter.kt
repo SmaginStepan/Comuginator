@@ -3,8 +3,10 @@ package com.example.comuginator.ui
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import coil.load
 import com.example.comuginator.R
 import com.example.comuginator.api.ArasaacCardDto
 
@@ -33,10 +35,16 @@ class SimpleCardAdapter(
     override fun getItemCount(): Int = items.size
 
     inner class CardViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        private val ivCardImage: ImageView = view.findViewById(R.id.ivCardImage)
         private val tvCardLabel: TextView = view.findViewById(R.id.tvCardLabel)
 
         fun bind(item: ArasaacCardDto) {
             tvCardLabel.text = item.label
+
+            ivCardImage.load(item.imageUrl) {
+                crossfade(true)
+            }
+
             itemView.setOnClickListener { onClick(item) }
         }
     }

@@ -5,6 +5,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.comuginator.R
@@ -76,7 +77,7 @@ class ComposeMessageActivity : AppCompatActivity() {
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         rvSelectedCards.adapter = selectedAdapter
 
-        rvResults.layoutManager = LinearLayoutManager(this)
+        rvResults.layoutManager = GridLayoutManager(this, 3)
         rvResults.adapter = resultsAdapter
 
         btnSearch.setOnClickListener {

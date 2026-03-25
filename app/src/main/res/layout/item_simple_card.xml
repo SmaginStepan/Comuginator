@@ -1,9 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/tvCardLabel"
-    android:layout_width="wrap_content"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
-    android:padding="12dp"
-    android:background="@android:drawable/dialog_holo_light_frame"
-    android:text="Card" />
+    android:orientation="vertical"
+    android:padding="8dp"
+    android:background="#2F2F2F">
+
+    <ImageView
+        android:id="@+id/ivCardImage"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:layout_gravity="center_horizontal"
+        android:contentDescription="@null"
+        android:scaleType="fitCenter" />
+
+    <TextView
+        android:id="@+id/tvCardLabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:text="Card"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp" />
+</LinearLayout>
