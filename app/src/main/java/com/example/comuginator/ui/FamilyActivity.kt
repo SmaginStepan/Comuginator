@@ -2,12 +2,13 @@ package com.example.comuginator.ui
 
 import android.os.Bundle
 import android.widget.Button
+import android.widget.LinearLayout
+import android.widget.SeekBar
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
 import com.example.comuginator.R
 import com.example.comuginator.api.ApiClient
+import com.example.comuginator.api.CreateCommandRequest
 import com.example.comuginator.api.CreateInviteRequest
-import com.example.comuginator.api.DeviceDto
 import com.example.comuginator.api.FamilyMeResponse
 import com.example.comuginator.api.UserDto
 import com.example.comuginator.storage.SessionStore
@@ -17,6 +18,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.comuginator.ui.family.FamilyAdapter
+import com.example.comuginator.ui.family.FamilyListItem
 
 class FamilyActivity : BaseActivity() {
 
@@ -27,7 +32,10 @@ class FamilyActivity : BaseActivity() {
     private lateinit var tvFamily: TextView
     private lateinit var tvMe: TextView
     private lateinit var tvInvite: TextView
-    private lateinit var tvUsers: TextView
+    private lateinit var rvFamily: RecyclerView
+    private lateinit var familyAdapter: FamilyAdapter
+    private var currentMeRole: String = ""
+    private var currentMyDeviceId: String = ""
     private lateinit var tvStatus: TextView
 
     private lateinit var btnRefresh: Button
@@ -43,7 +51,17 @@ class FamilyActivity : BaseActivity() {
         tvFamily = findViewById(R.id.tvFamily)
         tvMe = findViewById(R.id.tvMe)
         tvInvite = findViewById(R.id.tvInvite)
-        tvUsers = findViewById(R.id.tvUsers)
+        rvFamily = findViewById(R.id.rvFamily)
+
+        familyAdapter = FamilyAdapter(
+            isParentViewer = false,
+            myDeviceId = ""
+        ) { deviceId, deviceName, currentVolumePercent ->
+            showSetVolumeDialog(deviceId, deviceName, currentVolumePercent)
+        }
+
+        rvFamily.layoutManager = LinearLayoutManager(this)
+        rvFamily.adapter = familyAdapter
         tvStatus = findViewById(R.id.tvStatus)
 
         btnRefresh = findViewById(R.id.btnRefresh)
@@ -88,6 +106,7 @@ class FamilyActivity : BaseActivity() {
                     setButtonsEnabled(true)
                 }
             } catch (e: Exception) {
+                if (handleUnauthorized(e)) return@launch
                 runOnUiThread {
                     tvStatus.text = "Load family failed: ${e.message}"
                     setButtonsEnabled(true)
@@ -122,6 +141,7 @@ class FamilyActivity : BaseActivity() {
                     setButtonsEnabled(true)
                 }
             } catch (e: Exception) {
+                if (handleUnauthorized(e)) return@launch
                 runOnUiThread {
                     tvStatus.text = "Create invite failed: ${e.message}"
                     setButtonsEnabled(true)
@@ -130,9 +150,39 @@ class FamilyActivity : BaseActivity() {
         }
     }
 
+    private fun mapFamilyItems(users: List<UserDto>): List<FamilyListItem> {
+        val out = mutableListOf<FamilyListItem>()
+
+        for (user in users) {
+            out += FamilyListItem.UserHeader(
+                userId = user.id,
+                userName = user.name ?: "(no name)",
+                role = user.role
+            )
+
+            for (device in user.devices) {
+                out += FamilyListItem.DeviceRow(
+                    userId = user.id,
+                    userRole = user.role,
+                    deviceId = device.deviceId,
+                    deviceName = device.name ?: device.deviceId,
+                    batteryPercent = device.state?.batteryPercent,
+                    isCharging = device.state?.isCharging,
+                    lastSeenAt = device.lastSeenAt,
+                    volumePercent = device.state?.volumePercent
+                )
+            }
+        }
+
+        return out
+    }
+
     private fun renderFamily(response: FamilyMeResponse) {
         val familyName = response.family.name ?: "(no name)"
         tvFamily.text = "Family: $familyName"
+
+        currentMeRole = response.me.role
+        currentMyDeviceId = response.me.deviceId
 
         tvMe.text = buildString {
             append("Me:\n")
@@ -141,44 +191,90 @@ class FamilyActivity : BaseActivity() {
             append("deviceId=${response.me.deviceId}")
         }
 
-        tvUsers.text = formatUsers(response.users)
+        familyAdapter = FamilyAdapter(
+            isParentViewer = currentMeRole == "PARENT",
+            myDeviceId = currentMyDeviceId
+        ) { deviceId, deviceName, currentVolumePercent ->
+            showSetVolumeDialog(deviceId, deviceName, currentVolumePercent)
+        }
+
+        rvFamily.adapter = familyAdapter
+        familyAdapter.submitItems(mapFamilyItems(response.users))
     }
 
-    private fun formatUsers(users: List<UserDto>): String {
-        if (users.isEmpty()) return "No users"
 
-        return buildString {
-            users.forEach { user ->
-                append("• ${user.name ?: "(no name)"} [${user.role}]\n")
-
-                if (user.devices.isEmpty()) {
-                    append("   └ no devices\n")
-                } else {
-                    user.devices.forEachIndexed { index, device ->
-                        val prefix = if (index == user.devices.lastIndex) "   └" else "   ├"
-                        append(prefix)
-                        append(" ")
-                        append(formatDevice(device))
-                        append("\n")
-                    }
+    private fun sendSetVolumeCommand(deviceId: String, volumePercent: Int) {
+        scope.launch {
+            try {
+                runOnUiThread {
+                    tvStatus.text = "Sending volume command..."
+                    setButtonsEnabled(false)
                 }
 
-                append("\n")
+                ApiClient.api.createCommand(
+                    auth = authHeaderOrThrow(),
+                    deviceId = deviceId,
+                    body = CreateCommandRequest(
+                        type = "set_volume",
+                        payload = mapOf("volumePercent" to volumePercent)
+                    )
+                )
+
+                runOnUiThread {
+                    tvStatus.text = "Volume command sent: $volumePercent%"
+                    setButtonsEnabled(true)
+                }
+            } catch (e: Exception) {
+                runOnUiThread {
+                    tvStatus.text = "Failed to send volume command: ${e.message}"
+                    setButtonsEnabled(true)
+                }
             }
-        }.trim()
+        }
     }
 
-    private fun formatDevice(device: DeviceDto): String {
-        val displayName = device.name ?: device.deviceId
-        val battery = device.state?.batteryPercent?.toString() ?: "?"
-        val charging = when (device.state?.isCharging) {
-            true -> "charging"
-            false -> "not charging"
-            null -> "charging?"
-        }
-        val lastSeen = device.lastSeenAt ?: "never"
+    private fun showSetVolumeDialog(
+        deviceId: String,
+        deviceName: String,
+        currentVolumePercent: Int?
+    ) {
+        val initialValue = (currentVolumePercent ?: 50).coerceIn(0, 100)
 
-        return "$displayName | battery=$battery% | $charging | lastSeen=$lastSeen"
+        val container = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(48, 32, 48, 0)
+        }
+
+        val valueText = TextView(this).apply {
+            text = "Volume: $initialValue%"
+            textSize = 16f
+        }
+
+        val seekBar = SeekBar(this).apply {
+            max = 100
+            progress = initialValue
+
+            setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                    valueText.text = "Volume: $progress%"
+                }
+
+                override fun onStartTrackingTouch(seekBar: SeekBar?) = Unit
+                override fun onStopTrackingTouch(seekBar: SeekBar?) = Unit
+            })
+        }
+
+        container.addView(valueText)
+        container.addView(seekBar)
+
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Set volume: $deviceName")
+            .setView(container)
+            .setNegativeButton("Cancel", null)
+            .setPositiveButton("Apply") { _, _ ->
+                sendSetVolumeCommand(deviceId, seekBar.progress)
+            }
+            .show()
     }
 
     override fun onDestroy() {

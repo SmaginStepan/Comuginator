@@ -81,6 +81,7 @@ data class DeviceDto(
 
 data class DeviceStateDto(
     val deviceId: String,
+    val volumePercent: Int?,
     val batteryPercent: Int?,
     val isCharging: Boolean?,
     val reportedAt: String?
@@ -88,6 +89,7 @@ data class DeviceStateDto(
 
 data class HeartbeatRequest(
     val batteryPercent: Int?,
+    val volumePercent: Int?,
     val isCharging: Boolean?,
     val reportedAt: String?,
     val platform: String?,
@@ -99,4 +101,31 @@ data class HeartbeatRequest(
 data class HeartbeatResponse(
     val ok: Boolean,
     val now: String
+)
+
+data class CreateCommandRequest(
+    val type: String,
+    val payload: Map<String, @JvmSuppressWildcards Any>
+)
+
+data class CreateCommandResponse(
+    val ok: Boolean,
+    val commandId: String
+)
+
+data class PendingCommandsResponse(
+    val items: List<CommandDto>
+)
+
+data class CommandDto(
+    val id: String,
+    val deviceId: String,
+    val type: String,
+    val payload: Map<String, @JvmSuppressWildcards Any>,
+    val status: String,
+    val createdAt: String
+)
+
+data class AckCommandResponse(
+    val ok: Boolean
 )

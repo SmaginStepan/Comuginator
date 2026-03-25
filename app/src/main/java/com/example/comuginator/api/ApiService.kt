@@ -4,6 +4,7 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
+import retrofit2.http.Path
 
 interface ApiService {
 
@@ -33,4 +34,22 @@ interface ApiService {
         @Header("Authorization") auth: String,
         @Body body: HeartbeatRequest
     ): HeartbeatResponse
+
+    @POST("/v1/devices/{deviceId}/commands")
+    suspend fun createCommand(
+        @Header("Authorization") auth: String,
+        @Path("deviceId") deviceId: String,
+        @Body body: CreateCommandRequest
+    ): CreateCommandResponse
+
+    @GET("/v1/commands/pending")
+    suspend fun getPendingCommands(
+        @Header("Authorization") auth: String
+    ): PendingCommandsResponse
+
+    @POST("/v1/commands/{id}/ack")
+    suspend fun ackCommand(
+        @Header("Authorization") auth: String,
+        @Path("id") commandId: String
+    ): AckCommandResponse
 }

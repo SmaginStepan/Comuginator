@@ -1,26 +1,16 @@
 package com.example.comuginator.ui
 
-import android.Manifest
-import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
-import android.provider.Settings
-import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import com.example.comuginator.R
 import com.example.comuginator.api.ApiClient
 import com.example.comuginator.api.CreateFamilyRequest
 import com.example.comuginator.api.JoinFamilyRequest
-import com.example.comuginator.service.ConnectionService
 import com.example.comuginator.storage.SessionStore
 import com.example.comuginator.ui.base.BaseActivity
 import kotlinx.coroutines.CoroutineScope
@@ -29,6 +19,9 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import java.util.UUID
+import androidx.appcompat.app.AlertDialog
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 
 class MainActivity : BaseActivity() {
 
@@ -115,7 +108,7 @@ class MainActivity : BaseActivity() {
         }
 
         btnCreateFamily.setOnClickListener {
-            createFamily()
+            showCreateFamilyDialog()
         }
 
         btnJoinFamily.setOnClickListener {
@@ -141,7 +134,32 @@ class MainActivity : BaseActivity() {
         finish()
     }
 
-    private fun createFamily() {
+    private fun showCreateFamilyDialog() {
+        val inputLayout = TextInputLayout(this).apply {
+            setPadding(48, 24, 48, 0)
+            hint = "Family name"
+        }
+
+        val input = TextInputEditText(inputLayout.context).apply {
+            setText("")
+            setSingleLine(true)
+        }
+
+        inputLayout.addView(input)
+
+        AlertDialog.Builder(this)
+            .setTitle("Create family")
+            .setMessage("Enter family name")
+            .setView(inputLayout)
+            .setNegativeButton("Cancel", null)
+            .setPositiveButton("Create") { _, _ ->
+                val familyName = input.text?.toString()?.trim().orEmpty().ifBlank { null }
+                createFamily(familyName)
+            }
+            .show()
+    }
+
+    private fun createFamily(familyName: String?) {
         val userName = etUserName.text.toString().trim()
         val deviceName = etDeviceName.text.toString().trim()
 
@@ -166,7 +184,8 @@ class MainActivity : BaseActivity() {
                     CreateFamilyRequest(
                         userName = userName,
                         deviceName = deviceName,
-                        deviceId = stableDeviceId
+                        deviceId = stableDeviceId,
+                        familyName = familyName
                     )
                 )
 
@@ -184,6 +203,7 @@ class MainActivity : BaseActivity() {
                     openFamilyScreen()
                 }
             } catch (e: Exception) {
+                if (handleUnauthorized(e)) return@launch
                 runOnUiThread {
                     tvStatus.text = "Create family failed: ${e.message}"
                     setButtonsEnabled(true)
@@ -242,6 +262,7 @@ class MainActivity : BaseActivity() {
                     openFamilyScreen()
                 }
             } catch (e: Exception) {
+                if (handleUnauthorized(e)) return@launch
                 runOnUiThread {
                     tvStatus.text = "Join family failed: ${e.message}"
                     setButtonsEnabled(true)

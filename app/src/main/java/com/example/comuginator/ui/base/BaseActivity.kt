@@ -13,6 +13,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.example.comuginator.service.ConnectionService
 import com.example.comuginator.storage.SessionStore
+import com.example.comuginator.ui.MainActivity
+import retrofit2.HttpException
 
 open class BaseActivity: AppCompatActivity() {
     private lateinit var store: SessionStore
@@ -62,6 +64,19 @@ open class BaseActivity: AppCompatActivity() {
             return false
         }
         return true
+    }
+
+    protected fun handleUnauthorized(e: Exception): Boolean {
+        if (e is HttpException && e.code() == 401) {
+            val store = SessionStore(this)
+            store.clear()
+
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
+
+            return true
+        }
+        return false
     }
 
     private fun openNotifSettings(ctx: Context) {

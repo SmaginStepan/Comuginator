@@ -12,6 +12,7 @@ import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import com.example.comuginator.R
 import com.example.comuginator.api.ApiClient
+import com.example.comuginator.api.CommandDto
 import com.example.comuginator.api.HeartbeatRequest
 import com.example.comuginator.storage.SessionStore
 import com.example.comuginator.ui.MainActivity
@@ -25,6 +26,7 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import retrofit2.HttpException
 
 class ConnectionService : Service() {
 
@@ -81,13 +83,71 @@ class ConnectionService : Service() {
         return START_STICKY
     }
 
+    private fun getCurrentVolumePercent(): Int {
+        val audioManager = getSystemService(AUDIO_SERVICE) as android.media.AudioManager
+        val stream = android.media.AudioManager.STREAM_MUSIC
+        val current = audioManager.getStreamVolume(stream)
+        val max = audioManager.getStreamMaxVolume(stream)
+        if (max <= 0) return 0
+        return (current * 100) / max
+    }
+
+    private fun handleSetVolumeCommand(cmd: CommandDto) {
+        val raw = cmd.payload["volumePercent"] ?: return
+        val volumePercent = when (raw) {
+            is Double -> raw.toInt()
+            is Int -> raw
+            else -> return
+        }.coerceIn(0, 100)
+
+        val audioManager = getSystemService(AUDIO_SERVICE) as android.media.AudioManager
+        val stream = android.media.AudioManager.STREAM_MUSIC
+        val maxVolume = audioManager.getStreamMaxVolume(stream)
+        val targetVolume = (maxVolume * volumePercent) / 100
+
+        audioManager.setStreamVolume(stream, targetVolume, 0)
+    }
+
+    private suspend fun fetchAndProcessCommands() {
+        val token = sessionStore.token ?: return
+
+        val response = ApiClient.api.getPendingCommands("Bearer $token")
+
+        for (cmd in response.items) {
+            try {
+                when (cmd.type) {
+                    "set_volume" -> handleSetVolumeCommand(cmd)
+                }
+
+                ApiClient.api.ackCommand("Bearer $token", cmd.id)
+            } catch (e: Exception) {
+                if (handleUnauthorized(e)) return
+                // пока просто не ack-аем, тогда команда останется pending
+            }
+        }
+    }
+
+    private fun handleUnauthorized(e: Exception): Boolean {
+        if (e is HttpException && e.code() == 401) {
+            sessionStore.clear()
+            updateNotification("Session expired")
+            stopSelf()
+            return true
+        }
+        return false
+    }
+
     private fun startHeartbeatLoop() {
         serviceScope.launch {
             while (isActive) {
                 try {
                     sendHeartbeatOnce()
+                    fetchAndProcessCommands()
                     updateNotification("Last heartbeat OK: ${nowLocalTime()}")
                 } catch (e: Exception) {
+                    if (handleUnauthorized(e)) {
+                        break
+                    }
                     updateNotification("Heartbeat error: ${e.message ?: "unknown"}")
                 }
 
@@ -95,15 +155,16 @@ class ConnectionService : Service() {
             }
         }
     }
-
     private suspend fun sendHeartbeatOnce() {
         val token = sessionStore.token ?: return
         val battery = DeviceInfoProvider.getBatterySnapshot(this)
+        val volumePercent = getCurrentVolumePercent()
 
         ApiClient.api.heartbeat(
             auth = "Bearer $token",
             body = HeartbeatRequest(
                 batteryPercent = battery.batteryPercent,
+                volumePercent = volumePercent,
                 isCharging = battery.isCharging,
                 reportedAt = DeviceInfoProvider.getReportedAtIsoUtc(),
                 platform = DeviceInfoProvider.getPlatform(),
