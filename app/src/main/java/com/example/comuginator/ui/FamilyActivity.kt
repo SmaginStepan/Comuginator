@@ -1,5 +1,6 @@
 package com.example.comuginator.ui
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.LinearLayout
@@ -54,11 +55,15 @@ class FamilyActivity : BaseActivity() {
         rvFamily = findViewById(R.id.rvFamily)
 
         familyAdapter = FamilyAdapter(
-            isParentViewer = false,
-            myDeviceId = ""
-        ) { deviceId, deviceName, currentVolumePercent ->
-            showSetVolumeDialog(deviceId, deviceName, currentVolumePercent)
-        }
+            isParentViewer = currentMeRole == "PARENT",
+            myDeviceId = currentMyDeviceId,
+            onVolumeClick = { deviceId, deviceName, currentVolumePercent ->
+                showSetVolumeDialog(deviceId, deviceName, currentVolumePercent)
+            },
+            onSendClick = { userId, userName ->
+                openComposeMessageScreen(userId, userName)
+            }
+        )
 
         rvFamily.layoutManager = LinearLayoutManager(this)
         rvFamily.adapter = familyAdapter
@@ -73,6 +78,14 @@ class FamilyActivity : BaseActivity() {
         btnInviteChild.setOnClickListener { createInvite("CHILD") }
 
         ensureInitialized()
+    }
+
+    private fun openComposeMessageScreen(targetUserId: String, targetUserName: String) {
+        val intent = Intent(this, ComposeMessageActivity::class.java).apply {
+            putExtra("targetUserId", targetUserId)
+            putExtra("targetUserName", targetUserName)
+        }
+        startActivity(intent)
     }
 
     override fun onInitialized() {
@@ -193,10 +206,14 @@ class FamilyActivity : BaseActivity() {
 
         familyAdapter = FamilyAdapter(
             isParentViewer = currentMeRole == "PARENT",
-            myDeviceId = currentMyDeviceId
-        ) { deviceId, deviceName, currentVolumePercent ->
-            showSetVolumeDialog(deviceId, deviceName, currentVolumePercent)
-        }
+            myDeviceId = currentMyDeviceId,
+            onVolumeClick = { deviceId, deviceName, currentVolumePercent ->
+                showSetVolumeDialog(deviceId, deviceName, currentVolumePercent)
+            },
+            onSendClick = { userId, userName ->
+                openComposeMessageScreen(userId, userName)
+            }
+        )
 
         rvFamily.adapter = familyAdapter
         familyAdapter.submitItems(mapFamilyItems(response.users))

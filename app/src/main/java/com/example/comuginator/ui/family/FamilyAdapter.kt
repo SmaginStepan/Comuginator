@@ -12,7 +12,8 @@ import com.example.comuginator.R
 class FamilyAdapter(
     private val isParentViewer: Boolean,
     private val myDeviceId: String,
-    private val onVolumeClick: (deviceId: String, deviceName: String, currentVolumePercent: Int?) -> Unit
+    private val onVolumeClick: (deviceId: String, deviceName: String, currentVolumePercent: Int?) -> Unit,
+    private val onSendClick: (userId: String, userName: String) -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val items = mutableListOf<FamilyListItem>()
@@ -55,9 +56,13 @@ class FamilyAdapter(
 
     inner class UserHeaderViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         private val tvUserHeader: TextView = view.findViewById(R.id.tvUserHeader)
+        private val btnSend: Button = view.findViewById(R.id.btnSend)
 
         fun bind(item: FamilyListItem.UserHeader) {
             tvUserHeader.text = "${item.userName} [${item.role}]"
+            btnSend.setOnClickListener {
+                onSendClick(item.userId, item.userName)
+            }
         }
     }
 

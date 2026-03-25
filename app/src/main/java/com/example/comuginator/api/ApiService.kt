@@ -5,6 +5,7 @@ import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface ApiService {
 
@@ -52,4 +53,16 @@ interface ApiService {
         @Header("Authorization") auth: String,
         @Path("id") commandId: String
     ): AckCommandResponse
+
+    @GET("/v1/arasaac/search")
+    suspend fun searchArasaac(
+        @Header("Authorization") auth: String,
+        @Query("q") query: String
+    ): ArasaacSearchResponse
+
+    @POST("/v1/messages/aac")
+    suspend fun sendAacMessage(
+        @Header("Authorization") auth: String,
+        @Body body: SendAacMessageRequest
+    ): SendAacMessageResponse
 }

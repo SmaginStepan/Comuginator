@@ -19,6 +19,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Comuginator">
 
+        <activity android:name=".ui.ComposeMessageActivity" />
         <activity android:name=".ui.FamilyActivity" />
         <activity
             android:name=".ui.MainActivity"

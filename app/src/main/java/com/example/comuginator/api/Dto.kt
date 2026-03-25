@@ -129,3 +129,29 @@ data class CommandDto(
 data class AckCommandResponse(
     val ok: Boolean
 )
+
+data class ArasaacSearchResponse(
+    val items: List<ArasaacCardDto>
+)
+
+data class ArasaacCardDto(
+    val id: String,
+    val label: String,
+    val imageUrl: String
+)
+
+data class SendAacMessageRequest(
+    val targetUserId: String,
+    val cards: List<SendAacCardDto>
+)
+
+data class SendAacCardDto(
+    val id: String,
+    val label: String,
+    val imageUrl: String
+)
+
+data class SendAacMessageResponse(
+    val ok: Boolean,
+    val messageId: String
+)
