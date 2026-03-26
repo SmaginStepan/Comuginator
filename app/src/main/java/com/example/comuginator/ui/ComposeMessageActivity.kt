@@ -33,7 +33,7 @@ class ComposeMessageActivity : AppCompatActivity() {
     private lateinit var rvSelectedCards: RecyclerView
     private lateinit var rvResults: RecyclerView
 
-    private lateinit var selectedAdapter: SimpleCardAdapter
+    private lateinit var selectedAdapter: SelectedCardAdapter
     private lateinit var resultsAdapter: SimpleCardAdapter
 
     private lateinit var targetUserId: String
@@ -59,7 +59,7 @@ class ComposeMessageActivity : AppCompatActivity() {
 
         tvTarget.text = "Send to $targetUserName"
 
-        selectedAdapter = SimpleCardAdapter(
+        selectedAdapter = SelectedCardAdapter(
             onClick = { card ->
                 selectedCards.remove(card)
                 selectedAdapter.submitItems(selectedCards.toList())
