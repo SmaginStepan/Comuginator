@@ -54,6 +54,10 @@ class IncomingMessageActivity : BaseActivity() {
             return
         }
 
+        ensureInitialized()
+    }
+
+    override fun onInitialized() {
         authToken = try {
             requireToken()
         } catch (e: Exception) {
@@ -78,10 +82,6 @@ class IncomingMessageActivity : BaseActivity() {
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         rvSuggestedReplies.adapter = repliesAdapter
 
-        ensureInitialized()
-    }
-
-    override fun onInitialized() {
         loadMessage()
     }
 
