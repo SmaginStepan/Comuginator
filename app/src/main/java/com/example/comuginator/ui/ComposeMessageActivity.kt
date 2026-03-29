@@ -1,10 +1,12 @@
 package com.example.comuginator.ui
 
 import android.os.Bundle
+import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.widget.doAfterTextChanged
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -16,8 +18,10 @@ import com.example.comuginator.api.SendAacMessageRequest
 import com.example.comuginator.storage.SessionStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class ComposeMessageActivity : AppCompatActivity() {
@@ -27,19 +31,33 @@ class ComposeMessageActivity : AppCompatActivity() {
     private lateinit var store: SessionStore
 
     private lateinit var tvTarget: TextView
+    private lateinit var tvMessageHeader: TextView
+    private lateinit var tvRepliesHeader: TextView
     private lateinit var etSearch: EditText
-    private lateinit var btnSearch: Button
     private lateinit var btnSendMessage: Button
     private lateinit var rvSelectedCards: RecyclerView
+    private lateinit var rvReplyCards: RecyclerView
     private lateinit var rvResults: RecyclerView
 
     private lateinit var selectedAdapter: SelectedCardAdapter
+    private lateinit var replyAdapter: SelectedCardAdapter
     private lateinit var resultsAdapter: SimpleCardAdapter
 
     private lateinit var targetUserId: String
     private lateinit var targetUserName: String
 
+    private var searchJob: Job? = null
+    private var lastSearchQuery: String = ""
+
+    private enum class AddMode {
+        MESSAGE,
+        REPLY
+    }
+
+    private var currentAddMode: AddMode = AddMode.MESSAGE
+
     private val selectedCards = mutableListOf<ArasaacCardDto>()
+    private val replyCards = mutableListOf<ArasaacCardDto>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,10 +69,12 @@ class ComposeMessageActivity : AppCompatActivity() {
         targetUserName = intent.getStringExtra("targetUserName").orEmpty()
 
         tvTarget = findViewById(R.id.tvTarget)
+        tvMessageHeader = findViewById(R.id.tvMessageHeader)
+        tvRepliesHeader = findViewById(R.id.tvRepliesHeader)
         etSearch = findViewById(R.id.etSearch)
-        btnSearch = findViewById(R.id.btnSearch)
         btnSendMessage = findViewById(R.id.btnSendMessage)
         rvSelectedCards = findViewById(R.id.rvSelectedCards)
+        rvReplyCards = findViewById(R.id.rvReplyCards)
         rvResults = findViewById(R.id.rvResults)
 
         tvTarget.text = "Send to $targetUserName"
@@ -66,10 +86,25 @@ class ComposeMessageActivity : AppCompatActivity() {
             }
         )
 
+        replyAdapter = SelectedCardAdapter(
+            onClick = { card ->
+                replyCards.remove(card)
+                replyAdapter.submitItems(replyCards.toList())
+            }
+        )
+
         resultsAdapter = SimpleCardAdapter(
             onClick = { card ->
-                selectedCards.add(card)
-                selectedAdapter.submitItems(selectedCards.toList())
+                when (currentAddMode) {
+                    AddMode.MESSAGE -> {
+                        selectedCards.add(card)
+                        selectedAdapter.submitItems(selectedCards.toList())
+                    }
+                    AddMode.REPLY -> {
+                        replyCards.add(card)
+                        replyAdapter.submitItems(replyCards.toList())
+                    }
+                }
             }
         )
 
@@ -77,16 +112,62 @@ class ComposeMessageActivity : AppCompatActivity() {
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         rvSelectedCards.adapter = selectedAdapter
 
+        rvReplyCards.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        rvReplyCards.adapter = replyAdapter
+
         rvResults.layoutManager = GridLayoutManager(this, 3)
         rvResults.adapter = resultsAdapter
 
-        btnSearch.setOnClickListener {
-            searchCards()
+        tvMessageHeader.setOnClickListener {
+            currentAddMode = AddMode.MESSAGE
+            updateModeUi()
+        }
+
+        tvRepliesHeader.setOnClickListener {
+            currentAddMode = AddMode.REPLY
+            updateModeUi()
         }
 
         btnSendMessage.setOnClickListener {
             sendMessage()
         }
+
+        etSearch.doAfterTextChanged { editable ->
+            val query = editable?.toString()?.trim().orEmpty()
+
+            searchJob?.cancel()
+
+            if (query.isBlank()) {
+                resultsAdapter.submitItems(emptyList())
+                return@doAfterTextChanged
+            }
+
+            searchJob = scope.launch {
+                delay(2000)
+                if (query != lastSearchQuery) {
+                    runSearch(query)
+                }
+            }
+        }
+
+        etSearch.setOnEditorActionListener { _: TextView, actionId: Int, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE) {
+                val query = etSearch.text.toString().trim()
+                if (query.isNotBlank()) {
+                    searchJob?.cancel()
+                    scope.launch {
+                        runSearch(query)
+                    }
+                }
+                true
+            } else {
+                false
+            }
+        }
+
+        updateModeUi()
+        loadDefaultReplies()
     }
 
     private fun authHeaderOrThrow(): String {
@@ -94,23 +175,55 @@ class ComposeMessageActivity : AppCompatActivity() {
         return "Bearer $token"
     }
 
-    private fun searchCards() {
-        val query = etSearch.text.toString().trim()
-        if (query.isBlank()) return
+    private fun updateModeUi() {
+        val activeColor = 0xFF4444FF.toInt()
+        val inactiveColor = 0x00000000
 
+        tvMessageHeader.setBackgroundColor(
+            if (currentAddMode == AddMode.MESSAGE) activeColor else inactiveColor
+        )
+        tvRepliesHeader.setBackgroundColor(
+            if (currentAddMode == AddMode.REPLY) activeColor else inactiveColor
+        )
+    }
+
+    private fun loadDefaultReplies() {
         scope.launch {
             try {
                 val response = ApiClient.api.searchArasaac(
                     auth = authHeaderOrThrow(),
-                    query = query
+                    query = "ok"
                 )
 
-                runOnUiThread {
-                    resultsAdapter.submitItems(response.items)
+                val okCard = response.items.firstOrNull()
+                if (okCard != null) {
+                    replyCards.clear()
+                    replyCards.add(okCard)
+
+                    runOnUiThread {
+                        replyAdapter.submitItems(replyCards.toList())
+                    }
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
             }
+        }
+    }
+
+    private suspend fun runSearch(query: String) {
+        try {
+            lastSearchQuery = query
+
+            val response = ApiClient.api.searchArasaac(
+                auth = authHeaderOrThrow(),
+                query = query
+            )
+
+            runOnUiThread {
+                resultsAdapter.submitItems(response.items)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
@@ -124,6 +237,13 @@ class ComposeMessageActivity : AppCompatActivity() {
                     body = SendAacMessageRequest(
                         targetUserId = targetUserId,
                         cards = selectedCards.map {
+                            SendAacCardDto(
+                                id = it.id,
+                                label = it.label,
+                                imageUrl = it.imageUrl
+                            )
+                        },
+                        suggestedReplies = replyCards.map {
                             SendAacCardDto(
                                 id = it.id,
                                 label = it.label,

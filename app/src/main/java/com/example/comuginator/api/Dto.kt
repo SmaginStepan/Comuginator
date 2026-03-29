@@ -142,7 +142,8 @@ data class ArasaacCardDto(
 
 data class SendAacMessageRequest(
     val targetUserId: String,
-    val cards: List<SendAacCardDto>
+    val cards: List<SendAacCardDto>,
+    val suggestedReplies: List<SendAacCardDto> = emptyList()
 )
 
 data class SendAacCardDto(

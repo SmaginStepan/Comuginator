@@ -13,25 +13,46 @@
         android:textSize="20sp"
         android:textStyle="bold" />
 
+    <TextView
+        android:id="@+id/tvMessageHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:padding="8dp"
+        android:text="Сообщение"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvSelectedCards"
         android:layout_width="match_parent"
         android:layout_height="100dp"
-        android:orientation="horizontal"/>
+        android:layout_marginTop="8dp" />
+
+    <TextView
+        android:id="@+id/tvRepliesHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:padding="8dp"
+        android:text="Ответы"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvReplyCards"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_marginTop="8dp" />
 
     <EditText
         android:id="@+id/etSearch"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:hint="Search cards" />
-
-    <Button
-        android:id="@+id/btnSearch"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Search" />
+        android:layout_marginTop="16dp"
+        android:hint="Search cards"
+        android:imeOptions="actionSearch"
+        android:singleLine="true" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvResults"
@@ -44,5 +65,6 @@
         android:id="@+id/btnSendMessage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
         android:text="Send" />
 </LinearLayout>
