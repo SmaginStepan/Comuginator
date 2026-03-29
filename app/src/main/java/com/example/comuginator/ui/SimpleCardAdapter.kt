@@ -48,10 +48,4 @@ class SimpleCardAdapter(
             itemView.setOnClickListener { onClick(item) }
         }
     }
-
-    fun replaceItems(newItems: MutableList<AacCardDto>) {
-        items.clear()
-        items.addAll(newItems)
-        notifyDataSetChanged()
-    }
 }
