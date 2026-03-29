@@ -13,7 +13,6 @@ import com.example.comuginator.R
 import com.example.comuginator.api.AacCardDto
 import com.example.comuginator.api.ApiClient
 import com.example.comuginator.api.SendAacReplyRequest
-import com.example.comuginator.storage.SessionStore
 import com.example.comuginator.ui.base.BaseActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -23,7 +22,6 @@ class IncomingMessageActivity : BaseActivity() {
     companion object {
         const val EXTRA_MESSAGE_ID = "message_id"
     }
-    private lateinit var store: SessionStore
     private lateinit var tvFromUser: TextView
     private lateinit var tvCreatedAt: TextView
     private lateinit var tvCurrentReply: TextView
