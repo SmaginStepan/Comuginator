@@ -26,6 +26,10 @@ open class BaseActivity: AppCompatActivity() {
         store = SessionStore(this)
     }
 
+    protected fun requireToken(): String {
+        return store.token ?: error("No token in SessionStore")
+    }
+
     protected fun ensureInitialized() {
         if (initialized) return
         if (!ensureNotificationsPermission()) return

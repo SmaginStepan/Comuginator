@@ -54,7 +54,9 @@ class IncomingMessageActivity : BaseActivity() {
             return
         }
 
-        if (authToken.isBlank()) {
+        authToken = try {
+            requireToken()
+        } catch (e: Exception) {
             Toast.makeText(this, "No auth token", Toast.LENGTH_SHORT).show()
             finish()
             return
@@ -110,8 +112,8 @@ class IncomingMessageActivity : BaseActivity() {
         tvFromUser.text = "From: ${message.fromUser.name ?: message.fromUser.id}"
         tvCreatedAt.text = "Created: ${message.createdAt}"
 
-        messageAdapter.replaceItems(message.message.toMutableList())
-        repliesAdapter.replaceItems(message.suggestedReplies.toMutableList())
+        messageAdapter.submitItems(message.message)
+        repliesAdapter.submitItems(message.suggestedReplies)
 
         if (message.reply != null) {
             tvCurrentReply.text = "Reply: ${message.reply.reply.label}"
