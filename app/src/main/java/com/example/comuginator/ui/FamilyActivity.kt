@@ -294,6 +294,12 @@ class FamilyActivity : BaseActivity() {
             .show()
     }
 
+    private fun openIncomingMessage(messageId: String) {
+        val intent = Intent(this, IncomingMessageActivity::class.java)
+        intent.putExtra(IncomingMessageActivity.EXTRA_MESSAGE_ID, messageId)
+        startActivity(intent)
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         scope.cancel()

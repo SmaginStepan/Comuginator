@@ -12,8 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.comuginator.R
 import com.example.comuginator.api.ApiClient
-import com.example.comuginator.api.ArasaacCardDto
-import com.example.comuginator.api.SendAacCardDto
+import com.example.comuginator.api.AacCardDto
 import com.example.comuginator.api.SendAacMessageRequest
 import com.example.comuginator.storage.SessionStore
 import kotlinx.coroutines.CoroutineScope
@@ -56,8 +55,8 @@ class ComposeMessageActivity : AppCompatActivity() {
 
     private var currentAddMode: AddMode = AddMode.MESSAGE
 
-    private val selectedCards = mutableListOf<ArasaacCardDto>()
-    private val replyCards = mutableListOf<ArasaacCardDto>()
+    private val selectedCards = mutableListOf<AacCardDto>()
+    private val replyCards = mutableListOf<AacCardDto>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -237,14 +236,14 @@ class ComposeMessageActivity : AppCompatActivity() {
                     body = SendAacMessageRequest(
                         targetUserId = targetUserId,
                         cards = selectedCards.map {
-                            SendAacCardDto(
+                            AacCardDto(
                                 id = it.id,
                                 label = it.label,
                                 imageUrl = it.imageUrl
                             )
                         },
                         suggestedReplies = replyCards.map {
-                            SendAacCardDto(
+                            AacCardDto(
                                 id = it.id,
                                 label = it.label,
                                 imageUrl = it.imageUrl

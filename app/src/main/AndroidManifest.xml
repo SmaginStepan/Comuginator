@@ -21,6 +21,7 @@
 
         <activity android:name=".ui.ComposeMessageActivity" />
         <activity android:name=".ui.FamilyActivity" />
+        <activity android:name=".ui.IncomingMessageActivity" />
         <activity
             android:name=".ui.MainActivity"
             android:exported="true"

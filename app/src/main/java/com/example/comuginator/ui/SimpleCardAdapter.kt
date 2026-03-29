@@ -8,15 +8,15 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import com.example.comuginator.R
-import com.example.comuginator.api.ArasaacCardDto
+import com.example.comuginator.api.AacCardDto
 
 class SimpleCardAdapter(
-    private val onClick: (ArasaacCardDto) -> Unit
+    private val onClick: (AacCardDto) -> Unit
 ) : RecyclerView.Adapter<SimpleCardAdapter.CardViewHolder>() {
 
-    private val items = mutableListOf<ArasaacCardDto>()
+    private val items = mutableListOf<AacCardDto>()
 
-    fun submitItems(newItems: List<ArasaacCardDto>) {
+    fun submitItems(newItems: List<AacCardDto>) {
         items.clear()
         items.addAll(newItems)
         notifyDataSetChanged()
@@ -38,7 +38,7 @@ class SimpleCardAdapter(
         private val ivCardImage: ImageView = view.findViewById(R.id.ivCardImage)
         private val tvCardLabel: TextView = view.findViewById(R.id.tvCardLabel)
 
-        fun bind(item: ArasaacCardDto) {
+        fun bind(item: AacCardDto) {
             tvCardLabel.text = item.label
 
             ivCardImage.load(item.imageUrl) {
@@ -47,5 +47,11 @@ class SimpleCardAdapter(
 
             itemView.setOnClickListener { onClick(item) }
         }
+    }
+
+    fun replaceItems(newItems: MutableList<AacCardDto>) {
+        items.clear()
+        items.addAll(newItems)
+        notifyDataSetChanged()
     }
 }
