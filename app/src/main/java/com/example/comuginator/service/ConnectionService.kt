@@ -116,10 +116,15 @@ class ConnectionService : Service() {
         for (cmd in response.items) {
             try {
                 when (cmd.type) {
-                    "set_volume" -> handleSetVolumeCommand(cmd)
+                    "set_volume" -> {
+                        handleSetVolumeCommand(cmd)
+                        ApiClient.api.ackCommand("Bearer $token", cmd.id)
+                    }
+                    "aac_message_available",
+                    "aac_reply_available" -> {
+                        // не трогаем, это для UI
+                    }
                 }
-
-                ApiClient.api.ackCommand("Bearer $token", cmd.id)
             } catch (e: Exception) {
                 if (handleUnauthorized(e)) return
                 // пока просто не ack-аем, тогда команда останется pending
