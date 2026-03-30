@@ -63,6 +63,9 @@ class FamilyActivity : BaseActivity() {
             },
             onSendClick = { userId, userName ->
                 openComposeMessageScreen(userId, userName)
+            },
+            onHistoryClick = { userId, userName ->
+                openMessageHistoryScreen(userId, userName)
             }
         )
 
@@ -215,6 +218,9 @@ class FamilyActivity : BaseActivity() {
             },
             onSendClick = { userId, userName ->
                 openComposeMessageScreen(userId, userName)
+            },
+            onHistoryClick = { userId, userName ->
+                openMessageHistoryScreen(userId, userName)
             }
         )
 
@@ -222,6 +228,13 @@ class FamilyActivity : BaseActivity() {
         familyAdapter.submitItems(mapFamilyItems(response.users))
     }
 
+    private fun openMessageHistoryScreen(targetUserId: String, targetUserName: String) {
+        val intent = Intent(this, UserMessageHistoryActivity::class.java).apply {
+            putExtra("targetUserId", targetUserId)
+            putExtra("targetUserName", targetUserName)
+        }
+        startActivity(intent)
+    }
 
     private fun sendSetVolumeCommand(deviceId: String, volumePercent: Int) {
         scope.launch {

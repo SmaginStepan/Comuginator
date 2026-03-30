@@ -13,8 +13,9 @@ class FamilyAdapter(
     private val isParentViewer: Boolean,
     private val myDeviceId: String,
     private val onVolumeClick: (deviceId: String, deviceName: String, currentVolumePercent: Int?) -> Unit,
-    private val onSendClick: (userId: String, userName: String) -> Unit
-) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    private val onSendClick: (userId: String, userName: String) -> Unit,
+    private val onHistoryClick: (userId: String, userName: String) -> Unit
+): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val items = mutableListOf<FamilyListItem>()
 
@@ -58,11 +59,12 @@ class FamilyAdapter(
         private val tvUserHeader: TextView = view.findViewById(R.id.tvUserHeader)
         private val btnSend: Button = view.findViewById(R.id.btnSend)
 
+        private val btnHistory: Button = view.findViewById(R.id.btnHistory)
+
         fun bind(item: FamilyListItem.UserHeader) {
             tvUserHeader.text = "${item.userName} [${item.role}]"
-            btnSend.setOnClickListener {
-                onSendClick(item.userId, item.userName)
-            }
+            btnSend.setOnClickListener { onSendClick(item.userId, item.userName) }
+            btnHistory.setOnClickListener { onHistoryClick(item.userId, item.userName) }
         }
     }
 
