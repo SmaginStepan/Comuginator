@@ -28,7 +28,7 @@ import com.example.comuginator.ui.family.FamilyListItem
 class FamilyActivity : BaseActivity() {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-
+    private var openingIncomingMessageId: String? = null
     private lateinit var store: SessionStore
 
     private lateinit var tvFamily: TextView
@@ -315,13 +315,11 @@ class FamilyActivity : BaseActivity() {
 
                 val messageId = cmd.payload["messageId"] as? String ?: return@launch
 
-                ApiClient.api.ackCommand(
-                    auth = authHeaderOrThrow(),
-                    commandId = cmd.id
-                )
+                if (openingIncomingMessageId == messageId) return@launch
+                openingIncomingMessageId = messageId
 
                 runOnUiThread {
-                    openIncomingMessage(messageId)
+                    openIncomingMessage(messageId, cmd.id)
                 }
             } catch (e: Exception) {
                 if (handleUnauthorized(e)) return@launch
@@ -332,12 +330,13 @@ class FamilyActivity : BaseActivity() {
         }
     }
 
-    private fun openIncomingMessage(messageId: String) {
-        val intent = Intent(this, IncomingMessageActivity::class.java)
-        intent.putExtra(IncomingMessageActivity.EXTRA_MESSAGE_ID, messageId)
+    private fun openIncomingMessage(messageId: String, commandId: String) {
+        val intent = Intent(this, IncomingMessageActivity::class.java).apply {
+            putExtra(IncomingMessageActivity.EXTRA_MESSAGE_ID, messageId)
+            putExtra(IncomingMessageActivity.EXTRA_COMMAND_ID, commandId)
+        }
         startActivity(intent)
     }
-
     override fun onDestroy() {
         super.onDestroy()
         scope.cancel()

@@ -21,6 +21,7 @@ class IncomingMessageActivity : BaseActivity() {
 
     companion object {
         const val EXTRA_MESSAGE_ID = "message_id"
+        const val EXTRA_COMMAND_ID = "command_id"
     }
     private lateinit var tvFromUser: TextView
     private lateinit var tvCreatedAt: TextView
@@ -33,6 +34,8 @@ class IncomingMessageActivity : BaseActivity() {
     private lateinit var repliesAdapter: SimpleCardAdapter
 
     private var messageId: String = ""
+    private var commandId: String = ""
+    private var ackSent = false
     private var authToken: String = ""
     private var currentMessage: AacMessageDetailsDto? = null
     private var isSendingReply = false
@@ -49,6 +52,8 @@ class IncomingMessageActivity : BaseActivity() {
         rvSuggestedReplies = findViewById(R.id.rvSuggestedReplies)
 
         messageId = intent.getStringExtra(EXTRA_MESSAGE_ID).orEmpty()
+        commandId = intent.getStringExtra(EXTRA_COMMAND_ID).orEmpty()
+
         if (messageId.isBlank()) {
             finish()
             return
@@ -96,6 +101,16 @@ class IncomingMessageActivity : BaseActivity() {
 
                 currentMessage = message
                 renderMessage(message)
+
+                if (!ackSent && commandId.isNotBlank()) {
+                    withContext(Dispatchers.IO) {
+                        ApiClient.api.ackCommand(
+                            auth = "Bearer $authToken",
+                            commandId = commandId
+                        )
+                    }
+                    ackSent = true
+                }
             } catch (e: Exception) {
                 Toast.makeText(
                     this@IncomingMessageActivity,
