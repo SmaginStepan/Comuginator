@@ -2,6 +2,7 @@ package com.example.comuginator.ui
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.SeekBar
@@ -300,6 +301,11 @@ class FamilyActivity : BaseActivity() {
         scope.launch {
             try {
                 val pending = ApiClient.api.getPendingCommands(authHeaderOrThrow())
+
+                Log.d("AAC", "pending commands: ${pending.items}")
+                pending.items.forEach {
+                    Log.d("AAC", "cmd: ${it.type} ${it.payload}")
+                }
 
                 val cmd = pending.items.firstOrNull { item ->
                     item.status == "queued" &&

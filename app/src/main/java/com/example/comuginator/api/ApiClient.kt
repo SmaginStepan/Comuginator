@@ -33,7 +33,7 @@ object ApiClient {
 
     suspend fun getAacMessage(authToken: String, messageId: String): AacMessageDetailsDto {
         val request = Request.Builder()
-            .url("$BASE_URL/v1/messages/aac/$messageId")
+            .url("${BASE_URL}v1/messages/aac/$messageId")
             .header("Authorization", "Bearer $authToken")
             .get()
             .build()
@@ -57,7 +57,7 @@ object ApiClient {
         val body = json.toRequestBody("application/json".toMediaType())
 
         val request = Request.Builder()
-            .url("$BASE_URL/v1/messages/aac/$messageId/reply")
+            .url("${BASE_URL}v1/messages/aac/$messageId/reply")
             .header("Authorization", "Bearer $authToken")
             .post(body)
             .build()
