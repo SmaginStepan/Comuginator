@@ -118,6 +118,8 @@ class FamilyActivity : BaseActivity() {
                     tvStatus.text = "Family loaded"
                     setButtonsEnabled(true)
                 }
+
+                checkPendingIncomingMessages()
             } catch (e: Exception) {
                 if (handleUnauthorized(e)) return@launch
                 runOnUiThread {
@@ -292,6 +294,36 @@ class FamilyActivity : BaseActivity() {
                 sendSetVolumeCommand(deviceId, seekBar.progress)
             }
             .show()
+    }
+
+    private fun checkPendingIncomingMessages() {
+        scope.launch {
+            try {
+                val pending = ApiClient.api.getPendingCommands(authHeaderOrThrow())
+
+                val cmd = pending.items.firstOrNull { item ->
+                    item.status == "queued" &&
+                            item.type == "aac_message_available" &&
+                            item.payload["messageId"] is String
+                } ?: return@launch
+
+                val messageId = cmd.payload["messageId"] as? String ?: return@launch
+
+                ApiClient.api.ackCommand(
+                    auth = authHeaderOrThrow(),
+                    commandId = cmd.id
+                )
+
+                runOnUiThread {
+                    openIncomingMessage(messageId)
+                }
+            } catch (e: Exception) {
+                if (handleUnauthorized(e)) return@launch
+                runOnUiThread {
+                    tvStatus.text = "Check incoming message failed: ${e.message}"
+                }
+            }
+        }
     }
 
     private fun openIncomingMessage(messageId: String) {
