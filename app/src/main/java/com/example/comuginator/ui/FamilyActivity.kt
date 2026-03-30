@@ -300,26 +300,39 @@ class FamilyActivity : BaseActivity() {
     private fun checkPendingIncomingMessages() {
         scope.launch {
             try {
-                val pending = ApiClient.api.getPendingCommands(authHeaderOrThrow())
+                val auth = authHeaderOrThrow()
 
-                Log.d("AAC", "pending commands: ${pending.items}")
-                pending.items.forEach {
-                    Log.d("AAC", "cmd: ${it.type} ${it.payload}")
+                val pending = ApiClient.api.getPendingCommands(auth)
+                val inbox = ApiClient.api.getAacMessages(auth = auth, scope = "inbox")
+
+                val pendingMap = pending.items
+                    .asSequence()
+                    .filter { it.status == "queued" && it.type == "aac_message_available" }
+                    .mapNotNull { cmd ->
+                        val messageId = cmd.payload["messageId"] as? String
+                        if (messageId != null) messageId to cmd.id else null
+                    }
+                    .toMap()
+
+                val preferred = inbox.items.firstOrNull { msg ->
+                    msg.reply == null && msg.suggestedReplies.isNotEmpty()
                 }
 
-                val cmd = pending.items.firstOrNull { item ->
-                    item.status == "queued" &&
-                            item.type == "aac_message_available" &&
-                            item.payload["messageId"] is String
-                } ?: return@launch
+                val fallback = inbox.items.firstOrNull { msg ->
+                    msg.reply == null &&
+                            msg.suggestedReplies.isEmpty() &&
+                            pendingMap.containsKey(msg.id)
+                }
 
-                val messageId = cmd.payload["messageId"] as? String ?: return@launch
+                val target = preferred ?: fallback ?: return@launch
 
-                if (openingIncomingMessageId == messageId) return@launch
-                openingIncomingMessageId = messageId
+                if (openingIncomingMessageId == target.id) return@launch
+                openingIncomingMessageId = target.id
+
+                val commandId = pendingMap[target.id].orEmpty()
 
                 runOnUiThread {
-                    openIncomingMessage(messageId, cmd.id)
+                    openIncomingMessage(target.id, commandId)
                 }
             } catch (e: Exception) {
                 if (handleUnauthorized(e)) return@launch

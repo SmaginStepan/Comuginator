@@ -65,4 +65,10 @@ interface ApiService {
         @Header("Authorization") auth: String,
         @Body body: SendAacMessageRequest
     ): SendAacMessageResponse
+
+    @GET("/v1/messages/aac")
+    suspend fun getAacMessages(
+        @Header("Authorization") auth: String,
+        @Query("scope") scope: String = "inbox"
+    ): AacMessagesResponse
 }

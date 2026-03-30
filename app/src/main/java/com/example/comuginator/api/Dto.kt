@@ -182,3 +182,22 @@ data class SendAacReplyResponse(
     val ok: Boolean,
     val replyId: String
 )
+
+data class AacMessageListItemDto(
+    val id: String,
+    val familyId: String,
+    val fromUserId: String,
+    val toUserId: String,
+    val fromUser: AacUserDto?,
+    val toUser: AacUserDto?,
+    val message: List<AacCardDto>,
+    val suggestedReplies: List<AacCardDto>,
+    val reply: AacReplyShortDto?,
+    val createdAt: String,
+    val answeredAt: String?
+)
+
+data class AacMessagesResponse(
+    val ok: Boolean,
+    val items: List<AacMessageListItemDto>
+)
