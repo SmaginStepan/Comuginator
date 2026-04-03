@@ -268,14 +268,18 @@ class ComposeMessageActivity : AppCompatActivity() {
                             AacCardDto(
                                 id = it.id,
                                 label = it.label,
-                                imageUrl = it.imageUrl
+                                imageUrl = it.imageUrl,
+                                source = it.source,
+                                sourceRef = it.sourceRef,
                             )
                         },
                         suggestedReplies = replyCards.map {
                             AacCardDto(
                                 id = it.id,
                                 label = it.label,
-                                imageUrl = it.imageUrl
+                                imageUrl = it.imageUrl,
+                                source = it.source,
+                                sourceRef = it.sourceRef,
                             )
                         }
                     )

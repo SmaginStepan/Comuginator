@@ -148,8 +148,9 @@ data class SendAacMessageResponse(
 data class AacCardDto(
     val id: String,
     val label: String,
-    val imageUrl: String,
-    val source: String? = null
+    val imageUrl: String?,
+    val source: String? = null,
+    val sourceRef: String? = null,
 )
 
 data class AacUserDto(

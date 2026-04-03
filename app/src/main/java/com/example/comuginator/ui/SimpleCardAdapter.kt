@@ -6,7 +6,6 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import coil.load
 import com.example.comuginator.R
 import com.example.comuginator.api.AacCardDto
 import coil.ImageLoader
