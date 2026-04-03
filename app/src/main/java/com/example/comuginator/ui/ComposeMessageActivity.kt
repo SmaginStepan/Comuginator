@@ -22,11 +22,29 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import android.net.Uri
+import android.app.AlertDialog
+import androidx.activity.result.contract.ActivityResultContracts
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.File
+import java.io.FileOutputStream
 
 class ComposeMessageActivity : AppCompatActivity() {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
+    private lateinit var btnAddPhoto: Button
+    private lateinit var btnLoadFamilyPhotos: Button
+
+    private val pickImageLauncher =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            if (uri != null) {
+                askPhotoLabelAndUpload(uri)
+            }
+        }
     private lateinit var store: SessionStore
 
     private lateinit var tvTarget: TextView
@@ -165,6 +183,17 @@ class ComposeMessageActivity : AppCompatActivity() {
             }
         }
 
+        btnAddPhoto = findViewById(R.id.btnAddPhoto)
+        btnLoadFamilyPhotos = findViewById(R.id.btnLoadFamilyPhotos)
+
+        btnAddPhoto.setOnClickListener {
+            pickImageLauncher.launch("image/*")
+        }
+
+        btnLoadFamilyPhotos.setOnClickListener {
+            loadFamilyPhotos()
+        }
+
         updateModeUi()
         loadDefaultReplies()
     }
@@ -259,6 +288,117 @@ class ComposeMessageActivity : AppCompatActivity() {
                 e.printStackTrace()
             }
         }
+    }
+
+    private fun loadFamilyPhotos() {
+        scope.launch {
+            try {
+                val response = ApiClient.api.getFamilyPhotos(
+                    auth = authHeaderOrThrow()
+                )
+
+                runOnUiThread {
+                    resultsAdapter.submitItems(response.items)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    private fun getMimeType(uri: Uri): String {
+        return contentResolver.getType(uri) ?: "image/jpeg"
+    }
+
+    private fun guessExtension(mimeType: String): String {
+        return when (mimeType) {
+            "image/png" -> ".png"
+            "image/webp" -> ".webp"
+            "image/jpeg", "image/jpg" -> ".jpg"
+            else -> ".jpg"
+        }
+    }
+
+    private fun createTempFileFromUri(uri: Uri): File {
+        val mimeType = getMimeType(uri)
+        val extension = guessExtension(mimeType)
+
+        val inputStream = contentResolver.openInputStream(uri)
+            ?: error("Cannot open input stream")
+
+        val tempFile = File.createTempFile("upload_", extension, cacheDir)
+
+        inputStream.use { input ->
+            FileOutputStream(tempFile).use { output ->
+                input.copyTo(output)
+            }
+        }
+
+        return tempFile
+    }
+
+    private fun uploadFamilyPhoto(uri: Uri, label: String) {
+        scope.launch {
+            try {
+                val mimeType = getMimeType(uri)
+                val tempFile = createTempFileFromUri(uri)
+
+                val fileBody = tempFile.asRequestBody(mimeType.toMediaTypeOrNull())
+                val filePart = MultipartBody.Part.createFormData(
+                    "file",
+                    tempFile.name,
+                    fileBody
+                )
+
+                val labelBody = label.toRequestBody("text/plain".toMediaTypeOrNull())
+
+                val response = ApiClient.api.uploadFamilyPhoto(
+                    auth = authHeaderOrThrow(),
+                    file = filePart,
+                    label = labelBody
+                )
+
+                val card = response.item
+
+                runOnUiThread {
+                    when (currentAddMode) {
+                        AddMode.MESSAGE -> {
+                            selectedCards.add(card)
+                            selectedAdapter.submitItems(selectedCards.toList())
+                        }
+                        AddMode.REPLY -> {
+                            replyCards.add(card)
+                            replyAdapter.submitItems(replyCards.toList())
+                        }
+                    }
+                }
+
+                tempFile.delete()
+            } catch (e: Exception) {
+                e.printStackTrace()
+                runOnUiThread {
+                    tvTarget.text = "Upload failed: ${e.message}"
+                }
+            }
+        }
+    }
+
+    private fun askPhotoLabelAndUpload(uri: Uri) {
+        val input = EditText(this).apply {
+            hint = "Label"
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle("Photo label")
+            .setView(input)
+            .setNegativeButton("Cancel", null)
+            .setPositiveButton("Upload") { _, _ ->
+                val label = input.text?.toString()?.trim().orEmpty()
+                if (label.isNotBlank()) {
+                    uploadFamilyPhoto(uri, label)
+                }
+            }
+            .show()
     }
 
     override fun onDestroy() {

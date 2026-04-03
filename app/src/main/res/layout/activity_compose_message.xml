@@ -62,9 +62,22 @@
         android:layout_weight="1" />
 
     <Button
+        android:id="@+id/btnAddPhoto"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Add photo" />
+
+    <Button
+        android:id="@+id/btnLoadFamilyPhotos"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Family photos" />
+
+    <Button
         android:id="@+id/btnSendMessage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         android:text="Send" />
+
 </LinearLayout>

@@ -148,7 +148,8 @@ data class SendAacMessageResponse(
 data class AacCardDto(
     val id: String,
     val label: String,
-    val imageUrl: String
+    val imageUrl: String,
+    val source: String? = null
 )
 
 data class AacUserDto(
@@ -200,4 +201,14 @@ data class AacMessageListItemDto(
 data class AacMessagesResponse(
     val ok: Boolean,
     val items: List<AacMessageListItemDto>
+)
+
+data class UploadFamilyPhotoResponse(
+    val ok: Boolean,
+    val item: AacCardDto
+)
+
+data class FamilyPhotoListResponse(
+    val ok: Boolean,
+    val items: List<AacCardDto>
 )
