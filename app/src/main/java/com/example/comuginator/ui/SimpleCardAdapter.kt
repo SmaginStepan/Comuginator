@@ -50,7 +50,7 @@ class SimpleCardAdapter(
                 .target(ivCardImage)
                 .crossfade(true)
 
-            if (!token.isNullOrBlank() && item.source == "family_photo") {
+            if (!token.isNullOrBlank() && item.source == "FAMILY_PHOTO") {
                 requestBuilder.addHeader("Authorization", "Bearer $token")
             }
 
