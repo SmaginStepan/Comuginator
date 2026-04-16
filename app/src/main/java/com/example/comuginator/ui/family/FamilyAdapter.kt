@@ -14,8 +14,10 @@ class FamilyAdapter(
     private val myDeviceId: String,
     private val onVolumeClick: (deviceId: String, deviceName: String, currentVolumePercent: Int?) -> Unit,
     private val onSendClick: (userId: String, userName: String) -> Unit,
-    private val onHistoryClick: (userId: String, userName: String) -> Unit
-): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    private val onHistoryClick: (userId: String, userName: String) -> Unit,
+    private val onRenameUserClick: (userId: String, userName: String) -> Unit,
+    private val onRenameDeviceClick: (deviceId: String, deviceName: String) -> Unit,
+    ): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val items = mutableListOf<FamilyListItem>()
 
@@ -58,13 +60,15 @@ class FamilyAdapter(
     inner class UserHeaderViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         private val tvUserHeader: TextView = view.findViewById(R.id.tvUserHeader)
         private val btnSend: Button = view.findViewById(R.id.btnSend)
-
         private val btnHistory: Button = view.findViewById(R.id.btnHistory)
+        private val btnRenameUser: Button = view.findViewById(R.id.btnRenameUser)
 
         fun bind(item: FamilyListItem.UserHeader) {
             tvUserHeader.text = "${item.userName} [${item.role}]"
             btnSend.setOnClickListener { onSendClick(item.userId, item.userName) }
             btnHistory.setOnClickListener { onHistoryClick(item.userId, item.userName) }
+            btnRenameUser.visibility = if (isParentViewer) View.VISIBLE else View.GONE
+            btnRenameUser.setOnClickListener { onRenameUserClick(item.userId, item.userName) }
         }
     }
 
@@ -72,6 +76,7 @@ class FamilyAdapter(
         private val tvDeviceName: TextView = view.findViewById(R.id.tvDeviceName)
         private val tvDeviceMeta: TextView = view.findViewById(R.id.tvDeviceMeta)
         private val btnVolume: Button = view.findViewById(R.id.btnVolume)
+        private val btnRenameDevice: Button = view.findViewById(R.id.btnRenameDevice)
 
         fun bind(item: FamilyListItem.DeviceRow) {
             tvDeviceName.text = item.deviceName
@@ -97,6 +102,9 @@ class FamilyAdapter(
             btnVolume.setOnClickListener {
                 onVolumeClick(item.deviceId, item.deviceName, item.volumePercent)
             }
+
+            btnRenameDevice.visibility = if (isParentViewer) View.VISIBLE else View.GONE
+            btnRenameDevice.setOnClickListener { onRenameDeviceClick(item.deviceId, item.deviceName) }
         }
     }
 }

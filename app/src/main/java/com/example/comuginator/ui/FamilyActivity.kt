@@ -22,11 +22,13 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.comuginator.api.UpdateNameRequest
 import com.example.comuginator.ui.family.FamilyAdapter
 import com.example.comuginator.ui.family.FamilyListItem
 
 class FamilyActivity : BaseActivity() {
 
+    private lateinit var btnRenameFamily: Button
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var openingIncomingMessageId: String? = null
     private lateinit var store: SessionStore
@@ -66,8 +68,31 @@ class FamilyActivity : BaseActivity() {
             },
             onHistoryClick = { userId, userName ->
                 openMessageHistoryScreen(userId, userName)
+            },
+            onRenameUserClick = { userId, userName ->
+                showRenameDialog(
+                    title = "Rename user",
+                    initialValue = userName,
+                    onApply = { newName -> updateUserName(userId, newName) }
+                )
+            },
+            onRenameDeviceClick = { deviceId, deviceName ->
+                showRenameDialog(
+                    title = "Rename device",
+                    initialValue = deviceName,
+                    onApply = { newName -> updateDeviceName(deviceId, newName) }
+                )
             }
         )
+
+        btnRenameFamily = findViewById(R.id.btnRenameFamily)
+        btnRenameFamily.setOnClickListener {
+            showRenameDialog(
+                title = "Rename family",
+                initialValue = tvFamily.text.toString().removePrefix("Family: ").trim(),
+                onApply = { newName -> updateFamilyName(newName) }
+            )
+        }
 
         rvFamily.layoutManager = LinearLayoutManager(this)
         rvFamily.adapter = familyAdapter
@@ -82,6 +107,115 @@ class FamilyActivity : BaseActivity() {
         btnInviteChild.setOnClickListener { createInvite("CHILD") }
 
         ensureInitialized()
+    }
+
+    private fun showRenameDialog(
+        title: String,
+        initialValue: String,
+        onApply: (String) -> Unit
+    ) {
+        val editText = android.widget.EditText(this).apply {
+            setText(initialValue)
+            setSelection(text.length)
+        }
+
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle(title)
+            .setView(editText)
+            .setNegativeButton("Cancel", null)
+            .setPositiveButton("Save") { _, _ ->
+                val value = editText.text?.toString()?.trim().orEmpty()
+                if (value.isNotEmpty()) {
+                    onApply(value)
+                }
+            }
+            .show()
+    }
+
+    private fun updateFamilyName(name: String) {
+        scope.launch {
+            try {
+                runOnUiThread {
+                    tvStatus.text = "Updating family name..."
+                    setButtonsEnabled(false)
+                }
+
+                ApiClient.api.updateMyFamily(
+                    auth = authHeaderOrThrow(),
+                    body = UpdateNameRequest(name = name)
+                )
+
+                runOnUiThread {
+                    tvStatus.text = "Family name updated"
+                }
+
+                loadFamily()
+            } catch (e: Exception) {
+                if (handleUnauthorized(e)) return@launch
+                runOnUiThread {
+                    tvStatus.text = "Update family failed: ${e.message}"
+                    setButtonsEnabled(true)
+                }
+            }
+        }
+    }
+
+    private fun updateUserName(userId: String, name: String) {
+        scope.launch {
+            try {
+                runOnUiThread {
+                    tvStatus.text = "Updating user name..."
+                    setButtonsEnabled(false)
+                }
+
+                ApiClient.api.updateUserName(
+                    auth = authHeaderOrThrow(),
+                    userId = userId,
+                    body = UpdateNameRequest(name)
+                )
+
+                runOnUiThread {
+                    tvStatus.text = "User name updated"
+                }
+
+                loadFamily()
+            } catch (e: Exception) {
+                if (handleUnauthorized(e)) return@launch
+                runOnUiThread {
+                    tvStatus.text = "Update user failed: ${e.message}"
+                    setButtonsEnabled(true)
+                }
+            }
+        }
+    }
+
+    private fun updateDeviceName(deviceId: String, name: String) {
+        scope.launch {
+            try {
+                runOnUiThread {
+                    tvStatus.text = "Updating device name..."
+                    setButtonsEnabled(false)
+                }
+
+                ApiClient.api.updateDeviceName(
+                    auth = authHeaderOrThrow(),
+                    deviceId = deviceId,
+                    body = UpdateNameRequest(name)
+                )
+
+                runOnUiThread {
+                    tvStatus.text = "Device name updated"
+                }
+
+                loadFamily()
+            } catch (e: Exception) {
+                if (handleUnauthorized(e)) return@launch
+                runOnUiThread {
+                    tvStatus.text = "Update device failed: ${e.message}"
+                    setButtonsEnabled(true)
+                }
+            }
+        }
     }
 
     private fun openComposeMessageScreen(targetUserId: String, targetUserName: String) {
@@ -221,6 +355,20 @@ class FamilyActivity : BaseActivity() {
             },
             onHistoryClick = { userId, userName ->
                 openMessageHistoryScreen(userId, userName)
+            },
+            onRenameUserClick = { userId, userName ->
+                showRenameDialog(
+                    title = "Rename user",
+                    initialValue = userName,
+                    onApply = { newName -> updateUserName(userId, newName) }
+                )
+            },
+            onRenameDeviceClick = { deviceId, deviceName ->
+                showRenameDialog(
+                    title = "Rename device",
+                    initialValue = deviceName,
+                    onApply = { newName -> updateDeviceName(deviceId, newName) }
+                )
             }
         )
 

@@ -213,3 +213,38 @@ data class FamilyPhotoListResponse(
     val ok: Boolean,
     val items: List<AacCardDto>
 )
+
+data class UpdateNameRequest(
+    val name: String
+)
+
+data class UpdateFamilyResponse(
+    val ok: Boolean,
+    val family: FamilyNameDto
+)
+
+data class UpdateUserResponse(
+    val ok: Boolean,
+    val user: UserNameDto
+)
+
+data class UpdateDeviceResponse(
+    val ok: Boolean,
+    val device: DeviceNameDto
+)
+
+data class FamilyNameDto(
+    val id: String,
+    val name: String
+)
+
+data class UserNameDto(
+    val id: String,
+    val name: String,
+    val role: String
+)
+
+data class DeviceNameDto(
+    val deviceId: String,
+    val name: String
+)

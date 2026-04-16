@@ -6,6 +6,7 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Multipart
+import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Part
 import retrofit2.http.Path
@@ -90,5 +91,25 @@ interface ApiService {
     suspend fun getFamilyPhotos(
         @Header("Authorization") auth: String
     ): FamilyPhotoListResponse
+
+    @PATCH("/v1/families/me")
+    suspend fun updateMyFamily(
+        @Header("Authorization") auth: String,
+        @Body body: UpdateNameRequest
+    ): UpdateFamilyResponse
+
+    @PATCH("/v1/users/{userId}")
+    suspend fun updateUserName(
+        @Header("Authorization") auth: String,
+        @Path("userId") userId: String,
+        @Body body: UpdateNameRequest
+    ): UpdateUserResponse
+
+    @PATCH("/v1/devices/{deviceId}")
+    suspend fun updateDeviceName(
+        @Header("Authorization") auth: String,
+        @Path("deviceId") deviceId: String,
+        @Body body: UpdateNameRequest
+    ): UpdateDeviceResponse
 
 }
