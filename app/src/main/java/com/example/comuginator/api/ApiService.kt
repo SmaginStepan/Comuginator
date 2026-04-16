@@ -80,16 +80,17 @@ interface ApiService {
     ): AacMessagesResponse
 
     @Multipart
-    @POST("/v1/cards/family-photo/upload")
+    @POST("/v1/library/items/upload")
     suspend fun uploadFamilyPhoto(
         @Header("Authorization") auth: String,
         @Part file: MultipartBody.Part,
         @Part("label") label: RequestBody
     ): UploadFamilyPhotoResponse
 
-    @GET("/v1/cards/family-photo")
+    @GET("/v1/library/items")
     suspend fun getFamilyPhotos(
-        @Header("Authorization") auth: String
+        @Header("Authorization") auth: String,
+        @Query("source") source: String = "FAMILY_PHOTO"
     ): FamilyPhotoListResponse
 
     @PATCH("/v1/families/me")

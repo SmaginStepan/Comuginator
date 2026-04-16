@@ -298,7 +298,8 @@ class ComposeMessageActivity : AppCompatActivity() {
         scope.launch {
             try {
                 val response = ApiClient.api.getFamilyPhotos(
-                    auth = authHeaderOrThrow()
+                    auth = authHeaderOrThrow(),
+                    source = "FAMILY_PHOTO"
                 )
 
                 runOnUiThread {
