@@ -43,6 +43,7 @@ class MessageHistoryAdapter : RecyclerView.Adapter<MessageHistoryAdapter.History
             rvCards.layoutManager =
                 LinearLayoutManager(view.context, LinearLayoutManager.HORIZONTAL, false)
             rvCards.adapter = cardsAdapter
+            rvCards.setHasFixedSize(true)
         }
 
         fun bind(item: AacMessageListItemDto) {
