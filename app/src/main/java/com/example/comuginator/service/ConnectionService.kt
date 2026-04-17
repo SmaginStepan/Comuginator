@@ -27,6 +27,8 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import retrofit2.HttpException
+import android.app.ForegroundServiceStartNotAllowedException
+import android.util.Log
 
 class ConnectionService : Service() {
 
@@ -36,12 +38,18 @@ class ConnectionService : Service() {
         private const val NOTIFICATION_ID = 1001
         private const val HEARTBEAT_INTERVAL_MS = 30_000L
 
-        fun start(context: Context) {
+        fun start(context: Context): Boolean {
             val intent = Intent(context, ConnectionService::class.java)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                context.startForegroundService(intent)
-            } else {
-                context.startService(intent)
+            return try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    context.startForegroundService(intent)
+                } else {
+                    context.startService(intent)
+                }
+                true
+            } catch (e: Exception) {
+                Log.w("ConnectionService", "Failed to start service", e)
+                false
             }
         }
 
@@ -70,10 +78,16 @@ class ConnectionService : Service() {
             return START_NOT_STICKY
         }
 
-        startForeground(
-            NOTIFICATION_ID,
-            buildNotification("Connection active")
-        )
+        try {
+            startForeground(
+                NOTIFICATION_ID,
+                buildNotification("Connection active")
+            )
+        } catch (e: Exception) {
+            Log.w("ConnectionService", "Failed to enter foreground", e)
+            stopSelf()
+            return START_NOT_STICKY
+        }
 
         if (!loopStarted) {
             loopStarted = true
@@ -82,7 +96,6 @@ class ConnectionService : Service() {
 
         return START_STICKY
     }
-
     private fun getCurrentVolumePercent(): Int {
         val audioManager = getSystemService(AUDIO_SERVICE) as android.media.AudioManager
         val stream = android.media.AudioManager.STREAM_MUSIC
