@@ -248,3 +248,69 @@ data class DeviceNameDto(
     val deviceId: String,
     val name: String
 )
+
+data class LibraryItemDto(
+    val id: String,
+    val label: String,
+    val imageUrl: String?,
+    val source: String?,
+    val sourceRef: String?
+)
+
+data class LibrarySetDto(
+    val id: String,
+    val name: String,
+    val cover: LibraryItemDto?,
+    val itemsCount: Int
+)
+
+data class LibrarySetDetailsDto(
+    val id: String,
+    val name: String,
+    val cover: LibraryItemDto?,
+    val items: List<LibraryItemDto>
+)
+
+data class LibrarySetsResponse(
+    val ok: Boolean,
+    val sets: List<LibrarySetDto>
+)
+
+data class LibrarySetResponse(
+    val ok: Boolean,
+    val set: LibrarySetDetailsDto
+)
+
+data class CreateLibrarySetRequest(
+    val name: String,
+    val coverItemId: String? = null,
+    val itemIds: List<String> = emptyList()
+)
+
+data class UpdateLibrarySetRequest(
+    val name: String? = null,
+    val coverItemId: String? = null
+)
+
+data class AddItemsToSetRequest(
+    val itemIds: List<String>
+)
+
+data class MoveItemsToSetRequest(
+    val itemIds: List<String>,
+    val targetSetId: String
+)
+
+data class CreateArasaacLibraryItemRequest(
+    val label: String,
+    val sourceRef: String
+)
+
+data class LibraryItemsResponse(
+    val ok: Boolean,
+    val items: List<LibraryItemDto>
+)
+
+data class OkResponse(
+    val ok: Boolean
+)

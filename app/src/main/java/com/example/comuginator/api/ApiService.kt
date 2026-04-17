@@ -3,6 +3,7 @@ package com.example.comuginator.api
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Multipart
@@ -112,5 +113,74 @@ interface ApiService {
         @Path("deviceId") deviceId: String,
         @Body body: UpdateNameRequest
     ): UpdateDeviceResponse
+
+    @GET("/v1/library/sets")
+    suspend fun getLibrarySets(
+        @Header("Authorization") auth: String
+    ): LibrarySetsResponse
+
+    @GET("/v1/library/sets/{setId}")
+    suspend fun getLibrarySet(
+        @Header("Authorization") auth: String,
+        @Path("setId") setId: String
+    ): LibrarySetResponse
+
+    @POST("/v1/library/sets")
+    suspend fun createLibrarySet(
+        @Header("Authorization") auth: String,
+        @Body body: CreateLibrarySetRequest
+    ): LibrarySetResponse
+
+    @PATCH("/v1/library/sets/{setId}")
+    suspend fun updateLibrarySet(
+        @Header("Authorization") auth: String,
+        @Path("setId") setId: String,
+        @Body body: UpdateLibrarySetRequest
+    ): LibrarySetResponse
+
+    @DELETE("/v1/library/sets/{setId}")
+    suspend fun deleteLibrarySet(
+        @Header("Authorization") auth: String,
+        @Path("setId") setId: String
+    ): OkResponse
+
+    @GET("/v1/library/items")
+    suspend fun getLibraryItems(
+        @Header("Authorization") auth: String,
+        @Query("source") source: String? = null
+    ): LibraryItemsResponse
+
+    @DELETE("/v1/library/items/{itemId}")
+    suspend fun deleteLibraryItem(
+        @Header("Authorization") auth: String,
+        @Path("itemId") itemId: String
+    ): OkResponse
+
+    @POST("/v1/library/sets/{setId}/items")
+    suspend fun addItemsToSet(
+        @Header("Authorization") auth: String,
+        @Path("setId") setId: String,
+        @Body body: AddItemsToSetRequest
+    ): LibrarySetResponse
+
+    @DELETE("/v1/library/sets/{setId}/items/{itemId}")
+    suspend fun removeItemFromSet(
+        @Header("Authorization") auth: String,
+        @Path("setId") setId: String,
+        @Path("itemId") itemId: String
+    ): LibrarySetResponse
+
+    @POST("/v1/library/sets/{setId}/move-items")
+    suspend fun moveItemsToAnotherSet(
+        @Header("Authorization") auth: String,
+        @Path("setId") setId: String,
+        @Body body: MoveItemsToSetRequest
+    ): OkResponse
+
+    @POST("/v1/library/items/arasaac")
+    suspend fun createArasaacLibraryItem(
+        @Header("Authorization") auth: String,
+        @Body body: CreateArasaacLibraryItemRequest
+    ): UploadFamilyPhotoResponse
 
 }
