@@ -314,3 +314,8 @@ data class LibraryItemsResponse(
 data class OkResponse(
     val ok: Boolean
 )
+
+data class LibraryItemResponse(
+    val ok: Boolean,
+    val item: LibraryItemDto
+)

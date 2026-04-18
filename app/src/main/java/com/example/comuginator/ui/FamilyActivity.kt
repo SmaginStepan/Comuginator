@@ -45,6 +45,7 @@ class FamilyActivity : BaseActivity() {
     private lateinit var btnRefresh: Button
     private lateinit var btnInviteParent: Button
     private lateinit var btnInviteChild: Button
+    private lateinit var btnLibrary: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,6 +57,10 @@ class FamilyActivity : BaseActivity() {
         tvMe = findViewById(R.id.tvMe)
         tvInvite = findViewById(R.id.tvInvite)
         rvFamily = findViewById(R.id.rvFamily)
+        btnLibrary = findViewById(R.id.btnLibrary)
+        btnLibrary.setOnClickListener {
+            startActivity(Intent(this, LibraryActivity::class.java))
+        }
 
         familyAdapter = FamilyAdapter(
             isParentViewer = currentMeRole == "PARENT",

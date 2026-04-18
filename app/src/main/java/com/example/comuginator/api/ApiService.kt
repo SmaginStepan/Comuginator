@@ -181,6 +181,6 @@ interface ApiService {
     suspend fun createArasaacLibraryItem(
         @Header("Authorization") auth: String,
         @Body body: CreateArasaacLibraryItemRequest
-    ): UploadFamilyPhotoResponse
+    ): LibraryItemResponse
 
 }
