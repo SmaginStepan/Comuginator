@@ -431,10 +431,6 @@ class FamilyActivity : BaseActivity() {
     }
 
     private fun showChooseAvatarDialog(userId: String, userName: String) {
-        if (userId != store.userId) {
-            tvStatus.text = "Only current user avatar is supported now"
-            return
-        }
 
         scope.launch {
             try {
@@ -455,7 +451,7 @@ class FamilyActivity : BaseActivity() {
                         return@runOnUiThread
                     }
 
-                    showAvatarItemsDialog(items, userName)
+                    showAvatarItemsDialog(userId, items, userName)
                 }
             } catch (e: Exception) {
                 if (handleUnauthorized(e)) return@launch
@@ -467,7 +463,11 @@ class FamilyActivity : BaseActivity() {
         }
     }
 
-    private fun showAvatarItemsDialog(items: List<AacCardDto>, userName: String) {
+    private fun showAvatarItemsDialog(
+        userId: String,
+        items: List<AacCardDto>,
+        userName: String
+    ) {
         val labels = buildList {
             add("(clear avatar)")
             addAll(items.map { it.label })
@@ -477,16 +477,16 @@ class FamilyActivity : BaseActivity() {
             .setTitle("Choose avatar for $userName")
             .setItems(labels) { _, which ->
                 if (which == 0) {
-                    updateMyAvatar(null)
+                    updateUserAvatar(userId, null)
                 } else {
-                    updateMyAvatar(items[which - 1].id)
+                    updateUserAvatar(userId, items[which - 1].id)
                 }
             }
             .setNegativeButton("Cancel", null)
             .show()
     }
 
-    private fun updateMyAvatar(avatarItemId: String?) {
+    private fun updateUserAvatar(userId: String, avatarItemId: String?) {
         scope.launch {
             try {
                 runOnUiThread {
@@ -494,8 +494,9 @@ class FamilyActivity : BaseActivity() {
                     setButtonsEnabled(false)
                 }
 
-                ApiClient.api.updateMyAvatar(
+                ApiClient.api.updateUserAvatar(
                     auth = authHeaderOrThrow(),
+                    userId = userId,
                     body = UpdateMyAvatarRequest(
                         avatarItemId = avatarItemId
                     )

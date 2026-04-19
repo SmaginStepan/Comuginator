@@ -189,4 +189,11 @@ interface ApiService {
         @Body body: UpdateMyAvatarRequest
     ): UpdateMyAvatarResponse
 
+    @PATCH("/v1/users/{userId}/avatar")
+    suspend fun updateUserAvatar(
+        @Header("Authorization") auth: String,
+        @Path("userId") userId: String,
+        @Body body: UpdateMyAvatarRequest
+    ): UpdateMyAvatarResponse
+
 }
