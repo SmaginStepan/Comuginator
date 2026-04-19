@@ -27,6 +27,13 @@ import com.example.comuginator.api.UpdateNameRequest
 import com.example.comuginator.ui.family.FamilyAdapter
 import com.example.comuginator.ui.family.FamilyListItem
 import com.example.comuginator.api.UpdateMyAvatarRequest
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.ImageView
+import androidx.appcompat.app.AlertDialog
+import coil.imageLoader
+import coil.request.ImageRequest
 
 class FamilyActivity : BaseActivity() {
 
@@ -468,24 +475,64 @@ class FamilyActivity : BaseActivity() {
         items: List<AacCardDto>,
         userName: String
     ) {
-        val labels = buildList {
-            add("(clear avatar)")
-            addAll(items.map { it.label })
-        }.toTypedArray()
+        val rows = mutableListOf<AacCardDto?>()
+        rows.add(null) // clear avatar
+        rows.addAll(items)
 
-        androidx.appcompat.app.AlertDialog.Builder(this)
+        val adapter = object : ArrayAdapter<AacCardDto?>(
+            this,
+            0,
+            rows
+        ) {
+            override fun getView(
+                position: Int,
+                convertView: View?,
+                parent: ViewGroup
+            ): View {
+                val view = convertView ?: layoutInflater.inflate(
+                    R.layout.item_avatar_dialog,
+                    parent,
+                    false
+                )
+
+                val iv = view.findViewById<ImageView>(R.id.ivImage)
+                val tv = view.findViewById<TextView>(R.id.tvLabel)
+
+                val item = getItem(position)
+
+                if (item == null) {
+                    tv.text = "(clear avatar)"
+                    iv.setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
+                } else {
+                    tv.text = item.label
+
+                    val request = ImageRequest.Builder(this@FamilyActivity)
+                        .data(item.imageUrl)
+                        .addHeader("Authorization", authHeaderOrThrow())
+                        .target(iv)
+                        .build()
+
+                    imageLoader.enqueue(request)
+                }
+
+                return view
+            }
+        }
+
+        AlertDialog.Builder(this)
             .setTitle("Choose avatar for $userName")
-            .setItems(labels) { _, which ->
-                if (which == 0) {
+            .setAdapter(adapter) { _, which ->
+                val chosen = rows[which]
+
+                if (chosen == null) {
                     updateUserAvatar(userId, null)
                 } else {
-                    updateUserAvatar(userId, items[which - 1].id)
+                    updateUserAvatar(userId, chosen.id)
                 }
             }
             .setNegativeButton("Cancel", null)
             .show()
     }
-
     private fun updateUserAvatar(userId: String, avatarItemId: String?) {
         scope.launch {
             try {
