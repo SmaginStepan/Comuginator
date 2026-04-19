@@ -249,26 +249,18 @@ data class DeviceNameDto(
     val name: String
 )
 
-data class LibraryItemDto(
-    val id: String,
-    val label: String,
-    val imageUrl: String?,
-    val source: String?,
-    val sourceRef: String?
-)
-
 data class LibrarySetDto(
     val id: String,
     val name: String,
-    val cover: LibraryItemDto?,
+    val cover: AacCardDto?,
     val itemsCount: Int
 )
 
 data class LibrarySetDetailsDto(
     val id: String,
     val name: String,
-    val cover: LibraryItemDto?,
-    val items: List<LibraryItemDto>
+    val cover: AacCardDto?,
+    val items: List<AacCardDto>
 )
 
 data class LibrarySetsResponse(
@@ -308,7 +300,7 @@ data class CreateArasaacLibraryItemRequest(
 
 data class LibraryItemsResponse(
     val ok: Boolean,
-    val items: List<LibraryItemDto>
+    val items: List<AacCardDto>
 )
 
 data class OkResponse(
@@ -317,5 +309,5 @@ data class OkResponse(
 
 data class LibraryItemResponse(
     val ok: Boolean,
-    val item: LibraryItemDto
+    val item: AacCardDto
 )

@@ -17,7 +17,6 @@ import com.example.comuginator.R
 import com.example.comuginator.api.AddItemsToSetRequest
 import com.example.comuginator.api.ApiClient
 import com.example.comuginator.api.CreateArasaacLibraryItemRequest
-import com.example.comuginator.api.LibraryItemDto
 import com.example.comuginator.api.UpdateLibrarySetRequest
 import com.example.comuginator.storage.SessionStore
 import com.example.comuginator.ui.library.LibraryItemsAdapter
@@ -56,7 +55,7 @@ class LibrarySetActivity : AppCompatActivity() {
     private lateinit var btnAddArasaac: Button
     private lateinit var btnChangeCover: Button
 
-    private var currentItems: List<LibraryItemDto> = emptyList()
+    private var currentItems: List<AacCardDto> = emptyList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

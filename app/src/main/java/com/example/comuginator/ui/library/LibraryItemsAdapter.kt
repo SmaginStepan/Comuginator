@@ -10,17 +10,17 @@ import androidx.recyclerview.widget.RecyclerView
 import coil.imageLoader
 import coil.request.ImageRequest
 import com.example.comuginator.R
-import com.example.comuginator.api.LibraryItemDto
+import com.example.comuginator.api.AacCardDto
 
 class LibraryItemsAdapter(
     private val authToken: String,
-    private val onRemoveFromSetClick: (LibraryItemDto) -> Unit,
-    private val onDeleteItemClick: (LibraryItemDto) -> Unit
+    private val onRemoveFromSetClick: (AacCardDto) -> Unit,
+    private val onDeleteItemClick: (AacCardDto) -> Unit
 ) : RecyclerView.Adapter<LibraryItemsAdapter.VH>() {
 
-    private val items = mutableListOf<LibraryItemDto>()
+    private val items = mutableListOf<AacCardDto>()
 
-    fun submit(list: List<LibraryItemDto>) {
+    fun submit(list: List<AacCardDto>) {
         items.clear()
         items.addAll(list)
         notifyDataSetChanged()
