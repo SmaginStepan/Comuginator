@@ -25,6 +25,7 @@
         <activity android:name=".ui.UserMessageHistoryActivity" />
         <activity android:name=".ui.LibraryActivity" />
         <activity android:name=".ui.LibrarySetActivity" />
+        <activity android:name=".ui.LibraryItemPickerActivity" />
 
         <activity
             android:name=".ui.MainActivity"
@@ -50,6 +51,16 @@
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 
 </manifest>
