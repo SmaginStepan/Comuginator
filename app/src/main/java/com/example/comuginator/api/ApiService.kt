@@ -183,4 +183,10 @@ interface ApiService {
         @Body body: CreateArasaacLibraryItemRequest
     ): LibraryItemResponse
 
+    @PATCH("/v1/users/me/avatar")
+    suspend fun updateMyAvatar(
+        @Header("Authorization") auth: String,
+        @Body body: UpdateMyAvatarRequest
+    ): UpdateMyAvatarResponse
+
 }

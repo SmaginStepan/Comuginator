@@ -63,9 +63,10 @@ data class UserDto(
     val familyId: String,
     val role: String,
     val name: String?,
+    val avatarItemId: String?,
+    val avatarImageUrl: String?,
     val devices: List<DeviceDto>
 )
-
 data class DeviceDto(
     val id: String,
     val deviceId: String,
@@ -310,4 +311,13 @@ data class OkResponse(
 data class LibraryItemResponse(
     val ok: Boolean,
     val item: AacCardDto
+)
+
+data class UpdateMyAvatarRequest(
+    val avatarItemId: String?
+)
+
+data class UpdateMyAvatarResponse(
+    val ok: Boolean,
+    val user: UserDto
 )

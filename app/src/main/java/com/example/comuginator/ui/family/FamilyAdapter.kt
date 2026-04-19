@@ -4,20 +4,24 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import coil.imageLoader
+import coil.request.ImageRequest
 import com.example.comuginator.R
-
 
 class FamilyAdapter(
     private val isParentViewer: Boolean,
     private val myDeviceId: String,
+    private val authToken: String,
     private val onVolumeClick: (deviceId: String, deviceName: String, currentVolumePercent: Int?) -> Unit,
     private val onSendClick: (userId: String, userName: String) -> Unit,
     private val onHistoryClick: (userId: String, userName: String) -> Unit,
     private val onRenameUserClick: (userId: String, userName: String) -> Unit,
     private val onRenameDeviceClick: (deviceId: String, deviceName: String) -> Unit,
-    ): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    private val onSetAvatarClick: (userId: String, userName: String) -> Unit,
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val items = mutableListOf<FamilyListItem>()
 
@@ -58,17 +62,37 @@ class FamilyAdapter(
     override fun getItemCount(): Int = items.size
 
     inner class UserHeaderViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        private val ivAvatar: ImageView = view.findViewById(R.id.ivAvatar)
         private val tvUserHeader: TextView = view.findViewById(R.id.tvUserHeader)
         private val btnSend: Button = view.findViewById(R.id.btnSend)
         private val btnHistory: Button = view.findViewById(R.id.btnHistory)
         private val btnRenameUser: Button = view.findViewById(R.id.btnRenameUser)
+        private val btnSetAvatar: Button = view.findViewById(R.id.btnSetAvatar)
 
         fun bind(item: FamilyListItem.UserHeader) {
             tvUserHeader.text = "${item.userName} [${item.role}]"
+
+            val url = item.avatarImageUrl
+            if (!url.isNullOrBlank()) {
+                val request = ImageRequest.Builder(itemView.context)
+                    .data(url)
+                    .addHeader("Authorization", authToken)
+                    .target(ivAvatar)
+                    .build()
+
+                itemView.context.imageLoader.enqueue(request)
+            } else {
+                ivAvatar.setImageResource(android.R.drawable.ic_menu_gallery)
+            }
+
             btnSend.setOnClickListener { onSendClick(item.userId, item.userName) }
             btnHistory.setOnClickListener { onHistoryClick(item.userId, item.userName) }
+
             btnRenameUser.visibility = if (isParentViewer) View.VISIBLE else View.GONE
             btnRenameUser.setOnClickListener { onRenameUserClick(item.userId, item.userName) }
+
+            btnSetAvatar.visibility = if (isParentViewer) View.VISIBLE else View.GONE
+            btnSetAvatar.setOnClickListener { onSetAvatarClick(item.userId, item.userName) }
         }
     }
 

@@ -22,9 +22,11 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.comuginator.api.AacCardDto
 import com.example.comuginator.api.UpdateNameRequest
 import com.example.comuginator.ui.family.FamilyAdapter
 import com.example.comuginator.ui.family.FamilyListItem
+import com.example.comuginator.api.UpdateMyAvatarRequest
 
 class FamilyActivity : BaseActivity() {
 
@@ -65,6 +67,7 @@ class FamilyActivity : BaseActivity() {
         familyAdapter = FamilyAdapter(
             isParentViewer = currentMeRole == "PARENT",
             myDeviceId = currentMyDeviceId,
+            authToken = authHeaderOrThrow(),
             onVolumeClick = { deviceId, deviceName, currentVolumePercent ->
                 showSetVolumeDialog(deviceId, deviceName, currentVolumePercent)
             },
@@ -87,6 +90,9 @@ class FamilyActivity : BaseActivity() {
                     initialValue = deviceName,
                     onApply = { newName -> updateDeviceName(deviceId, newName) }
                 )
+            },
+            onSetAvatarClick = { userId, userName ->
+                showChooseAvatarDialog(userId, userName)
             }
         )
 
@@ -315,7 +321,8 @@ class FamilyActivity : BaseActivity() {
             out += FamilyListItem.UserHeader(
                 userId = user.id,
                 userName = user.name ?: "(no name)",
-                role = user.role
+                role = user.role,
+                avatarImageUrl = user.avatarImageUrl
             )
 
             for (device in user.devices) {
@@ -352,6 +359,7 @@ class FamilyActivity : BaseActivity() {
         familyAdapter = FamilyAdapter(
             isParentViewer = currentMeRole == "PARENT",
             myDeviceId = currentMyDeviceId,
+            authToken = authHeaderOrThrow(),
             onVolumeClick = { deviceId, deviceName, currentVolumePercent ->
                 showSetVolumeDialog(deviceId, deviceName, currentVolumePercent)
             },
@@ -374,6 +382,9 @@ class FamilyActivity : BaseActivity() {
                     initialValue = deviceName,
                     onApply = { newName -> updateDeviceName(deviceId, newName) }
                 )
+            },
+            onSetAvatarClick = { userId, userName ->
+                showChooseAvatarDialog(userId, userName)
             }
         )
 
@@ -413,6 +424,92 @@ class FamilyActivity : BaseActivity() {
             } catch (e: Exception) {
                 runOnUiThread {
                     tvStatus.text = "Failed to send volume command: ${e.message}"
+                    setButtonsEnabled(true)
+                }
+            }
+        }
+    }
+
+    private fun showChooseAvatarDialog(userId: String, userName: String) {
+        if (userId != store.userId) {
+            tvStatus.text = "Only current user avatar is supported now"
+            return
+        }
+
+        scope.launch {
+            try {
+                runOnUiThread {
+                    tvStatus.text = "Loading library items..."
+                    setButtonsEnabled(false)
+                }
+
+                val auth = authHeaderOrThrow()
+                val response = ApiClient.api.getLibraryItems(auth = auth, source = null)
+                val items = response.items
+
+                runOnUiThread {
+                    setButtonsEnabled(true)
+
+                    if (items.isEmpty()) {
+                        tvStatus.text = "Library is empty"
+                        return@runOnUiThread
+                    }
+
+                    showAvatarItemsDialog(items, userName)
+                }
+            } catch (e: Exception) {
+                if (handleUnauthorized(e)) return@launch
+                runOnUiThread {
+                    tvStatus.text = "Load library items failed: ${e.message}"
+                    setButtonsEnabled(true)
+                }
+            }
+        }
+    }
+
+    private fun showAvatarItemsDialog(items: List<AacCardDto>, userName: String) {
+        val labels = buildList {
+            add("(clear avatar)")
+            addAll(items.map { it.label })
+        }.toTypedArray()
+
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Choose avatar for $userName")
+            .setItems(labels) { _, which ->
+                if (which == 0) {
+                    updateMyAvatar(null)
+                } else {
+                    updateMyAvatar(items[which - 1].id)
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun updateMyAvatar(avatarItemId: String?) {
+        scope.launch {
+            try {
+                runOnUiThread {
+                    tvStatus.text = "Updating avatar..."
+                    setButtonsEnabled(false)
+                }
+
+                ApiClient.api.updateMyAvatar(
+                    auth = authHeaderOrThrow(),
+                    body = UpdateMyAvatarRequest(
+                        avatarItemId = avatarItemId
+                    )
+                )
+
+                runOnUiThread {
+                    tvStatus.text = "Avatar updated"
+                }
+
+                loadFamily()
+            } catch (e: Exception) {
+                if (handleUnauthorized(e)) return@launch
+                runOnUiThread {
+                    tvStatus.text = "Update avatar failed: ${e.message}"
                     setButtonsEnabled(true)
                 }
             }

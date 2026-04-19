@@ -5,7 +5,8 @@ sealed interface FamilyListItem {
     data class UserHeader(
         val userId: String,
         val userName: String,
-        val role: String
+        val role: String,
+        val avatarImageUrl: String?
     ) : FamilyListItem
 
     data class DeviceRow(
