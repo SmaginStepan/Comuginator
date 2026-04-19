@@ -27,6 +27,10 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import com.example.comuginator.api.AacCardDto
 
 class LibrarySetActivity : AppCompatActivity() {
 
@@ -230,11 +234,36 @@ class LibrarySetActivity : AppCompatActivity() {
                     return@launch
                 }
 
-                val labels = results.map { it.label }.toTypedArray()
+                val adapter = object : ArrayAdapter<AacCardDto>(
+                    this@LibrarySetActivity,
+                    0,
+                    results
+                ) {
+                    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                        val view = convertView ?: layoutInflater.inflate(
+                            R.layout.item_arasaac_dialog,
+                            parent,
+                            false
+                        )
+
+                        val item = getItem(position)!!
+                        val iv = view.findViewById<ImageView>(R.id.ivImage)
+                        val tv = view.findViewById<TextView>(R.id.tvLabel)
+
+                        tv.text = item.label
+
+                        val imageUrl = item.imageUrl
+                            ?: "https://static.arasaac.org/pictograms/${item.id}/${item.id}_300.png"
+
+                        iv.load(imageUrl)
+
+                        return view
+                    }
+                }
 
                 AlertDialog.Builder(this@LibrarySetActivity)
                     .setTitle("Choose ARASAAC card")
-                    .setItems(labels) { _, which ->
+                    .setAdapter(adapter) { _, which ->
                         val chosen = results[which]
                         addArasaacResultToSet(
                             label = chosen.label,
