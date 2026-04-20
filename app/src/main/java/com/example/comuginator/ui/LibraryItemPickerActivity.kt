@@ -6,6 +6,8 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
+import android.view.View
+import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Button
@@ -21,6 +23,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
+import coil.request.ImageRequest
 import com.example.comuginator.R
 import com.example.comuginator.api.AacCardDto
 import com.example.comuginator.api.ApiClient
@@ -37,6 +40,7 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import coil.imageLoader
 
 class LibraryItemPickerActivity : AppCompatActivity() {
 
@@ -96,6 +100,8 @@ class LibraryItemPickerActivity : AppCompatActivity() {
     private var pendingSelectedUri: Uri? = null
     private var pendingSelectedArasaac: AacCardDto? = null
     private var pendingCameraUri: Uri? = null
+
+    private var libraryFilterWatcherAttached = false
 
     private val pickFromDeviceLauncher =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
@@ -261,15 +267,18 @@ class LibraryItemPickerActivity : AppCompatActivity() {
             applyLibraryFilter()
         }
 
-        etSearch.addTextChangedListener(
-            object : android.text.TextWatcher {
-                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
-                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
-                override fun afterTextChanged(s: android.text.Editable?) {
-                    applyLibraryFilter()
+        if (!libraryFilterWatcherAttached) {
+            etSearch.addTextChangedListener(
+                object : android.text.TextWatcher {
+                    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
+                    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
+                    override fun afterTextChanged(s: android.text.Editable?) {
+                        applyLibraryFilter()
+                    }
                 }
-            }
-        )
+            )
+            libraryFilterWatcherAttached = true
+        }
     }
 
     private fun applyLibraryFilter() {
@@ -337,11 +346,38 @@ class LibraryItemPickerActivity : AppCompatActivity() {
                     return@launch
                 }
 
-                val labels = results.map { it.label }.toTypedArray()
+                val dialogAdapter = object : ArrayAdapter<AacCardDto>(
+                    this@LibraryItemPickerActivity,
+                    0,
+                    results
+                ) {
+                    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                        val view = convertView ?: layoutInflater.inflate(
+                            R.layout.item_arasaac_dialog,
+                            parent,
+                            false
+                        )
+
+                        val item = getItem(position)!!
+                        val iv = view.findViewById<ImageView>(R.id.ivImage)
+                        val tv = view.findViewById<TextView>(R.id.tvLabel)
+
+                        tv.text = item.label
+
+                        val request = ImageRequest.Builder(this@LibraryItemPickerActivity)
+                            .data(item.imageUrl)
+                            .target(iv)
+                            .build()
+
+                        imageLoader.enqueue(request)
+
+                        return view
+                    }
+                }
 
                 AlertDialog.Builder(this@LibraryItemPickerActivity)
                     .setTitle("Choose ARASAAC card")
-                    .setItems(labels) { _, which ->
+                    .setAdapter(dialogAdapter) { _, which ->
                         startConfirmForArasaac(results[which])
                     }
                     .setNegativeButton("Cancel", null)
@@ -449,6 +485,7 @@ class LibraryItemPickerActivity : AppCompatActivity() {
 
     private fun hideConfirmBlock() {
         confirmBlock.visibility = LinearLayout.GONE
+        pendingCameraUri = null
         pendingSelectedUri = null
         pendingSelectedArasaac = null
         ivPreview.setImageDrawable(null)
