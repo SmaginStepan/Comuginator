@@ -68,10 +68,10 @@
         android:text="Add photo" />
 
     <Button
-        android:id="@+id/btnLoadFamilyPhotos"
+        android:id="@+id/btnLoadLibrarySet"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Family photos" />
+        android:text="Library set" />
 
     <Button
         android:id="@+id/btnSendMessage"

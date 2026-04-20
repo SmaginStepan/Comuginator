@@ -37,8 +37,8 @@ class ComposeMessageActivity : AppCompatActivity() {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     private lateinit var btnAddPhoto: Button
-    private lateinit var btnLoadFamilyPhotos: Button
 
+    private lateinit var btnLoadLibrarySet: Button
     private val pickImageLauncher =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             if (uri != null) {
@@ -184,14 +184,14 @@ class ComposeMessageActivity : AppCompatActivity() {
         }
 
         btnAddPhoto = findViewById(R.id.btnAddPhoto)
-        btnLoadFamilyPhotos = findViewById(R.id.btnLoadFamilyPhotos)
+        btnLoadLibrarySet = findViewById(R.id.btnLoadLibrarySet)
 
         btnAddPhoto.setOnClickListener {
             pickImageLauncher.launch("image/*")
         }
 
-        btnLoadFamilyPhotos.setOnClickListener {
-            loadFamilyPhotos()
+        btnLoadLibrarySet.setOnClickListener {
+            showChooseLibrarySetDialog()
         }
 
         updateModeUi()
@@ -294,19 +294,86 @@ class ComposeMessageActivity : AppCompatActivity() {
         }
     }
 
-    private fun loadFamilyPhotos() {
+    private fun showChooseLibrarySetDialog() {
         scope.launch {
             try {
-                val response = ApiClient.api.getFamilyPhotos(
-                    auth = authHeaderOrThrow(),
-                    source = "FAMILY_PHOTO"
-                )
+                val auth = authHeaderOrThrow()
+                val response = ApiClient.api.getLibrarySets(auth)
+                val sets = response.sets
+
+                if (sets.isEmpty()) {
+                    runOnUiThread {
+                        tvTarget.text = "No library sets"
+                    }
+                    return@launch
+                }
+
+                val labels = sets.map { "${it.name} (${it.itemsCount})" }.toTypedArray()
 
                 runOnUiThread {
-                    resultsAdapter.submitItems(response.items)
+                    AlertDialog.Builder(this@ComposeMessageActivity)
+                        .setTitle("Choose set")
+                        .setItems(labels) { _, which ->
+                            addAllItemsFromSet(sets[which].id)
+                        }
+                        .setNegativeButton("Cancel", null)
+                        .show()
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
+                runOnUiThread {
+                    tvTarget.text = "Load sets failed: ${e.message}"
+                }
+            }
+        }
+    }
+
+    private fun addAllItemsFromSet(setId: String) {
+        scope.launch {
+            try {
+                val auth = authHeaderOrThrow()
+                val response = ApiClient.api.getLibrarySet(auth, setId)
+                val items = response.set.items
+
+                if (items.isEmpty()) {
+                    runOnUiThread {
+                        android.widget.Toast.makeText(
+                            this@ComposeMessageActivity,
+                            "Set is empty",
+                            android.widget.Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    return@launch
+                }
+
+                runOnUiThread {
+                    when (currentAddMode) {
+                        AddMode.MESSAGE -> {
+                            val existingIds = selectedCards.map { it.id }.toSet()
+                            selectedCards.addAll(items.filter { it.id !in existingIds })
+                            selectedAdapter.submitItems(selectedCards.toList())
+                        }
+
+                        AddMode.REPLY -> {
+                            val existingIds = replyCards.map { it.id }.toSet()
+                            replyCards.addAll(items.filter { it.id !in existingIds })
+                            replyAdapter.submitItems(replyCards.toList())
+                        }
+                    }
+
+                    android.widget.Toast.makeText(
+                        this@ComposeMessageActivity,
+                        "Added ${items.size} items",
+                        android.widget.Toast.LENGTH_SHORT
+                    ).show()
+                }
+            } catch (e: Exception) {
+                runOnUiThread {
+                    android.widget.Toast.makeText(
+                        this@ComposeMessageActivity,
+                        "Load set failed: ${e.message}",
+                        android.widget.Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
         }
     }
