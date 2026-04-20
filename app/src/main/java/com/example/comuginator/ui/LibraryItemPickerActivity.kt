@@ -1,6 +1,7 @@
 package com.example.comuginator.ui
 
 import android.app.Activity
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -89,6 +90,8 @@ class LibraryItemPickerActivity : AppCompatActivity() {
     private lateinit var btnConfirm: Button
     private lateinit var btnCancelSelection: Button
 
+    private lateinit var btnPasteFromClipboard: Button
+
     private lateinit var itemsAdapter: LibraryPickerItemsAdapter
 
     private var allLibraryItems: List<AacCardDto> = emptyList()
@@ -148,6 +151,8 @@ class LibraryItemPickerActivity : AppCompatActivity() {
         actSetFilter = findViewById(R.id.actSetFilter)
         rvItems = findViewById(R.id.rvItems)
 
+        btnPasteFromClipboard = findViewById(R.id.btnPasteFromClipboard)
+
         confirmBlock = findViewById(R.id.confirmBlock)
         ivPreview = findViewById(R.id.ivPreview)
         etLabel = findViewById(R.id.etLabel)
@@ -202,6 +207,10 @@ class LibraryItemPickerActivity : AppCompatActivity() {
             confirmPendingSelection()
         }
 
+        btnPasteFromClipboard.setOnClickListener {
+            pasteImageFromClipboard()
+        }
+
         hideLibraryBrowse()
         hideConfirmBlock()
     }
@@ -251,6 +260,60 @@ class LibraryItemPickerActivity : AppCompatActivity() {
                 tvStatus.text = "Load library failed: ${e.message}"
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        updateClipboardButtonVisibility()
+    }
+
+    private fun updateClipboardButtonVisibility() {
+        btnPasteFromClipboard.visibility =
+            if (hasImageInClipboard()) View.VISIBLE else View.GONE
+    }
+
+    private fun hasImageInClipboard(): Boolean {
+        val clipboard = getSystemService(ClipboardManager::class.java) ?: return false
+        val clip = clipboard.primaryClip ?: return false
+        if (clip.itemCount == 0) return false
+
+        val item = clip.getItemAt(0)
+        val uri = item.uri ?: return false
+
+        val type = contentResolver.getType(uri)
+
+        return type?.startsWith("image/") == true
+    }
+
+    private fun pasteImageFromClipboard() {
+        val clipboard = getSystemService(android.content.ClipboardManager::class.java)
+
+        if (clipboard == null) {
+            tvStatus.text = "Clipboard is unavailable"
+            return
+        }
+
+        val clip = clipboard.primaryClip
+        if (clip == null || clip.itemCount == 0) {
+            tvStatus.text = "Clipboard is empty"
+            return
+        }
+
+        val item = clip.getItemAt(0)
+
+        val uri = item.uri
+        if (uri != null) {
+            startConfirmForPhoto(uri)
+            return
+        }
+
+        val text = item.coerceToText(this)?.toString()?.trim().orEmpty()
+        if (text.isNotEmpty()) {
+            tvStatus.text = "Clipboard text is not supported yet"
+            return
+        }
+
+        tvStatus.text = "No image found in clipboard"
     }
 
     private fun setupSetFilter() {
@@ -303,9 +366,17 @@ class LibraryItemPickerActivity : AppCompatActivity() {
         pendingSelectedArasaac = null
 
         ivPreview.load(uri)
-        etLabel.setText(extractDisplayName(uri) ?: fallbackPhotoName())
+        etLabel.setText(
+            sanitizeSuggestedLabel(extractDisplayName(uri) ?: fallbackPhotoName())
+        )
 
         showConfirmBlock()
+    }
+
+    private fun sanitizeSuggestedLabel(raw: String): String {
+        val dot = raw.lastIndexOf('.')
+        val noExt = if (dot > 0) raw.substring(0, dot) else raw
+        return noExt.replace('_', ' ').replace('-', ' ').trim()
     }
 
     private fun startConfirmForArasaac(card: AacCardDto) {

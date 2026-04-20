@@ -107,7 +107,7 @@ interface ApiService {
         @Body body: UpdateNameRequest
     ): UpdateUserResponse
 
-    @PATCH("/v1/devices/{deviceId}")
+    @PATCH("/v1/devices/{deviceId}/name")
     suspend fun updateDeviceName(
         @Header("Authorization") auth: String,
         @Path("deviceId") deviceId: String,
