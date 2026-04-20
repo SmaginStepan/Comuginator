@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.comuginator.api.AacMessageDetailsDto
 import android.os.Bundle
 import android.view.View
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -17,6 +18,10 @@ import com.example.comuginator.ui.base.BaseActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import androidx.recyclerview.widget.GridLayoutManager
+import coil.Coil
+import coil.request.ImageRequest
+
 class IncomingMessageActivity : BaseActivity() {
 
     companion object {
@@ -33,6 +38,7 @@ class IncomingMessageActivity : BaseActivity() {
     private lateinit var messageAdapter: SimpleCardAdapter
     private lateinit var repliesAdapter: SimpleCardAdapter
 
+    private lateinit var ivFromAvatar: ImageView
     private var messageId: String = ""
     private var commandId: String = ""
     private var ackSent = false
@@ -51,6 +57,8 @@ class IncomingMessageActivity : BaseActivity() {
         rvMessageCards = findViewById(R.id.rvMessageCards)
         rvSuggestedReplies = findViewById(R.id.rvSuggestedReplies)
 
+        ivFromAvatar = findViewById(R.id.ivFromAvatar)
+        tvFromUser = findViewById(R.id.tvFromUser)
         messageId = intent.getStringExtra(EXTRA_MESSAGE_ID).orEmpty()
         commandId = intent.getStringExtra(EXTRA_COMMAND_ID).orEmpty()
 
@@ -83,8 +91,7 @@ class IncomingMessageActivity : BaseActivity() {
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         rvMessageCards.adapter = messageAdapter
 
-        rvSuggestedReplies.layoutManager =
-            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        rvSuggestedReplies.layoutManager = GridLayoutManager(this, 3)
         rvSuggestedReplies.adapter = repliesAdapter
 
         loadMessage()
@@ -124,11 +131,13 @@ class IncomingMessageActivity : BaseActivity() {
     }
 
     private fun renderMessage(message: AacMessageDetailsDto) {
-        tvFromUser.text = "From: ${message.fromUser.name ?: message.fromUser.id}"
         tvCreatedAt.text = "Created: ${message.createdAt}"
 
         messageAdapter.submitItems(message.message)
         repliesAdapter.submitItems(message.suggestedReplies)
+
+        tvFromUser.text = message.fromUser.name
+        loadProtectedImage(message.fromUser.avatarUrl, ivFromAvatar)
 
         if (message.reply != null) {
             tvCurrentReply.text = "Reply: ${message.reply.reply.label}"
@@ -137,6 +146,18 @@ class IncomingMessageActivity : BaseActivity() {
             tvCurrentReply.text = "No reply yet"
             rvSuggestedReplies.isEnabled = true
         }
+    }
+
+    private fun loadProtectedImage(url: String?, imageView: ImageView) {
+        if (url.isNullOrBlank()) return
+
+        val request = ImageRequest.Builder(this)
+            .data(url)
+            .addHeader("Authorization", "Bearer $authToken")
+            .target(imageView)
+            .build()
+
+        Coil.imageLoader(this).enqueue(request)
     }
 
     private fun sendReply(card: AacCardDto) {

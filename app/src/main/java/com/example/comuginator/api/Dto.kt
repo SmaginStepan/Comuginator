@@ -156,10 +156,11 @@ data class AacCardDto(
 
 data class AacUserDto(
     val id: String,
-    val name: String?,
-    val role: String? = null
+    val name: String,
+    val role: String,
+    val avatarItemId: String?,
+    val avatarUrl: String?
 )
-
 data class AacReplyShortDto(
     val id: String,
     val reply: AacCardDto,
