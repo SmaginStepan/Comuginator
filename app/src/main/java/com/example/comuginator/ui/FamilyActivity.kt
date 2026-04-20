@@ -2,7 +2,6 @@ package com.example.comuginator.ui
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.SeekBar
@@ -22,18 +21,12 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.comuginator.api.AacCardDto
 import com.example.comuginator.api.UpdateNameRequest
 import com.example.comuginator.ui.family.FamilyAdapter
 import com.example.comuginator.ui.family.FamilyListItem
 import com.example.comuginator.api.UpdateMyAvatarRequest
-import android.view.View
-import android.view.ViewGroup
-import android.widget.ArrayAdapter
-import android.widget.ImageView
-import androidx.appcompat.app.AlertDialog
-import coil.imageLoader
-import coil.request.ImageRequest
+import android.app.Activity
+import androidx.activity.result.contract.ActivityResultContracts
 
 class FamilyActivity : BaseActivity() {
 
@@ -55,6 +48,21 @@ class FamilyActivity : BaseActivity() {
     private lateinit var btnInviteParent: Button
     private lateinit var btnInviteChild: Button
     private lateinit var btnLibrary: Button
+
+    private var pendingAvatarUserId: String? = null
+
+    private val avatarPickerLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            val userId = pendingAvatarUserId
+            pendingAvatarUserId = null
+
+            if (result.resultCode == Activity.RESULT_OK) {
+                val itemId = LibraryItemPickerActivity.parseResultItemId(result.data)
+                if (!userId.isNullOrBlank() && !itemId.isNullOrBlank()) {
+                    updateUserAvatar(userId, itemId)
+                }
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -98,8 +106,8 @@ class FamilyActivity : BaseActivity() {
                     onApply = { newName -> updateDeviceName(deviceId, newName) }
                 )
             },
-            onSetAvatarClick = { userId, userName ->
-                showChooseAvatarDialog(userId, userName)
+            onSetAvatarClick = { userId ->
+                showChooseAvatarDialog(userId)
             }
         )
 
@@ -390,8 +398,8 @@ class FamilyActivity : BaseActivity() {
                     onApply = { newName -> updateDeviceName(deviceId, newName) }
                 )
             },
-            onSetAvatarClick = { userId, userName ->
-                showChooseAvatarDialog(userId, userName)
+            onSetAvatarClick = { userId ->
+                showChooseAvatarDialog(userId)
             }
         )
 
@@ -437,102 +445,17 @@ class FamilyActivity : BaseActivity() {
         }
     }
 
-    private fun showChooseAvatarDialog(userId: String, userName: String) {
+    private fun showChooseAvatarDialog(userId: String) {
+        pendingAvatarUserId = userId
 
-        scope.launch {
-            try {
-                runOnUiThread {
-                    tvStatus.text = "Loading library items..."
-                    setButtonsEnabled(false)
-                }
+        val intent = LibraryItemPickerActivity.createIntent(
+            context = this,
+            targetMode = LibraryItemPickerActivity.TargetMode.USER_AVATAR
+        )
 
-                val auth = authHeaderOrThrow()
-                val response = ApiClient.api.getLibraryItems(auth = auth, source = null)
-                val items = response.items
-
-                runOnUiThread {
-                    setButtonsEnabled(true)
-
-                    if (items.isEmpty()) {
-                        tvStatus.text = "Library is empty"
-                        return@runOnUiThread
-                    }
-
-                    showAvatarItemsDialog(userId, items, userName)
-                }
-            } catch (e: Exception) {
-                if (handleUnauthorized(e)) return@launch
-                runOnUiThread {
-                    tvStatus.text = "Load library items failed: ${e.message}"
-                    setButtonsEnabled(true)
-                }
-            }
-        }
+        avatarPickerLauncher.launch(intent)
     }
 
-    private fun showAvatarItemsDialog(
-        userId: String,
-        items: List<AacCardDto>,
-        userName: String
-    ) {
-        val rows = mutableListOf<AacCardDto?>()
-        rows.add(null) // clear avatar
-        rows.addAll(items)
-
-        val adapter = object : ArrayAdapter<AacCardDto?>(
-            this,
-            0,
-            rows
-        ) {
-            override fun getView(
-                position: Int,
-                convertView: View?,
-                parent: ViewGroup
-            ): View {
-                val view = convertView ?: layoutInflater.inflate(
-                    R.layout.item_avatar_dialog,
-                    parent,
-                    false
-                )
-
-                val iv = view.findViewById<ImageView>(R.id.ivImage)
-                val tv = view.findViewById<TextView>(R.id.tvLabel)
-
-                val item = getItem(position)
-
-                if (item == null) {
-                    tv.text = "(clear avatar)"
-                    iv.setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
-                } else {
-                    tv.text = item.label
-
-                    val request = ImageRequest.Builder(this@FamilyActivity)
-                        .data(item.imageUrl)
-                        .addHeader("Authorization", authHeaderOrThrow())
-                        .target(iv)
-                        .build()
-
-                    imageLoader.enqueue(request)
-                }
-
-                return view
-            }
-        }
-
-        AlertDialog.Builder(this)
-            .setTitle("Choose avatar for $userName")
-            .setAdapter(adapter) { _, which ->
-                val chosen = rows[which]
-
-                if (chosen == null) {
-                    updateUserAvatar(userId, null)
-                } else {
-                    updateUserAvatar(userId, chosen.id)
-                }
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
-    }
     private fun updateUserAvatar(userId: String, avatarItemId: String?) {
         scope.launch {
             try {

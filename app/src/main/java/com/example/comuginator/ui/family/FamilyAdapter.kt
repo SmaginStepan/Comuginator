@@ -20,7 +20,7 @@ class FamilyAdapter(
     private val onHistoryClick: (userId: String, userName: String) -> Unit,
     private val onRenameUserClick: (userId: String, userName: String) -> Unit,
     private val onRenameDeviceClick: (deviceId: String, deviceName: String) -> Unit,
-    private val onSetAvatarClick: (userId: String, userName: String) -> Unit,
+    private val onSetAvatarClick: (userId: String) -> Unit,
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val items = mutableListOf<FamilyListItem>()
@@ -92,7 +92,7 @@ class FamilyAdapter(
             btnRenameUser.setOnClickListener { onRenameUserClick(item.userId, item.userName) }
 
             btnSetAvatar.visibility = if (isParentViewer) View.VISIBLE else View.GONE
-            btnSetAvatar.setOnClickListener { onSetAvatarClick(item.userId, item.userName) }
+            btnSetAvatar.setOnClickListener { onSetAvatarClick(item.userId) }
         }
     }
 

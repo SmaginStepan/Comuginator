@@ -1,6 +1,5 @@
 package com.example.comuginator.ui
 
-import android.net.Uri
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
@@ -16,20 +15,11 @@ import coil.load
 import com.example.comuginator.R
 import com.example.comuginator.api.AddItemsToSetRequest
 import com.example.comuginator.api.ApiClient
-import com.example.comuginator.api.CreateArasaacLibraryItemRequest
 import com.example.comuginator.api.UpdateLibrarySetRequest
 import com.example.comuginator.storage.SessionStore
 import com.example.comuginator.ui.library.LibraryItemsAdapter
 import kotlinx.coroutines.launch
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.MultipartBody
-import okhttp3.RequestBody.Companion.asRequestBody
-import okhttp3.RequestBody.Companion.toRequestBody
-import java.io.File
-import android.view.View
-import android.view.ViewGroup
-import android.widget.ArrayAdapter
-import com.example.comuginator.api.AacCardDto
+import android.app.Activity
 
 class LibrarySetActivity : AppCompatActivity() {
 
@@ -45,17 +35,29 @@ class LibrarySetActivity : AppCompatActivity() {
 
     private lateinit var adapter: LibraryItemsAdapter
 
-    private val pickPhotoLauncher =
-        registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-            if (uri != null) {
-                uploadPhotoToSet(uri)
+    private val addItemPickerLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val itemId = LibraryItemPickerActivity.parseResultItemId(result.data)
+                if (!itemId.isNullOrBlank()) {
+                    addExistingItemToSet(itemId)
+                }
             }
         }
+
+    private val coverPickerLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val itemId = LibraryItemPickerActivity.parseResultItemId(result.data)
+                if (!itemId.isNullOrBlank()) {
+                    updateCover(itemId)
+                }
+            }
+        }
+
     private lateinit var btnAddPhoto: Button
     private lateinit var btnAddArasaac: Button
     private lateinit var btnChangeCover: Button
-
-    private var currentItems: List<AacCardDto> = emptyList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,19 +78,18 @@ class LibrarySetActivity : AppCompatActivity() {
         btnChangeCover = findViewById(R.id.btnChangeCover)
 
         btnAddPhoto.setOnClickListener {
-            pickPhotoLauncher.launch("image/*")
+            openAddItemPicker()
         }
 
         btnAddArasaac.setOnClickListener {
-            showAddArasaacDialog()
+            openAddItemPicker()
         }
 
         btnChangeCover.setOnClickListener {
-            showChangeCoverDialog()
+            openCoverPicker()
         }
 
-        val token = sessionStore.token ?: ""
-        val auth = "Bearer $token"
+        val auth = authHeaderOrNull().orEmpty()
 
         adapter = LibraryItemsAdapter(
             auth,
@@ -114,6 +115,43 @@ class LibrarySetActivity : AppCompatActivity() {
         loadSet()
     }
 
+    private fun addExistingItemToSet(itemId: String) {
+        lifecycleScope.launch {
+            try {
+                val auth = authHeaderOrNull() ?: return@launch
+                tvStatus.text = "Adding item..."
+
+                ApiClient.api.addItemsToSet(
+                    auth = auth,
+                    setId = setId,
+                    body = AddItemsToSetRequest(
+                        itemIds = listOf(itemId)
+                    )
+                )
+
+                loadSet()
+            } catch (e: Exception) {
+                tvStatus.text = "Add item failed: ${e.message}"
+            }
+        }
+    }
+
+    private fun openAddItemPicker() {
+        val intent = LibraryItemPickerActivity.createIntent(
+            context = this,
+            targetMode = LibraryItemPickerActivity.TargetMode.ADD_TO_SET
+        )
+        addItemPickerLauncher.launch(intent)
+    }
+
+    private fun openCoverPicker() {
+        val intent = LibraryItemPickerActivity.createIntent(
+            context = this,
+            targetMode = LibraryItemPickerActivity.TargetMode.SET_COVER
+        )
+        coverPickerLauncher.launch(intent)
+    }
+
     private fun updateCover(itemId: String) {
         lifecycleScope.launch {
             try {
@@ -135,178 +173,6 @@ class LibrarySetActivity : AppCompatActivity() {
         }
     }
 
-    private fun showChangeCoverDialog() {
-        if (currentItems.isEmpty()) {
-            tvStatus.text = "Set is empty"
-            return
-        }
-
-        val labels = currentItems.map { it.label }.toTypedArray()
-
-        AlertDialog.Builder(this)
-            .setTitle("Choose cover")
-            .setItems(labels) { _, which ->
-                val selected = currentItems[which]
-                updateCover(selected.id)
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
-    }
-    private fun uploadPhotoToSet(uri: Uri) {
-        lifecycleScope.launch {
-            try {
-                val auth = authHeaderOrNull() ?: return@launch
-                tvStatus.text = "Uploading photo..."
-
-                val contentResolver = applicationContext.contentResolver
-                val mimeType = contentResolver.getType(uri) ?: "image/jpeg"
-
-                val inputStream = contentResolver.openInputStream(uri)
-                    ?: throw IllegalStateException("Cannot open selected file")
-
-                val tempFile = File.createTempFile("library_upload_", ".tmp", cacheDir)
-                inputStream.use { input ->
-                    tempFile.outputStream().use { output ->
-                        input.copyTo(output)
-                    }
-                }
-
-                val fileBody = tempFile.asRequestBody(mimeType.toMediaTypeOrNull())
-                val filePart = MultipartBody.Part.createFormData(
-                    "file",
-                    tempFile.name,
-                    fileBody
-                )
-
-                val label = tempFile.nameWithoutExtension.ifBlank { "Photo" }
-                    .toRequestBody("text/plain".toMediaTypeOrNull())
-
-                val uploaded = ApiClient.api.uploadFamilyPhoto(
-                    auth = auth,
-                    file = filePart,
-                    label = label
-                )
-
-                ApiClient.api.addItemsToSet(
-                    auth = auth,
-                    setId = setId,
-                    body = AddItemsToSetRequest(
-                        itemIds = listOf(uploaded.item.id)
-                    )
-                )
-
-                tempFile.delete()
-                loadSet()
-            } catch (e: Exception) {
-                tvStatus.text = "Add photo failed: ${e.message}"
-            }
-        }
-    }
-
-    private fun showAddArasaacDialog() {
-        val input = EditText(this)
-
-        AlertDialog.Builder(this)
-            .setTitle("Search ARASAAC")
-            .setView(input)
-            .setNegativeButton("Cancel", null)
-            .setPositiveButton("Search") { _, _ ->
-                val query = input.text?.toString()?.trim().orEmpty()
-                if (query.isNotEmpty()) {
-                    searchAndAddArasaac(query)
-                }
-            }
-            .show()
-    }
-
-    private fun searchAndAddArasaac(query: String) {
-        lifecycleScope.launch {
-            try {
-                val auth = authHeaderOrNull() ?: return@launch
-                tvStatus.text = "Searching ARASAAC..."
-
-                val response = ApiClient.api.searchArasaac(auth = auth, query = query)
-                val results = response.items
-
-                if (results.isEmpty()) {
-                    tvStatus.text = "No ARASAAC results"
-                    return@launch
-                }
-
-                val adapter = object : ArrayAdapter<AacCardDto>(
-                    this@LibrarySetActivity,
-                    0,
-                    results
-                ) {
-                    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-                        val view = convertView ?: layoutInflater.inflate(
-                            R.layout.item_arasaac_dialog,
-                            parent,
-                            false
-                        )
-
-                        val item = getItem(position)!!
-                        val iv = view.findViewById<ImageView>(R.id.ivImage)
-                        val tv = view.findViewById<TextView>(R.id.tvLabel)
-
-                        tv.text = item.label
-
-                        val imageUrl = item.imageUrl
-                            ?: "https://static.arasaac.org/pictograms/${item.id}/${item.id}_300.png"
-
-                        iv.load(imageUrl)
-
-                        return view
-                    }
-                }
-
-                AlertDialog.Builder(this@LibrarySetActivity)
-                    .setTitle("Choose ARASAAC card")
-                    .setAdapter(adapter) { _, which ->
-                        val chosen = results[which]
-                        addArasaacResultToSet(
-                            label = chosen.label,
-                            sourceRef = chosen.id
-                        )
-                    }
-                    .setNegativeButton("Cancel", null)
-                    .show()
-
-                tvStatus.text = ""
-            } catch (e: Exception) {
-                tvStatus.text = "ARASAAC search failed: ${e.message}"
-            }
-        }
-    }
-
-    private fun addArasaacResultToSet(label: String, sourceRef: String) {
-        lifecycleScope.launch {
-            try {
-                val auth = authHeaderOrNull() ?: return@launch
-                tvStatus.text = "Adding ARASAAC..."
-
-                val created = ApiClient.api.createArasaacLibraryItem(
-                    auth = auth,
-                    body = CreateArasaacLibraryItemRequest(
-                        label = label,
-                        sourceRef = sourceRef
-                    )
-                )
-
-                ApiClient.api.addItemsToSet(
-                    auth = auth,
-                    setId = setId,
-                    body = AddItemsToSetRequest(
-                        itemIds = listOf(created.item.id)
-                    )
-                )
-
-                loadSet()
-            } catch (e: Exception) {
-                tvStatus.text = "Add ARASAAC failed: ${e.message}"
-            }
-        }
-    }
 
     override fun onResume() {
         super.onResume()
@@ -334,7 +200,7 @@ class LibrarySetActivity : AppCompatActivity() {
                 tvStatus.text = "${set.items.size} items"
                 ivCover.load(set.cover?.imageUrl)
                 adapter.submit(set.items)
-                currentItems = set.items
+
             } catch (e: Exception) {
                 tvStatus.text = "Failed: ${e.message}"
             }
