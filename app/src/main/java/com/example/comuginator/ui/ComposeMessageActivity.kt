@@ -31,8 +31,15 @@ import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
 import java.io.FileOutputStream
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 
 class ComposeMessageActivity : AppCompatActivity() {
+
+    companion object {
+        const val EXTRA_INITIAL_MESSAGE_CARDS = "initial_message_cards"
+        const val EXTRA_INITIAL_REPLY_CARDS = "initial_reply_cards"
+    }
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -84,6 +91,9 @@ class ComposeMessageActivity : AppCompatActivity() {
 
         targetUserId = intent.getStringExtra("targetUserId").orEmpty()
         targetUserName = intent.getStringExtra("targetUserName").orEmpty()
+
+        val initialMessageCards = parseInitialCards(EXTRA_INITIAL_MESSAGE_CARDS)
+        val initialReplyCards = parseInitialCards(EXTRA_INITIAL_REPLY_CARDS)
 
         tvTarget = findViewById(R.id.tvTarget)
         tvMessageHeader = findViewById(R.id.tvMessageHeader)
@@ -194,8 +204,23 @@ class ComposeMessageActivity : AppCompatActivity() {
             showChooseLibrarySetDialog()
         }
 
+        if (initialMessageCards.isNotEmpty()) {
+            selectedCards.clear()
+            selectedCards.addAll(initialMessageCards)
+            selectedAdapter.submitItems(selectedCards.toList())
+        }
+
+        if (initialReplyCards.isNotEmpty()) {
+            replyCards.clear()
+            replyCards.addAll(initialReplyCards)
+            replyAdapter.submitItems(replyCards.toList())
+        }
+
         updateModeUi()
-        loadDefaultReplies()
+
+        if (replyCards.isEmpty()) {
+            loadDefaultReplies()
+        }
     }
 
     private fun authHeaderOrThrow(): String {
@@ -213,6 +238,18 @@ class ComposeMessageActivity : AppCompatActivity() {
         tvRepliesHeader.setBackgroundColor(
             if (currentAddMode == AddMode.REPLY) activeColor else inactiveColor
         )
+    }
+
+    private fun parseInitialCards(extraName: String): List<AacCardDto> {
+        val json = intent.getStringExtra(extraName).orEmpty()
+        if (json.isBlank()) return emptyList()
+
+        return try {
+            val type = object : TypeToken<List<AacCardDto>>() {}.type
+            Gson().fromJson<List<AacCardDto>>(json, type) ?: emptyList()
+        } catch (e: Exception) {
+            emptyList()
+        }
     }
 
     private fun loadDefaultReplies() {

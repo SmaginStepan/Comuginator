@@ -1,5 +1,6 @@
 package com.example.comuginator.ui
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.ProgressBar
@@ -10,11 +11,13 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.comuginator.R
+import com.example.comuginator.api.AacMessageListItemDto
 import com.example.comuginator.api.ApiClient
 import com.example.comuginator.storage.SessionStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.google.gson.Gson
 
 class UserMessageHistoryActivity : AppCompatActivity() {
 
@@ -52,11 +55,29 @@ class UserMessageHistoryActivity : AppCompatActivity() {
 
         tvTitle.text = "History with ${if (targetUserName.isBlank()) targetUserId else targetUserName}"
 
-        historyAdapter = MessageHistoryAdapter()
+        historyAdapter = MessageHistoryAdapter { item ->
+            repeatMessage(item)
+        }
         rvHistory.layoutManager = LinearLayoutManager(this)
         rvHistory.adapter = historyAdapter
 
         loadHistory()
+    }
+
+    private fun repeatMessage(item: AacMessageListItemDto) {
+        val intent = Intent(this, ComposeMessageActivity::class.java).apply {
+            putExtra("targetUserId", targetUserId)
+            putExtra("targetUserName", targetUserName)
+            putExtra(
+                ComposeMessageActivity.EXTRA_INITIAL_MESSAGE_CARDS,
+                Gson().toJson(item.message)
+            )
+            putExtra(
+                ComposeMessageActivity.EXTRA_INITIAL_REPLY_CARDS,
+                Gson().toJson(item.suggestedReplies)
+            )
+        }
+        startActivity(intent)
     }
 
     private fun authHeaderOrThrow(): String {

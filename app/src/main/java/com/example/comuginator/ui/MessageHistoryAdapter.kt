@@ -3,13 +3,16 @@ package com.example.comuginator.ui
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.comuginator.R
 import com.example.comuginator.api.AacMessageListItemDto
 
-class MessageHistoryAdapter : RecyclerView.Adapter<MessageHistoryAdapter.HistoryViewHolder>() {
+class MessageHistoryAdapter(
+    private val onRepeatClick: (AacMessageListItemDto) -> Unit
+) : RecyclerView.Adapter<MessageHistoryAdapter.HistoryViewHolder>() {
 
     private val items = mutableListOf<AacMessageListItemDto>()
 
@@ -36,6 +39,7 @@ class MessageHistoryAdapter : RecyclerView.Adapter<MessageHistoryAdapter.History
         private val tvCreatedAt: TextView = view.findViewById(R.id.tvCreatedAt)
         private val tvReply: TextView = view.findViewById(R.id.tvReply)
         private val rvCards: RecyclerView = view.findViewById(R.id.rvCards)
+        private val btnRepeat: Button = view.findViewById(R.id.btnRepeat)
 
         private val cardsAdapter = SimpleCardAdapter { }
 
@@ -57,6 +61,10 @@ class MessageHistoryAdapter : RecyclerView.Adapter<MessageHistoryAdapter.History
                 "Reply: ${item.reply.reply.label}"
             } else {
                 "Reply: —"
+            }
+
+            btnRepeat.setOnClickListener {
+                onRepeatClick(item)
             }
         }
     }
