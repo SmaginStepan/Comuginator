@@ -30,7 +30,6 @@ class LibraryItemsAdapter(
         val ivImage = v.findViewById<ImageView>(R.id.ivImage)
         val tvLabel = v.findViewById<TextView>(R.id.tvLabel)
         val tvSource = v.findViewById<TextView>(R.id.tvSource)
-        val btnRemoveFromSet = v.findViewById<Button>(R.id.btnRemoveFromSet)
         val btnDeleteItem = v.findViewById<Button>(R.id.btnDeleteItem)
     }
 
@@ -59,10 +58,6 @@ class LibraryItemsAdapter(
             holder.ivImage.context.imageLoader.enqueue(request)
         } else {
             holder.ivImage.setImageResource(android.R.drawable.ic_menu_gallery)
-        }
-
-        holder.btnRemoveFromSet.setOnClickListener {
-            onRemoveFromSetClick(item)
         }
 
         holder.btnDeleteItem.setOnClickListener {
