@@ -27,6 +27,7 @@ import com.example.comuginator.ui.family.FamilyListItem
 import com.example.comuginator.api.UpdateMyAvatarRequest
 import android.app.Activity
 import androidx.activity.result.contract.ActivityResultContracts
+import com.example.comuginator.service.CommandSyncScheduler
 import com.example.comuginator.service.TelemetryScheduler
 
 class FamilyActivity : BaseActivity() {
@@ -263,7 +264,7 @@ class FamilyActivity : BaseActivity() {
     }
 
     private fun sendHeartbeat() {
-        TelemetryScheduler.enqueueImmediate(applicationContext, "manual_test")
+        CommandSyncScheduler.enqueueImmediate(this, "manual_test")
     }
 
     private fun authHeaderOrThrow(): String {

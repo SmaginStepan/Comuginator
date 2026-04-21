@@ -35,7 +35,7 @@ class CommandSyncWorker(
                     }
                     else -> {
                         // unknown command type for now
-                        Log.d("CommandSyncWorker", "$command.type")
+                        Log.d("CommandSyncWorker", "unknown command type $command.type")
                     }
                 }
 
@@ -52,18 +52,14 @@ class CommandSyncWorker(
     }
 
     private fun handleNewMessageCommand(command: CommandDto) {
-//        NotificationHelper.showNewMessageNotification(
-//            context = applicationContext,
-//            title = "New message",
-//            text = "Tap to open"
-//        )
+        NotificationHelper.showNewMessageNotification(
+            context = applicationContext
+        )
     }
 
     private fun handleNewReplyCommand(command: CommandDto) {
-//        NotificationHelper.showNewReplyNotification(
-//            context = applicationContext,
-//            title = "New reply",
-//            text = "Tap to open"
-//        )
+       NotificationHelper.showNewReplyNotification(
+            context = applicationContext
+        )
     }
 }
