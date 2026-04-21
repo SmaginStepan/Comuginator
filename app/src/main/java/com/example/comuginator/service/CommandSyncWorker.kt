@@ -1,6 +1,7 @@
 package com.example.comuginator.service
 
 import android.content.Context
+import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.example.comuginator.api.ApiClient
@@ -31,6 +32,10 @@ class CommandSyncWorker(
 
                     "aac_reply_available" -> {
                         handleNewReplyCommand(command)
+                    }
+                    else -> {
+                        // unknown command type for now
+                        Log.d("CommandSyncWorker", "$command.type")
                     }
                 }
 
