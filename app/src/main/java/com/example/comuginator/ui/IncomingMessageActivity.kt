@@ -137,7 +137,7 @@ class IncomingMessageActivity : BaseActivity() {
         repliesAdapter.submitItems(message.suggestedReplies)
 
         tvFromUser.text = message.fromUser.name
-        loadProtectedImage(message.fromUser.avatarUrl, ivFromAvatar)
+        loadProtectedImage(message.fromUser.avatarImageUrl, ivFromAvatar)
 
         if (message.reply != null) {
             tvCurrentReply.text = "Reply: ${message.reply.reply.label}"

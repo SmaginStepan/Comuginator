@@ -159,7 +159,7 @@ data class AacUserDto(
     val name: String,
     val role: String,
     val avatarItemId: String?,
-    val avatarUrl: String?
+    val avatarImageUrl: String?
 )
 data class AacReplyShortDto(
     val id: String,

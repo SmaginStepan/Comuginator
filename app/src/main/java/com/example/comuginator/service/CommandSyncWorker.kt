@@ -35,7 +35,7 @@ class CommandSyncWorker(
                     }
                     else -> {
                         // unknown command type for now
-                        Log.d("CommandSyncWorker", "unknown command type $command.type")
+                        Log.d("CommandSyncWorker", "unknown command type ${command.type}")
                     }
                 }
 
