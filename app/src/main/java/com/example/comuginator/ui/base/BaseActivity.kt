@@ -35,11 +35,13 @@ open class BaseActivity: AppCompatActivity() {
         if (initialized) return
         if (!ensureNotificationsPermission()) return
 
-        TelemetryScheduler.ensurePeriodic(this)
         initialized = true
 
         val existingToken = store.token
         if (!existingToken.isNullOrBlank()) {
+            TelemetryScheduler.ensurePeriodic(applicationContext)
+            TelemetryScheduler.enqueueImmediate(applicationContext, "app_start")
+
             ConnectionService.start(this)
             onInitialized()
             return

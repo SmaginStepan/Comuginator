@@ -2,20 +2,22 @@ package com.example.comuginator.service
 
 import android.content.Context
 import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.example.comuginator.api.ApiClient
 import com.example.comuginator.api.HeartbeatRequest
 import com.example.comuginator.storage.SessionStore
 import android.util.Log
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 
 class TelemetryWorker(
     appContext: Context,
     params: WorkerParameters
 ) : CoroutineWorker(appContext, params) {
 
-    @RequiresApi(Build.VERSION_CODES.O)
     override suspend fun doWork(): Result {
         return try {
             val reason = inputData.getString("reason") ?: "periodic"
@@ -32,7 +34,7 @@ class TelemetryWorker(
                     batteryPercent = snapshot.batteryPercent,
                     volumePercent = null,
                     isCharging = snapshot.isCharging,
-                    reportedAt = java.time.Instant.now().toString(),
+                    reportedAt = nowIsoString(),
                     platform = "android",
                     model = Build.MODEL ?: "unknown",
                     osVersion = Build.VERSION.RELEASE ?: "unknown",
@@ -44,6 +46,12 @@ class TelemetryWorker(
         } catch (e: Exception) {
             Result.retry()
         }
+    }
+
+    private fun nowIsoString(): String {
+        val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US)
+        sdf.timeZone = TimeZone.getTimeZone("UTC")
+        return sdf.format(Date())
     }
 
     private fun getAppVersion(): String {
