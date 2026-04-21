@@ -322,3 +322,7 @@ data class UpdateMyAvatarResponse(
     val ok: Boolean,
     val user: UserDto
 )
+
+data class FcmTokenRequest(
+    val fcmToken: String
+)

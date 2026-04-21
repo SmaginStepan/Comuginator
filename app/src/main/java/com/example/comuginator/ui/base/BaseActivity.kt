@@ -12,9 +12,12 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.example.comuginator.service.ConnectionService
+import com.example.comuginator.service.FcmTokenSyncScheduler
 import com.example.comuginator.service.TelemetryScheduler
+import com.example.comuginator.storage.FcmTokenStore
 import com.example.comuginator.storage.SessionStore
 import com.example.comuginator.ui.MainActivity
+import com.google.firebase.messaging.FirebaseMessaging
 import retrofit2.HttpException
 
 open class BaseActivity: AppCompatActivity() {
@@ -41,6 +44,14 @@ open class BaseActivity: AppCompatActivity() {
         if (!existingToken.isNullOrBlank()) {
             TelemetryScheduler.ensurePeriodic(applicationContext)
             TelemetryScheduler.enqueueImmediate(applicationContext, "app_start")
+
+            FirebaseMessaging.getInstance().token
+                .addOnSuccessListener { token ->
+                    if (!token.isNullOrBlank()) {
+                        FcmTokenStore(applicationContext).savePendingToken(token)
+                        FcmTokenSyncScheduler.enqueueImmediate(applicationContext, "app_start")
+                    }
+                }
 
             ConnectionService.start(this)
             onInitialized()

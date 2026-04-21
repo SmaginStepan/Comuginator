@@ -196,4 +196,9 @@ interface ApiService {
         @Body body: UpdateMyAvatarRequest
     ): UpdateMyAvatarResponse
 
+    @POST("/v1/devices/fcm-token")
+    suspend fun updateFcmToken(
+        @Header("Authorization") auth: String,
+        @Body body: FcmTokenRequest
+    ): OkResponse
 }
