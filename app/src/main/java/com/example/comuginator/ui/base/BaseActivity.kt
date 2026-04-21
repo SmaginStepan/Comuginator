@@ -12,6 +12,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.example.comuginator.service.ConnectionService
+import com.example.comuginator.service.TelemetryScheduler
 import com.example.comuginator.storage.SessionStore
 import com.example.comuginator.ui.MainActivity
 import retrofit2.HttpException
@@ -34,6 +35,7 @@ open class BaseActivity: AppCompatActivity() {
         if (initialized) return
         if (!ensureNotificationsPermission()) return
 
+        TelemetryScheduler.ensurePeriodic(this)
         initialized = true
 
         val existingToken = store.token
