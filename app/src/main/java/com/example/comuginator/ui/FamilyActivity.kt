@@ -27,6 +27,7 @@ import com.example.comuginator.ui.family.FamilyListItem
 import com.example.comuginator.api.UpdateMyAvatarRequest
 import android.app.Activity
 import androidx.activity.result.contract.ActivityResultContracts
+import com.example.comuginator.service.TelemetryScheduler
 
 class FamilyActivity : BaseActivity() {
 
@@ -45,6 +46,8 @@ class FamilyActivity : BaseActivity() {
     private lateinit var tvStatus: TextView
 
     private lateinit var btnRefresh: Button
+
+    private lateinit var btnSendHeartbeat: Button
     private lateinit var btnInviteParent: Button
     private lateinit var btnInviteChild: Button
     private lateinit var btnLibrary: Button
@@ -125,10 +128,13 @@ class FamilyActivity : BaseActivity() {
         tvStatus = findViewById(R.id.tvStatus)
 
         btnRefresh = findViewById(R.id.btnRefresh)
+        btnSendHeartbeat = findViewById(R.id.btnSendHeartbeat)
+
         btnInviteParent = findViewById(R.id.btnInviteParent)
         btnInviteChild = findViewById(R.id.btnInviteChild)
 
         btnRefresh.setOnClickListener { loadFamily() }
+        btnSendHeartbeat.setOnClickListener { sendHeartbeat() }
         btnInviteParent.setOnClickListener { createInvite("PARENT") }
         btnInviteChild.setOnClickListener { createInvite("CHILD") }
 
@@ -254,6 +260,10 @@ class FamilyActivity : BaseActivity() {
 
     override fun onInitialized() {
         loadFamily()
+    }
+
+    private fun sendHeartbeat() {
+        TelemetryScheduler.enqueueImmediate(applicationContext, "manual_test")
     }
 
     private fun authHeaderOrThrow(): String {
