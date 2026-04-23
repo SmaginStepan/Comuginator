@@ -11,7 +11,7 @@ import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import com.an0obis.comuginator.service.ConnectionService
+import com.an0obis.comuginator.service.CommandSyncScheduler
 import com.an0obis.comuginator.service.FcmTokenSyncScheduler
 import com.an0obis.comuginator.service.TelemetryScheduler
 import com.an0obis.comuginator.storage.FcmTokenStore
@@ -53,7 +53,7 @@ open class BaseActivity: AppCompatActivity() {
                     }
                 }
 
-            ConnectionService.start(this)
+            CommandSyncScheduler.enqueueImmediate(applicationContext, "app_start")
             onInitialized()
             return
         }

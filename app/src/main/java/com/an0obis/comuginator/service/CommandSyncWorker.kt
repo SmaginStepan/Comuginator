@@ -25,17 +25,19 @@ class CommandSyncWorker(
             val items = response.items ?: emptyList()
 
             for (command in items) {
+                Log.d("CommandSyncWorker", "command ${command.type}")
                 when (command.type) {
+                    "set_volume" -> {
+                        handleSetVolumeCommand(command)
+                    }
                     "aac_message_available" -> {
                         handleNewMessageCommand(command)
                     }
-
                     "aac_reply_available" -> {
                         handleNewReplyCommand(command)
                     }
                     else -> {
-                        // unknown command type for now
-                        Log.d("CommandSyncWorker", "unknown command type ${command.type}")
+
                     }
                 }
 
@@ -49,6 +51,22 @@ class CommandSyncWorker(
         } catch (e: Exception) {
             Result.retry()
         }
+    }
+
+    private fun handleSetVolumeCommand(cmd: CommandDto) {
+        val raw = cmd.payload["volumePercent"] ?: return
+        val volumePercent = when (raw) {
+            is Double -> raw.toInt()
+            is Int -> raw
+            else -> return
+        }.coerceIn(0, 100)
+
+        val audioManager =
+            applicationContext.getSystemService(Context.AUDIO_SERVICE) as android.media.AudioManager
+        val stream = android.media.AudioManager.STREAM_MUSIC
+        val maxVolume = audioManager.getStreamMaxVolume(stream)
+        val targetVolume = (maxVolume * volumePercent) / 100
+        audioManager.setStreamVolume(stream, targetVolume, 0)
     }
 
     private fun handleNewMessageCommand(command: CommandDto) {
