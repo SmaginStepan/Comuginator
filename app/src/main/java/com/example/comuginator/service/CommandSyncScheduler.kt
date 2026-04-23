@@ -7,7 +7,7 @@ import androidx.work.WorkManager
 import androidx.work.workDataOf
 
 object CommandSyncScheduler {
-    private const val IMMEDIATE_COMMAND_SYNC_WORK_NAME = "immediate-command-sync"
+    private const val WORK_NAME = "command-sync"
 
     fun enqueueImmediate(context: Context, reason: String) {
         val request = OneTimeWorkRequestBuilder<CommandSyncWorker>()
@@ -15,7 +15,7 @@ object CommandSyncScheduler {
             .build()
 
         WorkManager.getInstance(context).enqueueUniqueWork(
-            IMMEDIATE_COMMAND_SYNC_WORK_NAME,
+            WORK_NAME,
             ExistingWorkPolicy.REPLACE,
             request
         )
