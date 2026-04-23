@@ -4,13 +4,13 @@ plugins {
 }
 
 android {
-    namespace = "com.example.comuginator"
+    namespace = "com.an0obis.comuginator"
     compileSdk {
         version = release(36)
     }
 
     defaultConfig {
-        applicationId = "com.example.comuginator"
+        applicationId = "com.an0obis.comuginator"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
