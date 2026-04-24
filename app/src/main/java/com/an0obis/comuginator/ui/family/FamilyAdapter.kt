@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.PopupMenu
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import coil.imageLoader
@@ -66,8 +67,8 @@ class FamilyAdapter(
         private val tvUserHeader: TextView = view.findViewById(R.id.tvUserHeader)
         private val btnSend: Button = view.findViewById(R.id.btnSend)
         private val btnHistory: Button = view.findViewById(R.id.btnHistory)
-        private val btnRenameUser: Button = view.findViewById(R.id.btnRenameUser)
-        private val btnSetAvatar: Button = view.findViewById(R.id.btnSetAvatar)
+
+        private val btnUserMore: Button = view.findViewById(R.id.btnUserMore)
 
         fun bind(item: FamilyListItem.UserHeader) {
             tvUserHeader.text = "${item.userName} [${item.role}]"
@@ -88,11 +89,27 @@ class FamilyAdapter(
             btnSend.setOnClickListener { onSendClick(item.userId, item.userName) }
             btnHistory.setOnClickListener { onHistoryClick(item.userId, item.userName) }
 
-            btnRenameUser.visibility = if (isParentViewer) View.VISIBLE else View.GONE
-            btnRenameUser.setOnClickListener { onRenameUserClick(item.userId, item.userName) }
+            btnUserMore.setOnClickListener { view ->
+                val popup = PopupMenu(view.context, view)
+                popup.menu.add("Rename")
+                popup.menu.add("Avatar")
 
-            btnSetAvatar.visibility = if (isParentViewer) View.VISIBLE else View.GONE
-            btnSetAvatar.setOnClickListener { onSetAvatarClick(item.userId) }
+                popup.setOnMenuItemClickListener { btn ->
+                    when (btn.title.toString()) {
+                        "Rename" -> {
+                            onRenameUserClick(item.userId, item.userName)
+                            true
+                        }
+                        "Avatar" -> {
+                            onSetAvatarClick(item.userId)
+                            true
+                        }
+                        else -> false
+                    }
+                }
+
+                popup.show()
+            }
         }
     }
 

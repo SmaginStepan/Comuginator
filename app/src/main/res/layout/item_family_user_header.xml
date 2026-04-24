@@ -27,6 +27,12 @@
             android:text="User"
             android:textSize="18sp"
             android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/btnUserMore"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:text="⋮" />
     </LinearLayout>
 
     <LinearLayout
@@ -36,30 +42,19 @@
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/btnRenameUser"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Rename" />
-
-        <Button
-            android:id="@+id/btnSetAvatar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:text="Avatar" />
-
-        <Button
             android:id="@+id/btnSend"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_weight="1"
             android:text="Send" />
 
         <Button
             android:id="@+id/btnHistory"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
             android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:maxLines="1"
             android:text="History" />
     </LinearLayout>
 
