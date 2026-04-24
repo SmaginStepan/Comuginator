@@ -20,6 +20,14 @@
         android:text="Open incoming messages fullscreen" />
 
     <TextView
+        android:id="@+id/tvEnabled"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Status"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
@@ -32,5 +40,6 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:text="Open system fullscreen permission" />
+
 
 </LinearLayout>
