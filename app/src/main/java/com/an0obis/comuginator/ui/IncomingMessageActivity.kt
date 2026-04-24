@@ -180,7 +180,8 @@ class IncomingMessageActivity : BaseActivity() {
                     Toast.LENGTH_SHORT
                 ).show()
 
-                loadMessage()
+                setResult(RESULT_OK)
+                finish()
             } catch (e: Exception) {
                 Toast.makeText(
                     this@IncomingMessageActivity,
