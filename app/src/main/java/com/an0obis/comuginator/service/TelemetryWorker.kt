@@ -44,6 +44,7 @@ class TelemetryWorker(
 
             Result.success()
         } catch (e: Exception) {
+            Log.e("TelemetryWorker", "heartbeat failed", e)
             Result.retry()
         }
     }
