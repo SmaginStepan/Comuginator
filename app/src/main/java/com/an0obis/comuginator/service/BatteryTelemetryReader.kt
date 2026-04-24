@@ -5,6 +5,10 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.BatteryManager
 
+data class BatterySnapshot(
+    val batteryPercent: Int?,
+    val isCharging: Boolean?
+)
 object BatteryTelemetryReader {
     fun read(context: Context): BatterySnapshot {
         val batteryStatus = context.registerReceiver(

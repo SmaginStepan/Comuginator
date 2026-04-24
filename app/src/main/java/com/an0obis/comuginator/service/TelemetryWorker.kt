@@ -27,12 +27,13 @@ class TelemetryWorker(
             val token = sessionStore.token ?: return Result.success()
 
             val snapshot = BatteryTelemetryReader.read(applicationContext)
+            val volume = AudioVolumeProvider.getCurrentVolumePercent(applicationContext)
 
             ApiClient.api.heartbeat(
                 auth = "Bearer $token",
                 HeartbeatRequest(
                     batteryPercent = snapshot.batteryPercent,
-                    volumePercent = null,
+                    volumePercent = volume,
                     isCharging = snapshot.isCharging,
                     reportedAt = nowIsoString(),
                     platform = "android",
@@ -62,6 +63,7 @@ class TelemetryWorker(
 
             pInfo.versionName ?: "unknown"
         } catch (e: Exception) {
+            Log.e("TelemetryWorker", "failed to get app version", e)
             "unknown"
         }
     }
