@@ -47,6 +47,11 @@ class SettingsActivity : BaseActivity() {
         updateEnabledState()
     }
 
+    override fun onResume() {
+        super.onResume()
+        updateEnabledState()
+    }
+
     private fun updateEnabledState() {
         var canUseFsi = true
         if (!settingsStore.openIncomingFullscreen) {
