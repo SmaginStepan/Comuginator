@@ -3,6 +3,7 @@ package com.an0obis.comuginator.ui.base
 import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -13,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.an0obis.comuginator.service.CommandSyncScheduler
 import com.an0obis.comuginator.service.FcmTokenSyncScheduler
+import com.an0obis.comuginator.service.PowerConnectionReceiver
 import com.an0obis.comuginator.service.TelemetryScheduler
 import com.an0obis.comuginator.storage.FcmTokenStore
 import com.an0obis.comuginator.storage.SessionStore
@@ -52,6 +54,14 @@ open class BaseActivity: AppCompatActivity() {
                         FcmTokenSyncScheduler.enqueueImmediate(applicationContext, "app_start")
                     }
                 }
+
+            registerReceiver(
+                PowerConnectionReceiver(),
+                IntentFilter().apply {
+                    addAction(Intent.ACTION_POWER_CONNECTED)
+                    addAction(Intent.ACTION_POWER_DISCONNECTED)
+                }
+            )
 
             CommandSyncScheduler.enqueueImmediate(applicationContext, "app_start")
             onInitialized()
