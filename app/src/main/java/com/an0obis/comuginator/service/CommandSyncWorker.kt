@@ -49,6 +49,7 @@ class CommandSyncWorker(
 
             Result.success()
         } catch (e: Exception) {
+            Log.e("CommandSyncWorker", "failed", e)
             Result.retry()
         }
     }
@@ -71,13 +72,17 @@ class CommandSyncWorker(
 
     private fun handleNewMessageCommand(command: CommandDto) {
         NotificationHelper.showNewMessageNotification(
-            context = applicationContext
+            context = applicationContext,
+            messageId = command.payload["messageId"] as? String,
+            commandId = command.id
         )
     }
 
     private fun handleNewReplyCommand(command: CommandDto) {
-       NotificationHelper.showNewReplyNotification(
-            context = applicationContext
+        NotificationHelper.showNewReplyNotification(
+            context = applicationContext,
+            messageId = command.payload["messageId"] as? String,
+            commandId = command.id
         )
     }
 }

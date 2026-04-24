@@ -5,6 +5,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.an0obis.comuginator.api.AacMessageDetailsDto
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.Toast
@@ -27,6 +28,9 @@ class IncomingMessageActivity : BaseActivity() {
     companion object {
         const val EXTRA_MESSAGE_ID = "message_id"
         const val EXTRA_COMMAND_ID = "command_id"
+        const val EXTRA_MODE = "mode"
+        const val MODE_MESSAGE = "message"
+        const val MODE_REPLY = "reply"
     }
     private lateinit var tvFromUser: TextView
     private lateinit var tvCreatedAt: TextView
@@ -45,6 +49,7 @@ class IncomingMessageActivity : BaseActivity() {
     private var authToken: String = ""
     private var currentMessage: AacMessageDetailsDto? = null
     private var isSendingReply = false
+    private var mode: String = MODE_MESSAGE
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,6 +66,7 @@ class IncomingMessageActivity : BaseActivity() {
         tvFromUser = findViewById(R.id.tvFromUser)
         messageId = intent.getStringExtra(EXTRA_MESSAGE_ID).orEmpty()
         commandId = intent.getStringExtra(EXTRA_COMMAND_ID).orEmpty()
+        mode = intent.getStringExtra(EXTRA_MODE) ?: MODE_MESSAGE
 
         if (messageId.isBlank()) {
             finish()
@@ -74,6 +80,7 @@ class IncomingMessageActivity : BaseActivity() {
         authToken = try {
             requireToken()
         } catch (e: Exception) {
+            Log.e("CommandSyncWorker", "failed", e)
             Toast.makeText(this, "No auth token", Toast.LENGTH_SHORT).show()
             finish()
             return
@@ -135,6 +142,22 @@ class IncomingMessageActivity : BaseActivity() {
 
         messageAdapter.submitItems(message.message)
         repliesAdapter.submitItems(message.suggestedReplies)
+
+        tvFromUser.text = message.fromUser.name
+        loadProtectedImage(message.fromUser.avatarImageUrl, ivFromAvatar)
+
+        if (mode == MODE_REPLY) {
+            tvFromUser.text = "Reply from ${message.toUser.name}"
+            tvCurrentReply.text = message.reply?.let {
+                "Reply: ${it.reply.label}"
+            } ?: "Reply is not available yet"
+
+            repliesAdapter.submitItems(
+                message.reply?.let { listOf(it.reply) } ?: emptyList()
+            )
+            rvSuggestedReplies.isEnabled = false
+            return
+        }
 
         tvFromUser.text = message.fromUser.name
         loadProtectedImage(message.fromUser.avatarImageUrl, ivFromAvatar)

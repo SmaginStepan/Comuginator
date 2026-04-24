@@ -9,18 +9,25 @@ import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.an0obis.comuginator.ui.FamilyActivity
+import com.an0obis.comuginator.ui.IncomingMessageActivity
 
 object NotificationHelper {
 
     private const val CHANNEL_ID = "comuginator_messages"
     private const val CHANNEL_NAME = "Messages"
 
-    fun showNewMessageNotification(context: Context) {
+    fun showNewMessageNotification(
+        context: Context,
+        messageId: String?,
+        commandId: String?
+    ) {
         ensureChannel(context)
 
-        val intent = Intent(context, FamilyActivity::class.java).apply {
+        val intent = Intent(context, IncomingMessageActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra(IncomingMessageActivity.EXTRA_MESSAGE_ID, messageId)
+            putExtra(IncomingMessageActivity.EXTRA_COMMAND_ID, commandId)
+            putExtra(IncomingMessageActivity.EXTRA_MODE, IncomingMessageActivity.MODE_MESSAGE)
         }
 
         val pendingIntent = PendingIntent.getActivity(
@@ -47,13 +54,19 @@ object NotificationHelper {
         }
     }
 
-    fun showNewReplyNotification(context: Context) {
+    fun showNewReplyNotification(
+        context: Context,
+        messageId: String?,
+        commandId: String?
+    ) {
         ensureChannel(context)
 
-        val intent = Intent(context, FamilyActivity::class.java).apply {
+        val intent = Intent(context, IncomingMessageActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra(IncomingMessageActivity.EXTRA_MESSAGE_ID, messageId)
+            putExtra(IncomingMessageActivity.EXTRA_COMMAND_ID, commandId)
+            putExtra(IncomingMessageActivity.EXTRA_MODE, IncomingMessageActivity.MODE_REPLY)
         }
-
         val pendingIntent = PendingIntent.getActivity(
             context,
             1002,
