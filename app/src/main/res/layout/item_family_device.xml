@@ -27,14 +27,14 @@
     </LinearLayout>
 
     <Button
-        android:id="@+id/btnRenameDevice"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Rename" />
-
-    <Button
         android:id="@+id/btnVolume"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Volume" />
+
+    <Button
+        android:id="@+id/btnDeviceMore"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:text="⋮" />
 </LinearLayout>

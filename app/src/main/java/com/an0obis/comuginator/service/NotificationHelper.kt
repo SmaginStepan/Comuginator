@@ -9,6 +9,7 @@ import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import com.an0obis.comuginator.storage.SettingsStore
 import com.an0obis.comuginator.ui.IncomingMessageActivity
 
 object NotificationHelper {
@@ -73,15 +74,21 @@ object NotificationHelper {
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
+        val settings = SettingsStore(context)
 
-        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+        val builder  = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_dialog_info)
             .setContentTitle("New reply")
             .setContentText("Tap to open")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
-            .build()
+
+        if (settings.openIncomingFullscreen) {
+            builder.setFullScreenIntent(pendingIntent, true)
+        }
+
+        val notification = builder.build()
 
         try {
             NotificationManagerCompat.from(context)

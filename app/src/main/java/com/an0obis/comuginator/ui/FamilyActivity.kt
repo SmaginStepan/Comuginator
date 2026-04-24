@@ -26,12 +26,12 @@ import com.an0obis.comuginator.ui.family.FamilyAdapter
 import com.an0obis.comuginator.ui.family.FamilyListItem
 import com.an0obis.comuginator.api.UpdateMyAvatarRequest
 import android.app.Activity
+import android.widget.PopupMenu
 import androidx.activity.result.contract.ActivityResultContracts
 import com.an0obis.comuginator.service.CommandSyncScheduler
 
 class FamilyActivity : BaseActivity() {
 
-    private lateinit var btnRenameFamily: Button
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var openingIncomingMessageId: String? = null
     private lateinit var store: SessionStore
@@ -50,8 +50,9 @@ class FamilyActivity : BaseActivity() {
     private lateinit var btnSendHeartbeat: Button
     private lateinit var btnInviteParent: Button
     private lateinit var btnInviteChild: Button
+    private lateinit var btnFamilyMore: Button
     private lateinit var btnLibrary: Button
-
+    private lateinit var btnSettings: Button
     private var pendingAvatarUserId: String? = null
 
     private val avatarPickerLauncher =
@@ -80,6 +81,10 @@ class FamilyActivity : BaseActivity() {
         btnLibrary = findViewById(R.id.btnLibrary)
         btnLibrary.setOnClickListener {
             startActivity(Intent(this, LibraryActivity::class.java))
+        }
+        btnSettings = findViewById(R.id.btnSettings)
+        btnSettings.setOnClickListener {
+            startActivity(Intent(this, SettingsActivity::class.java))
         }
 
         familyAdapter = FamilyAdapter(
@@ -113,14 +118,27 @@ class FamilyActivity : BaseActivity() {
                 showChooseAvatarDialog(userId)
             }
         )
+        btnFamilyMore = findViewById(R.id.btnFamilyMore)
+        btnFamilyMore.setOnClickListener {view ->
 
-        btnRenameFamily = findViewById(R.id.btnRenameFamily)
-        btnRenameFamily.setOnClickListener {
-            showRenameDialog(
-                title = "Rename family",
-                initialValue = tvFamily.text.toString().removePrefix("Family: ").trim(),
-                onApply = { newName -> updateFamilyName(newName) }
-            )
+            val popup = PopupMenu(view.context, view)
+            popup.menu.add("Rename")
+
+            popup.setOnMenuItemClickListener { btn ->
+                when (btn.title.toString()) {
+                    "Rename" -> {
+                        showRenameDialog(
+                            title = "Rename family",
+                            initialValue = tvFamily.text.toString().removePrefix("Family: ").trim(),
+                            onApply = { newName -> updateFamilyName(newName) }
+                        )
+                        true
+                    }
+                    else -> false
+                }
+            }
+
+            popup.show()
         }
 
         rvFamily.layoutManager = LinearLayoutManager(this)

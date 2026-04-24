@@ -11,25 +11,40 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <TextView
-            android:id="@+id/tvFamily"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Family: -"
-            android:textSize="22sp"
-            android:textStyle="bold" />
-        <Button
-            android:id="@+id/btnRenameFamily"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Rename family" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tvFamily"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Family -"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btnFamilyMore"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:text="⋮" />
+        </LinearLayout>
+
         <Button
             android:id="@+id/btnLibrary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:text="Library" />
+
+        <Button
+            android:id="@+id/btnSettings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Settings" />
 
         <TextView
             android:id="@+id/tvMe"

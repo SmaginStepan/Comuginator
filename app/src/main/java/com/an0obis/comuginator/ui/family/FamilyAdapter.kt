@@ -67,7 +67,6 @@ class FamilyAdapter(
         private val tvUserHeader: TextView = view.findViewById(R.id.tvUserHeader)
         private val btnSend: Button = view.findViewById(R.id.btnSend)
         private val btnHistory: Button = view.findViewById(R.id.btnHistory)
-
         private val btnUserMore: Button = view.findViewById(R.id.btnUserMore)
 
         fun bind(item: FamilyListItem.UserHeader) {
@@ -117,7 +116,7 @@ class FamilyAdapter(
         private val tvDeviceName: TextView = view.findViewById(R.id.tvDeviceName)
         private val tvDeviceMeta: TextView = view.findViewById(R.id.tvDeviceMeta)
         private val btnVolume: Button = view.findViewById(R.id.btnVolume)
-        private val btnRenameDevice: Button = view.findViewById(R.id.btnRenameDevice)
+        private val btnDeviceMore: Button = view.findViewById(R.id.btnDeviceMore)
 
         fun bind(item: FamilyListItem.DeviceRow) {
             tvDeviceName.text = item.deviceName
@@ -144,8 +143,22 @@ class FamilyAdapter(
                 onVolumeClick(item.deviceId, item.deviceName, item.volumePercent)
             }
 
-            btnRenameDevice.visibility = if (isParentViewer) View.VISIBLE else View.GONE
-            btnRenameDevice.setOnClickListener { onRenameDeviceClick(item.deviceId, item.deviceName) }
+            btnDeviceMore.setOnClickListener { view ->
+                val popup = PopupMenu(view.context, view)
+                popup.menu.add("Rename")
+
+                popup.setOnMenuItemClickListener { btn ->
+                    when (btn.title.toString()) {
+                        "Rename" -> {
+                            onRenameDeviceClick(item.deviceId, item.deviceName)
+                            true
+                        }
+                        else -> false
+                    }
+                }
+
+                popup.show()
+            }
         }
     }
 }
