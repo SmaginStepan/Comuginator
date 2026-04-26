@@ -9,6 +9,7 @@ import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.an0obis.comuginator.R
@@ -41,7 +42,8 @@ class IncomingMessageActivity : BaseActivity() {
 
     private lateinit var messageAdapter: SimpleCardAdapter
     private lateinit var repliesAdapter: SimpleCardAdapter
-
+    private lateinit var tvRepliesLabel: TextView
+    private lateinit var ivCurrentReply: ImageView
     private lateinit var ivFromAvatar: ImageView
     private var messageId: String = ""
     private var commandId: String = ""
@@ -61,6 +63,8 @@ class IncomingMessageActivity : BaseActivity() {
         progressBar = findViewById(R.id.progressBar)
         rvMessageCards = findViewById(R.id.rvMessageCards)
         rvSuggestedReplies = findViewById(R.id.rvSuggestedReplies)
+        tvRepliesLabel = findViewById(R.id.tvRepliesLabel)
+        ivCurrentReply = findViewById(R.id.ivCurrentReply)
 
         ivFromAvatar = findViewById(R.id.ivFromAvatar)
         tvFromUser = findViewById(R.id.tvFromUser)
@@ -146,6 +150,17 @@ class IncomingMessageActivity : BaseActivity() {
         tvFromUser.text = message.fromUser.name
         loadProtectedImage(message.fromUser.avatarImageUrl, ivFromAvatar)
 
+        if (message.reply != null) {
+            tvCurrentReply.text = "Reply: ${message.reply.reply.label}"
+            rvSuggestedReplies.isEnabled = false
+            loadProtectedImage(message.reply.reply.imageUrl, ivCurrentReply)
+            ivCurrentReply.isVisible = true
+        } else {
+            tvCurrentReply.text = "No reply yet"
+            rvSuggestedReplies.isEnabled = true
+            ivCurrentReply.isVisible = false
+        }
+
         if (mode == MODE_REPLY) {
             tvFromUser.text = "Reply from ${message.toUser.name}"
             tvCurrentReply.text = message.reply?.let {
@@ -155,20 +170,21 @@ class IncomingMessageActivity : BaseActivity() {
             repliesAdapter.submitItems(
                 message.reply?.let { listOf(it.reply) } ?: emptyList()
             )
-            rvSuggestedReplies.isEnabled = false
+            rvSuggestedReplies.isVisible = false
+
+            tvRepliesLabel.isVisible = false
+
             return
+        } else {
+            rvSuggestedReplies.isVisible = true
+
+            tvRepliesLabel.isVisible = true
         }
 
         tvFromUser.text = message.fromUser.name
         loadProtectedImage(message.fromUser.avatarImageUrl, ivFromAvatar)
 
-        if (message.reply != null) {
-            tvCurrentReply.text = "Reply: ${message.reply.reply.label}"
-            rvSuggestedReplies.isEnabled = false
-        } else {
-            tvCurrentReply.text = "No reply yet"
-            rvSuggestedReplies.isEnabled = true
-        }
+
     }
 
     private fun loadProtectedImage(url: String?, imageView: ImageView) {

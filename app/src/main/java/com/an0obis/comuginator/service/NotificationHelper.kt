@@ -85,7 +85,10 @@ object NotificationHelper {
             .setContentIntent(pendingIntent)
 
         if (settings.openIncomingFullscreen) {
-            builder.setFullScreenIntent(pendingIntent, true)
+            builder.setPriority(NotificationCompat.PRIORITY_MAX)
+                .setCategory(NotificationCompat.CATEGORY_ALARM)
+                .setFullScreenIntent(pendingIntent, true)
+            // builder.setFullScreenIntent(pendingIntent, true)
         }
 
         val notification = builder.build()
