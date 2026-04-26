@@ -37,22 +37,15 @@ class FamilyActivity : BaseActivity() {
     private lateinit var store: SessionStore
 
     private lateinit var tvFamily: TextView
-    private lateinit var tvMe: TextView
     private lateinit var tvInvite: TextView
     private lateinit var rvFamily: RecyclerView
     private lateinit var familyAdapter: FamilyAdapter
     private var currentMeRole: String = ""
     private var currentMyDeviceId: String = ""
     private lateinit var tvStatus: TextView
-
-    private lateinit var btnRefresh: Button
-
-    private lateinit var btnSendHeartbeat: Button
-    private lateinit var btnInviteParent: Button
-    private lateinit var btnInviteChild: Button
+    private lateinit var btnFamilyAdd: Button
     private lateinit var btnFamilyMore: Button
     private lateinit var btnLibrary: Button
-    private lateinit var btnSettings: Button
     private var pendingAvatarUserId: String? = null
 
     private val avatarPickerLauncher =
@@ -75,16 +68,11 @@ class FamilyActivity : BaseActivity() {
         store = SessionStore(this)
 
         tvFamily = findViewById(R.id.tvFamily)
-        tvMe = findViewById(R.id.tvMe)
         tvInvite = findViewById(R.id.tvInvite)
         rvFamily = findViewById(R.id.rvFamily)
         btnLibrary = findViewById(R.id.btnLibrary)
         btnLibrary.setOnClickListener {
             startActivity(Intent(this, LibraryActivity::class.java))
-        }
-        btnSettings = findViewById(R.id.btnSettings)
-        btnSettings.setOnClickListener {
-            startActivity(Intent(this, SettingsActivity::class.java))
         }
 
         familyAdapter = FamilyAdapter(
@@ -118,11 +106,36 @@ class FamilyActivity : BaseActivity() {
                 showChooseAvatarDialog(userId)
             }
         )
+        btnFamilyAdd = findViewById(R.id.btnFamilyAdd)
+        btnFamilyAdd.setOnClickListener { view ->
+
+            val popup = PopupMenu(view.context, view)
+            popup.menu.add("Parent")
+            popup.menu.add("Child")
+            popup.setOnMenuItemClickListener { btn ->
+                when (btn.title.toString()) {
+                    "Parent" -> {
+                        createInvite("PARENT")
+                        true
+                    }
+                    "Child" -> {
+                        createInvite("CHILD")
+                        true
+                    }
+                    else -> false
+                }
+            }
+
+            popup.show()
+        }
         btnFamilyMore = findViewById(R.id.btnFamilyMore)
         btnFamilyMore.setOnClickListener {view ->
 
             val popup = PopupMenu(view.context, view)
             popup.menu.add("Rename")
+            popup.menu.add("Refresh")
+            popup.menu.add("Send heartbeat")
+            popup.menu.add("Settings")
 
             popup.setOnMenuItemClickListener { btn ->
                 when (btn.title.toString()) {
@@ -132,6 +145,18 @@ class FamilyActivity : BaseActivity() {
                             initialValue = tvFamily.text.toString().removePrefix("Family: ").trim(),
                             onApply = { newName -> updateFamilyName(newName) }
                         )
+                        true
+                    }
+                    "Settings" -> {
+                        startActivity(Intent(this, SettingsActivity::class.java))
+                        true
+                    }
+                    "Refresh" -> {
+                        loadFamily()
+                        true
+                    }
+                    "Send heartbeat" -> {
+                        sendHeartbeat()
                         true
                     }
                     else -> false
@@ -144,17 +169,6 @@ class FamilyActivity : BaseActivity() {
         rvFamily.layoutManager = LinearLayoutManager(this)
         rvFamily.adapter = familyAdapter
         tvStatus = findViewById(R.id.tvStatus)
-
-        btnRefresh = findViewById(R.id.btnRefresh)
-        btnSendHeartbeat = findViewById(R.id.btnSendHeartbeat)
-
-        btnInviteParent = findViewById(R.id.btnInviteParent)
-        btnInviteChild = findViewById(R.id.btnInviteChild)
-
-        btnRefresh.setOnClickListener { loadFamily() }
-        btnSendHeartbeat.setOnClickListener { sendHeartbeat() }
-        btnInviteParent.setOnClickListener { createInvite("PARENT") }
-        btnInviteChild.setOnClickListener { createInvite("CHILD") }
 
         ensureInitialized()
     }
@@ -290,9 +304,8 @@ class FamilyActivity : BaseActivity() {
     }
 
     private fun setButtonsEnabled(enabled: Boolean) {
-        btnRefresh.isEnabled = enabled
-        btnInviteParent.isEnabled = enabled
-        btnInviteChild.isEnabled = enabled
+        btnFamilyAdd.isEnabled = enabled
+        btnFamilyMore.isEnabled = enabled
     }
 
     private fun loadFamily() {
@@ -392,7 +405,7 @@ class FamilyActivity : BaseActivity() {
         currentMeRole = response.me.role
         currentMyDeviceId = response.me.deviceId
 
-        tvMe.text = buildString {
+        tvStatus.text = buildString {
             append("Me:\n")
             append("role=${response.me.role}\n")
             append("userId=${response.me.userId}\n")
