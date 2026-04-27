@@ -1,6 +1,7 @@
 package com.an0obis.comuginator.ui
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import coil.Coil
@@ -10,7 +11,10 @@ import com.an0obis.comuginator.api.ChildHomeNodeDto
 
 class ChildHomeAdapter(
     private val authToken: String,
-    private val onClick: (ChildHomeNodeDto) -> Unit
+    private val isEditorMode: Boolean,
+    private val onNodeClick: (ChildHomeNodeDto) -> Unit,
+    private val onEditClick: (ChildHomeNodeDto) -> Unit,
+    private val onDeleteClick: (ChildHomeNodeDto) -> Unit
 ) : RecyclerView.Adapter<ChildHomeAdapter.VH>() {
 
     private val items = mutableListOf<ChildHomeNodeDto>()
@@ -21,10 +25,12 @@ class ChildHomeAdapter(
         notifyDataSetChanged()
     }
 
-    class VH(val root: android.view.ViewGroup) : RecyclerView.ViewHolder(root) {
+    class VH(root: ViewGroup) : RecyclerView.ViewHolder(root) {
         val ivNode: android.widget.ImageView = root.findViewById(R.id.ivNode)
         val tvNodeLabel: android.widget.TextView = root.findViewById(R.id.tvNodeLabel)
-        val rootNode: android.view.View = root.findViewById(R.id.rootNode)
+        val rootNode: View = root.findViewById(R.id.rootNode)
+        val btnEdit: android.widget.Button = root.findViewById(R.id.btnEditNode)
+        val btnDelete: android.widget.Button = root.findViewById(R.id.btnDeleteNode)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
@@ -37,7 +43,11 @@ class ChildHomeAdapter(
 
     override fun onBindViewHolder(holder: VH, position: Int) {
         val node = items[position]
+
         holder.tvNodeLabel.text = node.item?.label ?: node.type
+
+        holder.btnEdit.visibility = if (isEditorMode) View.VISIBLE else View.GONE
+        holder.btnDelete.visibility = if (isEditorMode) View.VISIBLE else View.GONE
 
         val imageUrl = node.item?.imageUrl
         if (!imageUrl.isNullOrBlank()) {
@@ -53,7 +63,15 @@ class ChildHomeAdapter(
         }
 
         holder.rootNode.setOnClickListener {
-            onClick(node)
+            onNodeClick(node)
+        }
+
+        holder.btnEdit.setOnClickListener {
+            onEditClick(node)
+        }
+
+        holder.btnDelete.setOnClickListener {
+            onDeleteClick(node)
         }
     }
 }

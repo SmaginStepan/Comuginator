@@ -78,8 +78,10 @@ class FamilyActivity : BaseActivity() {
         }
 
         btnChildHome = findViewById(R.id.btnChildHome)
-        btnLibrary.setOnClickListener {
-            startActivity(Intent(this, ChildHomeActivity::class.java))
+        btnChildHome.setOnClickListener {
+            val intent = Intent(this, ChildHomeActivity::class.java)
+            intent.putExtra(ChildHomeActivity.EXTRA_EDITOR_MODE, true)
+            startActivity(intent)
         }
 
         familyAdapter = FamilyAdapter(

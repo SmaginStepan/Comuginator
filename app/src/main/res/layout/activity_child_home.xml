@@ -19,6 +19,13 @@
         android:layout_height="wrap_content"
         android:text="Back" />
 
+    <Button
+        android:id="@+id/btnChildHomeAdd"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Add"
+        android:visibility="gone" />
+
     <ProgressBar
         android:id="@+id/progressChildHome"
         android:layout_width="wrap_content"

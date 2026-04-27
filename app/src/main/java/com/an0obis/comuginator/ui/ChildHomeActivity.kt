@@ -21,12 +21,17 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class ChildHomeActivity : BaseActivity() {
-
+    companion object {
+        const val EXTRA_EDITOR_MODE = "editor_mode"
+    }
+    private val isEditorMode: Boolean by lazy {
+        intent.getBooleanExtra(EXTRA_EDITOR_MODE, false)
+    }
     private lateinit var sessionStore: SessionStore
     private lateinit var adapter: ChildHomeAdapter
-
     private lateinit var tvTitle: TextView
     private lateinit var btnBack: Button
+    private lateinit var btnAdd: Button
     private lateinit var progress: ProgressBar
     private lateinit var rv: RecyclerView
 
@@ -49,10 +54,20 @@ class ChildHomeActivity : BaseActivity() {
         btnBack = findViewById(R.id.btnChildHomeBack)
         progress = findViewById(R.id.progressChildHome)
         rv = findViewById(R.id.rvChildHome)
+        btnAdd = findViewById(R.id.btnChildHomeAdd)
+        btnAdd.visibility = if (isEditorMode) View.VISIBLE else View.GONE
 
-        adapter = ChildHomeAdapter(authToken) { node ->
-            onNodeClicked(node)
+        btnAdd.setOnClickListener {
+            openAddNode()
         }
+
+        adapter = ChildHomeAdapter(
+            authToken = authToken,
+            isEditorMode = isEditorMode,
+            onNodeClick = { node -> onNodeClicked(node) },
+            onEditClick = { node -> openEditNode(node) },
+            onDeleteClick = { node -> confirmDeleteNode(node) }
+        )
 
         rv.layoutManager = GridLayoutManager(this, 2)
         rv.adapter = adapter
@@ -67,18 +82,31 @@ class ChildHomeActivity : BaseActivity() {
         loadNodes(null)
     }
 
-    private fun onNodeClicked(node: ChildHomeNodeDto) {
-        when (node.type) {
-            "MENU" -> {
-                parentStack.add(currentParentId)
-                currentParentId = node.id
-                tvTitle.text = node.item?.label ?: "Menu"
-                loadNodes(node.id)
-            }
+    private fun openAddNode() {
+        Toast.makeText(this, "Add node: TODO", Toast.LENGTH_SHORT).show()
+    }
 
-            "ACTION" -> {
-                requestAction(node)
+    private fun openEditNode(node: ChildHomeNodeDto) {
+        Toast.makeText(this, "Edit: ${node.item?.label ?: node.id}", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun confirmDeleteNode(node: ChildHomeNodeDto) {
+        Toast.makeText(this, "Delete: ${node.item?.label ?: node.id}", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun onNodeClicked(node: ChildHomeNodeDto) {
+        if (isEditorMode) {
+            if (node.type == "MENU") {
+                loadNodes(node.id)
+            } else {
+                openEditNode(node)
             }
+            return
+        }
+
+        when (node.type) {
+            "MENU" -> loadNodes(node.id)
+            "ACTION" -> requestAction(node)
         }
     }
 
