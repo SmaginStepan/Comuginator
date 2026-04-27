@@ -9,7 +9,7 @@
         android:id="@+id/tvChildHomeTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Comuginator"
+        android:text="@string/app_name"
         android:textSize="24sp"
         android:textStyle="bold" />
 
@@ -17,13 +17,13 @@
         android:id="@+id/btnChildHomeBack"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Back" />
+        android:text="@string/back" />
 
     <Button
         android:id="@+id/btnChildHomeAdd"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Add"
+        android:text="@string/add"
         android:visibility="gone" />
 
     <ProgressBar

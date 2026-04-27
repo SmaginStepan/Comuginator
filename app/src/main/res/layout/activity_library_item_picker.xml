@@ -13,7 +13,7 @@
             android:id="@+id/tvTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Library item picker"
+            android:text="@string/library_item_picker"
             android:textSize="22sp"
             android:textStyle="bold" />
 
@@ -27,35 +27,35 @@
                 android:id="@+id/btnPasteFromClipboard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Paste from clipboard" />
+                android:text="@string/paste_from_clipboard" />
 
             <Button
                 android:id="@+id/btnTakePhoto"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Take photo" />
+                android:text="@string/take_photo" />
 
             <Button
                 android:id="@+id/btnChooseFromDevice"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Choose photo from device" />
+                android:text="@string/choose_photo_from_device" />
 
             <Button
                 android:id="@+id/btnSearchArasaac"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Search ARASAAC" />
+                android:text="@string/search_arasaac" />
 
             <Button
                 android:id="@+id/btnChooseFromLibrary"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Choose from library" />
+                android:text="@string/choose_from_library" />
         </LinearLayout>
 
         <LinearLayout
@@ -70,14 +70,14 @@
                 android:id="@+id/etSearch"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Search by label" />
+                android:hint="@string/search_by_label" />
 
             <AutoCompleteTextView
                 android:id="@+id/actSetFilter"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:hint="Filter by set" />
+                android:hint="@string/filter_by_set" />
         </LinearLayout>
 
         <TextView
@@ -113,21 +113,21 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:hint="Название" />
+                android:hint="@string/title" />
 
             <Button
                 android:id="@+id/btnConfirm"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:text="Save and use" />
+                android:text="@string/save_and_use" />
 
             <Button
                 android:id="@+id/btnCancelSelection"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Cancel" />
+                android:text="@string/cancel" />
         </LinearLayout>
 
     </LinearLayout>

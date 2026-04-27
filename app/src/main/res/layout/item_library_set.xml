@@ -26,13 +26,13 @@
             android:layout_height="wrap_content"
             android:textStyle="bold"
             android:textSize="18sp"
-            android:text="Set" />
+            android:text="@string/set_name" />
 
         <TextView
             android:id="@+id/tvCount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="0 items" />
+            android:text="@string/items_count" />
 
     </LinearLayout>
 

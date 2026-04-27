@@ -23,7 +23,7 @@
         android:ellipsize="end"
         android:gravity="center"
         android:maxLines="2"
-        android:text="Card"
+        android:text="@string/card"
         android:textColor="#FFFFFF"
         android:textSize="12sp" />
 </LinearLayout>

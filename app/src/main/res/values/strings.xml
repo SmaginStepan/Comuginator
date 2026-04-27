@@ -1,3 +1,102 @@
 <resources>
     <string name="app_name">Comuginator</string>
+
+    <string name="back">Back</string>
+    <string name="add">Add</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
+    <string name="send">Send</string>
+    <string name="history">History</string>
+    <string name="library">Library</string>
+    <string name="settings">Settings</string>
+    <string name="loading">Loading...</string>
+
+    <string name="child_home">Child Home</string>
+    <string name="child_home_preview">Child Home</string>
+    <string name="child_home_delete_node_title">Delete node?</string>
+    <string name="child_home_node_type_title">Node type</string>
+    <string name="child_home_create_failed">Create failed: %1$s</string>
+    <string name="child_home_update_failed">Update failed: %1$s</string>
+    <string name="child_home_delete_failed">Delete failed: %1$s</string>
+    <string name="child_home_load_failed">Failed to load child home: %1$s</string>
+    <string name="child_home_send_failed">Failed to send request: %1$s</string>
+    <string name="sent">Sent</string>
+
+    <string name="message">Message</string>
+    <string name="replies">Replies</string>
+    <string name="incoming_message">Incoming message</string>
+    <string name="from">From:</string>
+    <string name="suggested_replies">Suggested replies</string>
+    <string name="current_reply">Current reply</string>
+    <string name="no_reply_yet">No reply yet</string>
+    <string name="repeat">Repeat</string>
+    <string name="send_to_placeholder">Send to ...</string>
+    <string name="send_to_name">Send to %1$s</string>
+
+    <string name="add_single_photo">Add single photo</string>
+    <string name="add_full_library_set">Add full Library set</string>
+    <string name="choose_set">Choose set</string>
+    <string name="no_library_sets">No library sets</string>
+    <string name="set_is_empty">Set is empty</string>
+    <string name="added_items">Added %1$d items</string>
+    <string name="load_sets_failed">Load sets failed: %1$s</string>
+    <string name="load_set_failed">Load set failed: %1$s</string>
+    <string name="upload_failed">Upload failed: %1$s</string>
+    <string name="photo_label">Photo label</string>
+    <string name="label">Label</string>
+    <string name="upload">Upload</string>
+
+    <string name="family_title_placeholder">Family -</string>
+    <string name="invite_placeholder">Invite: -</string>
+    <string name="status_placeholder">Status: -</string>
+    <string name="device_name">Device name</string>
+    <string name="user_name">User name</string>
+    <string name="volume">Volume</string>
+    <string name="battery_meta_placeholder">Battery / charging / lastSeen</string>
+    <string name="rename">Rename</string>
+    <string name="avatar">Avatar</string>
+    <string name="charging">charging</string>
+    <string name="not_charging">not charging</string>
+    <string name="charging_unknown">charging?</string>
+    <string name="never">never</string>
+    <string name="device_meta">Battery: %1$s · %2$s · Volume: %3$s · Last seen: %4$s</string>
+
+    <string name="create_set">Create set</string>
+    <string name="set_name">Set name</string>
+    <string name="rename_set">Rename</string>
+    <string name="delete_set">Delete set</string>
+    <string name="add_photo">Add photo</string>
+    <string name="add_arasaac">Add ARASAAC</string>
+    <string name="change_cover">Change cover</string>
+    <string name="items_count">%1$d items</string>
+
+    <string name="library_item_picker">Library item picker</string>
+    <string name="paste_from_clipboard">Paste from clipboard</string>
+    <string name="take_photo">Take photo</string>
+    <string name="choose_photo_from_device">Choose photo from device</string>
+    <string name="search_arasaac">Search ARASAAC</string>
+    <string name="search_cards">Search cards</string>
+    <string name="choose_from_library">Choose from library</string>
+    <string name="save_and_use">Save and use</string>
+    <string name="search_by_label">Search by label</string>
+
+    <string name="filter_by_set">Filter by set</string>
+    <string name="title">Title</string>
+
+    <string name="next">Next</string>
+    <string name="already_have_family">Do you already have a family group?</string>
+    <string name="create_family_group">Create family group</string>
+    <string name="join_family_group">Join family group</string>
+    <string name="invite_code">Invite code</string>
+    <string name="join">Join</string>
+
+    <string name="open_incoming_fullscreen">Open incoming messages fullscreen</string>
+    <string name="status">Status</string>
+    <string name="fullscreen_permission_explanation">When enabled, incoming messages may open over other apps or the lock screen. Android may require an additional system permission.</string>
+    <string name="open_system_fullscreen_permission">Open system fullscreen permission</string>
+
+    <string name="item">Item</string>
+    <string name="card">Card</string>
+    <string name="family_photo">FAMILY_PHOTO</string>
 </resources>

@@ -16,7 +16,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="16dp"
-        android:text="Set name"
+        android:text="@string/set_name"
         android:textSize="24sp"
         android:textStyle="bold" />
 
@@ -40,7 +40,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Rename" />
+            android:text="@string/rename" />
 
         <Button
             android:id="@+id/btnDeleteSet"
@@ -48,7 +48,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_weight="1"
-            android:text="Delete set" />
+            android:text="@string/delete_set" />
     </LinearLayout>
 
     <LinearLayout
@@ -63,7 +63,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Add photo" />
+            android:text="@string/add_photo" />
 
         <Button
             android:id="@+id/btnAddArasaac"
@@ -71,7 +71,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_weight="1"
-            android:text="Add ARASAAC" />
+            android:text="@string/add_arasaac" />
     </LinearLayout>
 
     <Button
@@ -80,7 +80,7 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
         android:layout_marginBottom="8dp"
-        android:text="Change cover" />
+        android:text="@string/change_cover" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvItems"

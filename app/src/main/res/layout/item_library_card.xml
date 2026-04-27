@@ -24,14 +24,14 @@
             android:id="@+id/tvLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Item"
+            android:text="@string/item"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/tvSource"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="FAMILY_PHOTO" />
+            android:text="@string/family_photo" />
     </LinearLayout>
 
     <Button
@@ -39,6 +39,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:text="Delete" />
+        android:text="@string/delete" />
 
 </LinearLayout>

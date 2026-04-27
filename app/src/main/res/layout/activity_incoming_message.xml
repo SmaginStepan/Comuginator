@@ -9,7 +9,7 @@
         android:id="@+id/tvTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Incoming message"
+        android:text="@string/incoming_message"
         android:textSize="22sp"
         android:textStyle="bold" />
 
@@ -31,7 +31,7 @@
             android:id="@+id/tvFromUser"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="From:"
+            android:text="@string/from"
             android:textSize="18sp"
             android:textStyle="bold" />
 
@@ -48,7 +48,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
-        android:text="Message"
+        android:text="@string/message"
         android:textStyle="bold" />
 
     <androidx.recyclerview.widget.RecyclerView
@@ -63,7 +63,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
-        android:text="Suggested replies"
+        android:text="@string/suggested_replies"
         android:textStyle="bold" />
 
     <androidx.recyclerview.widget.RecyclerView
@@ -78,7 +78,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
-        android:text="Current reply"
+        android:text="@string/current_reply"
         android:textStyle="bold" />
     <ImageView
         android:id="@+id/ivCurrentReply"
@@ -91,7 +91,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="No reply yet" />
+        android:text="@string/no_reply_yet" />
 
     <ProgressBar
         android:id="@+id/progressBar"

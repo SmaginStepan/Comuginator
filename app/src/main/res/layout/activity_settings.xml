@@ -8,7 +8,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Settings"
+        android:text="@string/settings"
         android:textSize="24sp"
         android:textStyle="bold" />
 
@@ -17,13 +17,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:text="Open incoming messages fullscreen" />
+        android:text="@string/open_incoming_fullscreen" />
 
     <TextView
         android:id="@+id/tvEnabled"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Status"
+        android:text="@string/status"
         android:textSize="16sp"
         android:textStyle="bold" />
 
@@ -31,7 +31,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="When enabled, incoming messages may open over other apps or the lock screen. Android may require an additional system permission."
+        android:text="@string/fullscreen_permission_explanation"
         android:textSize="14sp" />
 
     <Button
@@ -39,7 +39,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="Open system fullscreen permission" />
+        android:text="@string/open_system_fullscreen_permission" />
 
 
 </LinearLayout>

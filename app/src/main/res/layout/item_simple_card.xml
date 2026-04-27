@@ -21,7 +21,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:gravity="center"
-        android:text="Card"
+        android:text="@string/card"
         android:textColor="#FFFFFF"
         android:textSize="14sp" />
 </LinearLayout>

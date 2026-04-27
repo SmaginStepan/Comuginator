@@ -22,7 +22,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Family -"
+                android:text="@string/family_title_placeholder"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
@@ -44,7 +44,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Library" />
+            android:text="@string/library" />
 
         <Button
             android:id="@+id/btnChildHome"
@@ -58,14 +58,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Invite: -" />
+            android:text="@string/invite_placeholder" />
 
         <TextView
             android:id="@+id/tvStatus"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="Status: -" />
+            android:text="@string/status_placeholder" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvFamily"

@@ -9,7 +9,7 @@
         android:id="@+id/tvTarget"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Send to ..."
+        android:text="@string/send_to_placeholder"
         android:textSize="20sp"
         android:textStyle="bold" />
 
@@ -19,7 +19,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:padding="8dp"
-        android:text="Сообщение"
+        android:text="@string/message"
         android:textSize="18sp"
         android:textStyle="bold" />
 
@@ -35,7 +35,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:padding="8dp"
-        android:text="Ответы"
+        android:text="@string/replies"
         android:textSize="18sp"
         android:textStyle="bold" />
 
@@ -50,7 +50,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:hint="Search cards"
+        android:hint="@string/search_cards"
         android:imeOptions="actionSearch"
         android:singleLine="true" />
 
@@ -72,14 +72,14 @@
             android:layout_width="0dp"
             android:layout_height="56dp"
             android:layout_weight="1"
-            android:text="Add single photo" />
+            android:text="@string/add_photo" />
 
         <Button
             android:id="@+id/btnLoadLibrarySet"
             android:layout_width="0dp"
             android:layout_height="56dp"
             android:layout_weight="1"
-            android:text="Add full Library set" />
+            android:text="@string/add_full_library_set" />
     </LinearLayout>
 
     <Button
@@ -88,6 +88,6 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         android:layout_marginBottom="32dp"
-        android:text="Send" />
+        android:text="@string/send" />
 
 </LinearLayout>

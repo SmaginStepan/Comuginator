@@ -16,21 +16,21 @@
             android:id="@+id/tvDeviceName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Device name"
+            android:text="@string/device_name"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/tvDeviceMeta"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Battery / charging / lastSeen" />
+            android:text="@string/battery_meta_placeholder" />
     </LinearLayout>
 
     <Button
         android:id="@+id/btnVolume"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Volume" />
+        android:text="@string/volume" />
 
     <Button
         android:id="@+id/btnDeviceMore"
