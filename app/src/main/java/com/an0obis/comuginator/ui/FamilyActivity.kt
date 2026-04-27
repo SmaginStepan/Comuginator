@@ -46,6 +46,7 @@ class FamilyActivity : BaseActivity() {
     private lateinit var btnFamilyAdd: Button
     private lateinit var btnFamilyMore: Button
     private lateinit var btnLibrary: Button
+    private lateinit var btnChildHome: Button
     private var pendingAvatarUserId: String? = null
 
     private val avatarPickerLauncher =
@@ -71,8 +72,14 @@ class FamilyActivity : BaseActivity() {
         tvInvite = findViewById(R.id.tvInvite)
         rvFamily = findViewById(R.id.rvFamily)
         btnLibrary = findViewById(R.id.btnLibrary)
+
         btnLibrary.setOnClickListener {
             startActivity(Intent(this, LibraryActivity::class.java))
+        }
+
+        btnChildHome = findViewById(R.id.btnChildHome)
+        btnLibrary.setOnClickListener {
+            startActivity(Intent(this, ChildHomeActivity::class.java))
         }
 
         familyAdapter = FamilyAdapter(

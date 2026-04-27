@@ -326,3 +326,43 @@ data class UpdateMyAvatarResponse(
 data class FcmTokenRequest(
     val fcmToken: String
 )
+
+data class ChildHomeNodeItemDto(
+    val id: String,
+    val label: String,
+    val source: String?,
+    val sourceRef: String?,
+    val imageUrl: String?
+)
+
+data class ChildHomeTargetDto(
+    val id: String,
+    val nodeId: String,
+    val userId: String
+)
+
+data class ChildHomeNodeDto(
+    val id: String,
+    val familyId: String,
+    val itemId: String,
+    val parentId: String?,
+    val type: String,
+    val sortOrder: Int,
+    val targetMode: String,
+    val blinkEnabled: Boolean,
+    val blinkSeconds: Int,
+    val item: ChildHomeNodeItemDto?,
+    val targets: List<ChildHomeTargetDto> = emptyList()
+)
+
+data class ChildHomeNodesResponse(
+    val ok: Boolean,
+    val items: List<ChildHomeNodeDto>
+)
+
+data class ChildHomeActionRequestResponse(
+    val ok: Boolean,
+    val sentCount: Int,
+    val blinkEnabled: Boolean,
+    val blinkSeconds: Int
+)

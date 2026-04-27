@@ -26,6 +26,7 @@
         <activity android:name=".ui.LibrarySetActivity" />
         <activity android:name=".ui.LibraryItemPickerActivity" />
         <activity android:name=".ui.SettingsActivity" />
+        <activity android:name=".ui.ChildHomeActivity" />
 
         <activity
             android:name=".ui.MainActivity"

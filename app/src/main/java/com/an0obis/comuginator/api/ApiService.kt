@@ -201,4 +201,16 @@ interface ApiService {
         @Header("Authorization") auth: String,
         @Body body: FcmTokenRequest
     ): OkResponse
+
+    @GET("/v1/child-home/nodes")
+    suspend fun getChildHomeNodes(
+        @Header("Authorization") auth: String,
+        @Query("parentId") parentId: String? = null
+    ): ChildHomeNodesResponse
+
+    @POST("/v1/child-home/actions/{nodeId}/request")
+    suspend fun requestChildHomeAction(
+        @Header("Authorization") auth: String,
+        @Path("nodeId") nodeId: String
+    ): ChildHomeActionRequestResponse
 }

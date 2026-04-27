@@ -46,6 +46,12 @@
             android:layout_marginTop="8dp"
             android:text="Library" />
 
+        <Button
+            android:id="@+id/btnChildHome"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Child Home Preview" />
 
         <TextView
             android:id="@+id/tvInvite"
