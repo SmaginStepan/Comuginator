@@ -9,6 +9,7 @@ import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import com.an0obis.comuginator.R
 import com.an0obis.comuginator.storage.SettingsStore
 import com.an0obis.comuginator.ui.IncomingMessageActivity
 
@@ -40,8 +41,8 @@ object NotificationHelper {
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentTitle("New message")
-            .setContentText("Tap to open")
+            .setContentTitle(context.getString(R.string.new_message))
+            .setContentText(context.getString(R.string.tap_to_open))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
@@ -78,8 +79,8 @@ object NotificationHelper {
 
         val builder  = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentTitle("New reply")
-            .setContentText("Tap to open")
+            .setContentTitle(context.getString(R.string.new_reply))
+            .setContentText(context.getString(R.string.tap_to_open))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)

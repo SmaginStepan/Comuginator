@@ -62,9 +62,9 @@ class SettingsActivity : BaseActivity() {
             canUseFsi = nm.canUseFullScreenIntent()
         }
         if (canUseFsi) {
-            tvEnabled.setText("Enabled")
+            tvEnabled.setText(R.string.enabled)
         } else {
-            tvEnabled.setText("Disabled")
+            tvEnabled.setText(R.string.disabled)
         }
     }
 
@@ -72,7 +72,7 @@ class SettingsActivity : BaseActivity() {
         if (Build.VERSION.SDK_INT < 34) {
             Toast.makeText(
                 this,
-                "This setting is only needed on newer Android versions",
+                getText(R.string.system_setting_only_newer_android),
                 Toast.LENGTH_SHORT
             ).show()
             return
@@ -83,7 +83,7 @@ class SettingsActivity : BaseActivity() {
         } catch (_: Exception) {
             Toast.makeText(
                 this,
-                "Could not open system settings",
+                getText(R.string.could_not_open_system_settings),
                 Toast.LENGTH_LONG
             ).show()
         }

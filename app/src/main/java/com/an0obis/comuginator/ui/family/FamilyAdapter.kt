@@ -70,7 +70,11 @@ class FamilyAdapter(
         private val btnUserMore: Button = view.findViewById(R.id.btnUserMore)
 
         fun bind(item: FamilyListItem.UserHeader) {
-            tvUserHeader.text = "${item.userName} [${item.role}]"
+            tvUserHeader.text = itemView.context.getString(
+                R.string.user_header,
+                item.userName,
+                item.role
+            )
 
             val url = item.avatarImageUrl
             if (!url.isNullOrBlank()) {

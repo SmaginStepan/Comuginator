@@ -32,7 +32,7 @@
             android:id="@+id/btnUserMore"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:text="⋮" />
+            android:text="@string/more" />`
     </LinearLayout>
 
     <LinearLayout

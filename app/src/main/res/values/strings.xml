@@ -7,6 +7,8 @@
     <string name="delete">Delete</string>
     <string name="cancel">Cancel</string>
     <string name="send">Send</string>
+    <string name="search">Search</string>
+    <string name="save">Save</string>
     <string name="history">History</string>
     <string name="library">Library</string>
     <string name="settings">Settings</string>
@@ -99,4 +101,43 @@
     <string name="item">Item</string>
     <string name="card">Card</string>
     <string name="family_photo">FAMILY_PHOTO</string>
+
+    <string name="more">⋮</string>
+    <string name="plus">+</string>
+
+    <string name="enabled">Enabled</string>
+    <string name="disabled">Disabled</string>
+    <string name="user_header">%1$s [%2$s]</string>
+
+    <string name="new_message">New message</string>
+    <string name="new_reply">New reply</string>
+    <string name="tap_to_open">Tap to open</string>
+
+    <string name="system_setting_only_newer_android">This setting is only needed on newer Android versions</string>
+    <string name="could_not_open_system_settings">Could not open system settings</string>
+
+    <string name="loading_library">Loading library...</string>
+    <string name="load_library_failed">Load library failed: %1$s</string>
+    <string name="clipboard_unavailable">Clipboard is unavailable</string>
+    <string name="clipboard_empty">Clipboard is empty</string>
+    <string name="clipboard_text_not_supported">Clipboard text is not supported yet</string>
+    <string name="no_image_in_clipboard">No image found in clipboard</string>
+    <string name="all_sets">(all sets)</string>
+    <string name="items_count_plain">%1$d items</string>
+    <string name="searching_arasaac">Searching ARASAAC...</string>
+    <string name="nothing_found">Nothing found</string>
+    <string name="choose_arasaac_card">Choose ARASAAC card</string>
+    <string name="arasaac_search_failed">ARASAAC search failed: %1$s</string>
+    <string name="label_required">Label is required</string>
+    <string name="nothing_selected">Nothing selected</string>
+    <string name="save_failed">Save failed: %1$s</string>
+    <string name="rename_set_title">Rename set</string>
+    <string name="failed_with_message">Failed: %1$s</string>
+    <string name="changing_cover">Changing cover...</string>
+    <string name="renaming">Renaming...</string>
+    <string name="deleting_set">Deleting set...</string>
+    <string name="removing_from_set">Removing from set...</string>
+    <string name="deleting_item">Deleting item...</string>
+    <string name="adding_item">Adding item...</string>
+
 </resources>

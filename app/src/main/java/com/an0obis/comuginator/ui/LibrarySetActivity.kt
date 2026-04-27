@@ -19,7 +19,6 @@ import com.an0obis.comuginator.api.UpdateLibrarySetRequest
 import com.an0obis.comuginator.storage.SessionStore
 import com.an0obis.comuginator.ui.library.LibraryItemsAdapter
 import kotlinx.coroutines.launch
-import android.app.Activity
 
 class LibrarySetActivity : AppCompatActivity() {
 
@@ -37,7 +36,7 @@ class LibrarySetActivity : AppCompatActivity() {
 
     private val addItemPickerLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
+            if (result.resultCode == RESULT_OK) {
                 val itemId = LibraryItemPickerActivity.parseResultItemId(result.data)
                 if (!itemId.isNullOrBlank()) {
                     addExistingItemToSet(itemId)
@@ -47,7 +46,7 @@ class LibrarySetActivity : AppCompatActivity() {
 
     private val coverPickerLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
+            if (result.resultCode == RESULT_OK) {
                 val itemId = LibraryItemPickerActivity.parseResultItemId(result.data)
                 if (!itemId.isNullOrBlank()) {
                     updateCover(itemId)
@@ -119,7 +118,7 @@ class LibrarySetActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val auth = authHeaderOrNull() ?: return@launch
-                tvStatus.text = "Adding item..."
+                tvStatus.text = getString(R.string.adding_item)
 
                 ApiClient.api.addItemsToSet(
                     auth = auth,
@@ -131,7 +130,7 @@ class LibrarySetActivity : AppCompatActivity() {
 
                 loadSet()
             } catch (e: Exception) {
-                tvStatus.text = "Add item failed: ${e.message}"
+                tvStatus.text = getString(R.string.failed_with_message, e.message)
             }
         }
     }
@@ -156,7 +155,7 @@ class LibrarySetActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val auth = authHeaderOrNull() ?: return@launch
-                tvStatus.text = "Changing cover..."
+                tvStatus.text = getString(R.string.changing_cover)
 
                 ApiClient.api.updateLibrarySet(
                     auth = auth,
@@ -168,7 +167,7 @@ class LibrarySetActivity : AppCompatActivity() {
 
                 loadSet()
             } catch (e: Exception) {
-                tvStatus.text = "Change cover failed: ${e.message}"
+                tvStatus.text = getString(R.string.failed_with_message, e.message)
             }
         }
     }
@@ -188,7 +187,7 @@ class LibrarySetActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val auth = authHeaderOrNull() ?: return@launch
-                tvStatus.text = "Loading..."
+                tvStatus.text = getString(R.string.loading)
 
                 val response = ApiClient.api.getLibrarySet(
                     auth = auth,
@@ -197,12 +196,12 @@ class LibrarySetActivity : AppCompatActivity() {
 
                 val set = response.set
                 tvName.text = set.name
-                tvStatus.text = "${set.items.size} items"
+                tvStatus.text = getString(R.string.items_count_plain, set.items.size)
                 ivCover.load(set.cover?.imageUrl)
                 adapter.submit(set.items)
 
             } catch (e: Exception) {
-                tvStatus.text = "Failed: ${e.message}"
+                tvStatus.text = getString(R.string.failed_with_message, e.message)
             }
         }
     }
@@ -213,10 +212,10 @@ class LibrarySetActivity : AppCompatActivity() {
         input.setSelection(input.text.length)
 
         AlertDialog.Builder(this)
-            .setTitle("Rename set")
+            .setTitle(getString(R.string.rename_set))
             .setView(input)
-            .setNegativeButton("Cancel", null)
-            .setPositiveButton("Save") { _, _ ->
+            .setNegativeButton(getString(R.string.cancel), null)
+            .setPositiveButton(getString(R.string.save)) { _, _ ->
                 val newName = input.text?.toString()?.trim().orEmpty()
                 if (newName.isNotEmpty()) {
                     renameSet(newName)
@@ -229,7 +228,7 @@ class LibrarySetActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val auth = authHeaderOrNull() ?: return@launch
-                tvStatus.text = "Renaming..."
+                tvStatus.text = getString(R.string.renaming)
 
                 ApiClient.api.updateLibrarySet(
                     auth = auth,
@@ -239,7 +238,7 @@ class LibrarySetActivity : AppCompatActivity() {
 
                 loadSet()
             } catch (e: Exception) {
-                tvStatus.text = "Rename failed: ${e.message}"
+                tvStatus.text = getString(R.string.failed_with_message, e.message)
             }
         }
     }
@@ -248,7 +247,7 @@ class LibrarySetActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val auth = authHeaderOrNull() ?: return@launch
-                tvStatus.text = "Deleting set..."
+                tvStatus.text = getString(R.string.deleting_set)
 
                 ApiClient.api.deleteLibrarySet(
                     auth = auth,
@@ -257,7 +256,7 @@ class LibrarySetActivity : AppCompatActivity() {
 
                 finish()
             } catch (e: Exception) {
-                tvStatus.text = "Delete failed: ${e.message}"
+                tvStatus.text = getString(R.string.failed_with_message, e.message)
             }
         }
     }
@@ -266,7 +265,7 @@ class LibrarySetActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val auth = authHeaderOrNull() ?: return@launch
-                tvStatus.text = "Removing from set..."
+                tvStatus.text = getString(R.string.removing_from_set)
 
                 ApiClient.api.removeItemFromSet(
                     auth = auth,
@@ -276,7 +275,7 @@ class LibrarySetActivity : AppCompatActivity() {
 
                 loadSet()
             } catch (e: Exception) {
-                tvStatus.text = "Remove failed: ${e.message}"
+                tvStatus.text = getString(R.string.failed_with_message, e.message)
             }
         }
     }
@@ -285,7 +284,7 @@ class LibrarySetActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val auth = authHeaderOrNull() ?: return@launch
-                tvStatus.text = "Deleting item..."
+                tvStatus.text = getString(R.string.deleting_item)
 
                 ApiClient.api.deleteLibraryItem(
                     auth = auth,
@@ -294,7 +293,7 @@ class LibrarySetActivity : AppCompatActivity() {
 
                 loadSet()
             } catch (e: Exception) {
-                tvStatus.text = "Delete item failed: ${e.message}"
+                tvStatus.text = getString(R.string.failed_with_message, e.message)
             }
         }
     }

@@ -229,7 +229,8 @@ class LibraryItemPickerActivity : AppCompatActivity() {
     private fun openLibraryBrowse() {
         lifecycleScope.launch {
             try {
-                tvStatus.text = "Loading library..."
+                tvStatus.text = getString(R.string.loading_library)
+
                 val auth = authHeaderOrThrow()
 
                 val itemsResponse = ApiClient.api.getLibraryItems(auth = auth, source = null)
@@ -257,7 +258,7 @@ class LibraryItemPickerActivity : AppCompatActivity() {
                 confirmBlock.visibility = LinearLayout.GONE
                 tvStatus.text = ""
             } catch (e: Exception) {
-                tvStatus.text = "Load library failed: ${e.message}"
+                tvStatus.text = getString(R.string.load_library_failed, e.message)
             }
         }
     }
@@ -289,13 +290,13 @@ class LibraryItemPickerActivity : AppCompatActivity() {
         val clipboard = getSystemService(android.content.ClipboardManager::class.java)
 
         if (clipboard == null) {
-            tvStatus.text = "Clipboard is unavailable"
+            tvStatus.text = getString(R.string.clipboard_unavailable)
             return
         }
 
         val clip = clipboard.primaryClip
         if (clip == null || clip.itemCount == 0) {
-            tvStatus.text = "Clipboard is empty"
+            tvStatus.text = getString(R.string.clipboard_empty)
             return
         }
 
@@ -309,15 +310,15 @@ class LibraryItemPickerActivity : AppCompatActivity() {
 
         val text = item.coerceToText(this)?.toString()?.trim().orEmpty()
         if (text.isNotEmpty()) {
-            tvStatus.text = "Clipboard text is not supported yet"
+            tvStatus.text = getString(R.string.clipboard_text_not_supported)
             return
         }
 
-        tvStatus.text = "No image found in clipboard"
+        tvStatus.text = getString(R.string.no_image_in_clipboard)
     }
 
     private fun setupSetFilter() {
-        val names = mutableListOf("(all sets)")
+        val names = mutableListOf(getString(R.string.all_sets))
         names.addAll(allSets.map { it.name })
 
         actSetFilter.setAdapter(
@@ -358,7 +359,7 @@ class LibraryItemPickerActivity : AppCompatActivity() {
         }
 
         itemsAdapter.submit(currentVisibleItems)
-        tvStatus.text = "${currentVisibleItems.size} items"
+        tvStatus.text = getString(R.string.items_count_plain, currentVisibleItems.size)
     }
 
     private fun startConfirmForPhoto(uri: Uri) {
@@ -393,10 +394,10 @@ class LibraryItemPickerActivity : AppCompatActivity() {
         val input = EditText(this)
 
         AlertDialog.Builder(this)
-            .setTitle("Search ARASAAC")
+            .setTitle(getString(R.string.search_arasaac))
             .setView(input)
-            .setNegativeButton("Cancel", null)
-            .setPositiveButton("Search") { _, _ ->
+            .setNegativeButton(getString(R.string.cancel), null)
+            .setPositiveButton(getString(R.string.search)) { _, _ ->
                 val query = input.text?.toString()?.trim().orEmpty()
                 if (query.isNotEmpty()) {
                     searchArasaac(query)
@@ -408,12 +409,12 @@ class LibraryItemPickerActivity : AppCompatActivity() {
     private fun searchArasaac(query: String) {
         lifecycleScope.launch {
             try {
-                tvStatus.text = "Searching ARASAAC..."
+                tvStatus.text = getString(R.string.searching_arasaac)
                 val response = ApiClient.api.searchArasaac(authHeaderOrThrow(), query)
                 val results = response.items
 
                 if (results.isEmpty()) {
-                    tvStatus.text = "Nothing found"
+                    tvStatus.text = getString(R.string.nothing_found)
                     return@launch
                 }
 
@@ -447,7 +448,7 @@ class LibraryItemPickerActivity : AppCompatActivity() {
                 }
 
                 AlertDialog.Builder(this@LibraryItemPickerActivity)
-                    .setTitle("Choose ARASAAC card")
+                    .setTitle(getString(R.string.choose_arasaac_card))
                     .setAdapter(dialogAdapter) { _, which ->
                         startConfirmForArasaac(results[which])
                     }
@@ -456,7 +457,7 @@ class LibraryItemPickerActivity : AppCompatActivity() {
 
                 tvStatus.text = ""
             } catch (e: Exception) {
-                tvStatus.text = "ARASAAC search failed: ${e.message}"
+                tvStatus.text = getString(R.string.arasaac_search_failed, e.message)
             }
         }
     }
@@ -464,7 +465,7 @@ class LibraryItemPickerActivity : AppCompatActivity() {
     private fun confirmPendingSelection() {
         val label = etLabel.text?.toString()?.trim().orEmpty()
         if (label.isBlank()) {
-            tvStatus.text = "Label is required"
+            tvStatus.text = getString(R.string.label_required)
             return
         }
 
@@ -486,11 +487,11 @@ class LibraryItemPickerActivity : AppCompatActivity() {
                         finishWithItem(created.item.id)
                     }
                     else -> {
-                        tvStatus.text = "Nothing selected"
+                        tvStatus.text = getString(R.string.nothing_selected)
                     }
                 }
             } catch (e: Exception) {
-                tvStatus.text = "Save failed: ${e.message}"
+                tvStatus.text = getString(R.string.save_failed, e.message)
             }
         }
     }

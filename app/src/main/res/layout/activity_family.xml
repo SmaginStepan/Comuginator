@@ -30,13 +30,13 @@
                 android:id="@+id/btnFamilyAdd"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
-                android:text="+" />
+                android:text="@string/plus" />
 
             <Button
                 android:id="@+id/btnFamilyMore"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
-                android:text="⋮" />
+                android:text="@string/more" />
         </LinearLayout>
 
         <Button
@@ -51,7 +51,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Child Home" />
+            android:text="@string/child_home" />
 
         <TextView
             android:id="@+id/tvInvite"

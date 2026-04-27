@@ -57,7 +57,7 @@ class LibraryActivity : AppCompatActivity() {
     private fun loadSets() {
         lifecycleScope.launch {
             try {
-                tvStatus.text = "Loading..."
+                tvStatus.text = getString(R.string.loading)
 
                 val token = sessionStore.token ?: return@launch
                 val resp = ApiClient.api.getLibrarySets("Bearer $token")
