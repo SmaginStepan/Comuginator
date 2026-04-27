@@ -61,23 +61,33 @@
         android:layout_marginTop="12dp"
         android:layout_weight="1" />
 
-    <Button
-        android:id="@+id/btnAddPhoto"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Add photo" />
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
-    <Button
-        android:id="@+id/btnLoadLibrarySet"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Library set" />
+        <Button
+            android:id="@+id/btnAddPhoto"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_weight="1"
+            android:text="Add single photo" />
+
+        <Button
+            android:id="@+id/btnLoadLibrarySet"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_weight="1"
+            android:text="Add full Library set" />
+    </LinearLayout>
 
     <Button
         android:id="@+id/btnSendMessage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
+        android:layout_marginBottom="32dp"
         android:text="Send" />
 
 </LinearLayout>

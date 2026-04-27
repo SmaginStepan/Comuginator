@@ -33,6 +33,10 @@ import java.io.File
 import java.io.FileOutputStream
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import androidx.activity.viewModels
+import android.view.KeyEvent
+import androidx.lifecycle.lifecycleScope
+import android.view.inputmethod.InputMethodManager
 
 class ComposeMessageActivity : AppCompatActivity() {
 
@@ -53,7 +57,6 @@ class ComposeMessageActivity : AppCompatActivity() {
             }
         }
     private lateinit var store: SessionStore
-
     private lateinit var tvTarget: TextView
     private lateinit var tvMessageHeader: TextView
     private lateinit var tvRepliesHeader: TextView
@@ -71,17 +74,8 @@ class ComposeMessageActivity : AppCompatActivity() {
     private lateinit var targetUserName: String
 
     private var searchJob: Job? = null
-    private var lastSearchQuery: String = ""
 
-    private enum class AddMode {
-        MESSAGE,
-        REPLY
-    }
-
-    private var currentAddMode: AddMode = AddMode.MESSAGE
-
-    private val selectedCards = mutableListOf<AacCardDto>()
-    private val replyCards = mutableListOf<AacCardDto>()
+    private val vm: ComposeMessageViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -92,8 +86,6 @@ class ComposeMessageActivity : AppCompatActivity() {
         targetUserId = intent.getStringExtra("targetUserId").orEmpty()
         targetUserName = intent.getStringExtra("targetUserName").orEmpty()
 
-        val initialMessageCards = parseInitialCards(EXTRA_INITIAL_MESSAGE_CARDS)
-        val initialReplyCards = parseInitialCards(EXTRA_INITIAL_REPLY_CARDS)
 
         tvTarget = findViewById(R.id.tvTarget)
         tvMessageHeader = findViewById(R.id.tvMessageHeader)
@@ -104,32 +96,43 @@ class ComposeMessageActivity : AppCompatActivity() {
         rvReplyCards = findViewById(R.id.rvReplyCards)
         rvResults = findViewById(R.id.rvResults)
 
-        tvTarget.text = "Send to $targetUserName"
+        if (!vm.initialized) {
+            vm.targetUserId = intent.getStringExtra("targetUserId").orEmpty()
+            vm.targetUserName = intent.getStringExtra("targetUserName").orEmpty()
+
+            vm.selectedCards.addAll(parseInitialCards(EXTRA_INITIAL_MESSAGE_CARDS))
+            vm.replyCards.addAll(parseInitialCards(EXTRA_INITIAL_REPLY_CARDS))
+
+            vm.initialized = true
+        }
+
+        targetUserId = vm.targetUserId
+        targetUserName = vm.targetUserName
 
         selectedAdapter = SelectedCardAdapter(
             onClick = { card ->
-                selectedCards.remove(card)
-                selectedAdapter.submitItems(selectedCards.toList())
+                vm.selectedCards.remove(card)
+                selectedAdapter.submitItems(vm.selectedCards.toList())
             }
         )
 
         replyAdapter = SelectedCardAdapter(
             onClick = { card ->
-                replyCards.remove(card)
-                replyAdapter.submitItems(replyCards.toList())
+                vm.replyCards.remove(card)
+                replyAdapter.submitItems(vm.replyCards.toList())
             }
         )
 
         resultsAdapter = SimpleCardAdapter(
             onClick = { card ->
-                when (currentAddMode) {
-                    AddMode.MESSAGE -> {
-                        selectedCards.add(card)
-                        selectedAdapter.submitItems(selectedCards.toList())
+                when (vm.currentAddMode) {
+                    ComposeMessageViewModel.AddMode.MESSAGE -> {
+                        vm.selectedCards.add(card)
+                        selectedAdapter.submitItems(vm.selectedCards.toList())
                     }
-                    AddMode.REPLY -> {
-                        replyCards.add(card)
-                        replyAdapter.submitItems(replyCards.toList())
+                    ComposeMessageViewModel.AddMode.REPLY -> {
+                        vm.replyCards.add(card)
+                        replyAdapter.submitItems(vm.replyCards.toList())
                     }
                 }
             }
@@ -146,13 +149,18 @@ class ComposeMessageActivity : AppCompatActivity() {
         rvResults.layoutManager = GridLayoutManager(this, 3)
         rvResults.adapter = resultsAdapter
 
+        selectedAdapter.submitItems(vm.selectedCards.toList())
+        replyAdapter.submitItems(vm.replyCards.toList())
+
+        tvTarget.text = "Send to $targetUserName"
+
         tvMessageHeader.setOnClickListener {
-            currentAddMode = AddMode.MESSAGE
+            vm.currentAddMode = ComposeMessageViewModel.AddMode.MESSAGE
             updateModeUi()
         }
 
         tvRepliesHeader.setOnClickListener {
-            currentAddMode = AddMode.REPLY
+            vm.currentAddMode = ComposeMessageViewModel.AddMode.REPLY
             updateModeUi()
         }
 
@@ -172,7 +180,7 @@ class ComposeMessageActivity : AppCompatActivity() {
 
             searchJob = scope.launch {
                 delay(2000)
-                if (query != lastSearchQuery) {
+                if (query != vm.lastSearchQuery) {
                     runSearch(query)
                 }
             }
@@ -204,21 +212,31 @@ class ComposeMessageActivity : AppCompatActivity() {
             showChooseLibrarySetDialog()
         }
 
-        if (initialMessageCards.isNotEmpty()) {
-            selectedCards.clear()
-            selectedCards.addAll(initialMessageCards)
-            selectedAdapter.submitItems(selectedCards.toList())
-        }
+        etSearch.setOnEditorActionListener { view, actionId, event ->
+            val isSearchAction = actionId == EditorInfo.IME_ACTION_SEARCH
+            val isEnter = event?.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP
 
-        if (initialReplyCards.isNotEmpty()) {
-            replyCards.clear()
-            replyCards.addAll(initialReplyCards)
-            replyAdapter.submitItems(replyCards.toList())
+            if (isSearchAction || isEnter) {
+                val query = etSearch.text.toString().trim()
+                if (query.isNotBlank()) {
+                    lifecycleScope.launch {
+                        runSearch(query)
+                    }
+                }
+
+                val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.hideSoftInputFromWindow(view.windowToken, 0)
+                view.clearFocus()
+
+                true
+            } else {
+                false
+            }
         }
 
         updateModeUi()
 
-        if (replyCards.isEmpty()) {
+        if (vm.replyCards.isEmpty()) {
             loadDefaultReplies()
         }
     }
@@ -233,10 +251,10 @@ class ComposeMessageActivity : AppCompatActivity() {
         val inactiveColor = 0x00000000
 
         tvMessageHeader.setBackgroundColor(
-            if (currentAddMode == AddMode.MESSAGE) activeColor else inactiveColor
+            if (vm.currentAddMode == ComposeMessageViewModel.AddMode.MESSAGE) activeColor else inactiveColor
         )
         tvRepliesHeader.setBackgroundColor(
-            if (currentAddMode == AddMode.REPLY) activeColor else inactiveColor
+            if (vm.currentAddMode == ComposeMessageViewModel.AddMode.REPLY) activeColor else inactiveColor
         )
     }
 
@@ -262,11 +280,11 @@ class ComposeMessageActivity : AppCompatActivity() {
 
                 val okCard = response.items.firstOrNull()
                 if (okCard != null) {
-                    replyCards.clear()
-                    replyCards.add(okCard)
+                    vm.replyCards.clear()
+                    vm.replyCards.add(okCard)
 
                     runOnUiThread {
-                        replyAdapter.submitItems(replyCards.toList())
+                        replyAdapter.submitItems(vm.replyCards.toList())
                     }
                 }
             } catch (e: Exception) {
@@ -277,7 +295,7 @@ class ComposeMessageActivity : AppCompatActivity() {
 
     private suspend fun runSearch(query: String) {
         try {
-            lastSearchQuery = query
+            vm.lastSearchQuery = query
 
             val response = ApiClient.api.searchArasaac(
                 auth = authHeaderOrThrow(),
@@ -293,7 +311,7 @@ class ComposeMessageActivity : AppCompatActivity() {
     }
 
     private fun sendMessage() {
-        if (selectedCards.isEmpty()) return
+        if (vm.selectedCards.isEmpty()) return
 
         scope.launch {
             try {
@@ -301,7 +319,7 @@ class ComposeMessageActivity : AppCompatActivity() {
                     auth = authHeaderOrThrow(),
                     body = SendAacMessageRequest(
                         targetUserId = targetUserId,
-                        cards = selectedCards.map {
+                        cards = vm.selectedCards.map {
                             AacCardDto(
                                 id = it.id,
                                 label = it.label,
@@ -310,7 +328,7 @@ class ComposeMessageActivity : AppCompatActivity() {
                                 sourceRef = it.sourceRef,
                             )
                         },
-                        suggestedReplies = replyCards.map {
+                        suggestedReplies = vm.replyCards.map {
                             AacCardDto(
                                 id = it.id,
                                 label = it.label,
@@ -383,17 +401,17 @@ class ComposeMessageActivity : AppCompatActivity() {
                 }
 
                 runOnUiThread {
-                    when (currentAddMode) {
-                        AddMode.MESSAGE -> {
-                            val existingIds = selectedCards.map { it.id }.toSet()
-                            selectedCards.addAll(items.filter { it.id !in existingIds })
-                            selectedAdapter.submitItems(selectedCards.toList())
+                    when (vm.currentAddMode) {
+                        ComposeMessageViewModel.AddMode.MESSAGE -> {
+                            val existingIds = vm.selectedCards.map { it.id }.toSet()
+                            vm.selectedCards.addAll(items.filter { it.id !in existingIds })
+                            selectedAdapter.submitItems(vm.selectedCards.toList())
                         }
 
-                        AddMode.REPLY -> {
-                            val existingIds = replyCards.map { it.id }.toSet()
-                            replyCards.addAll(items.filter { it.id !in existingIds })
-                            replyAdapter.submitItems(replyCards.toList())
+                        ComposeMessageViewModel.AddMode.REPLY -> {
+                            val existingIds = vm.replyCards.map { it.id }.toSet()
+                            vm.replyCards.addAll(items.filter { it.id !in existingIds })
+                            replyAdapter.submitItems(vm.replyCards.toList())
                         }
                     }
 
@@ -470,14 +488,14 @@ class ComposeMessageActivity : AppCompatActivity() {
                 val card = response.item
 
                 runOnUiThread {
-                    when (currentAddMode) {
-                        AddMode.MESSAGE -> {
-                            selectedCards.add(card)
-                            selectedAdapter.submitItems(selectedCards.toList())
+                    when (vm.currentAddMode) {
+                        ComposeMessageViewModel.AddMode.MESSAGE -> {
+                            vm.selectedCards.add(card)
+                            selectedAdapter.submitItems(vm.selectedCards.toList())
                         }
-                        AddMode.REPLY -> {
-                            replyCards.add(card)
-                            replyAdapter.submitItems(replyCards.toList())
+                        ComposeMessageViewModel.AddMode.REPLY -> {
+                            vm.replyCards.add(card)
+                            replyAdapter.submitItems(vm.replyCards.toList())
                         }
                     }
                 }
