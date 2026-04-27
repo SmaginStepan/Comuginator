@@ -132,7 +132,7 @@ class IncomingMessageActivity : BaseActivity() {
             } catch (e: Exception) {
                 Toast.makeText(
                     this@IncomingMessageActivity,
-                    "Failed to load message: ${e.message}",
+                    getString(R.string.failed_to_load_message, e.message),
                     Toast.LENGTH_LONG
                 ).show()
             } finally {
@@ -142,7 +142,7 @@ class IncomingMessageActivity : BaseActivity() {
     }
 
     private fun renderMessage(message: AacMessageDetailsDto) {
-        tvCreatedAt.text = "Created: ${message.createdAt}"
+        tvCreatedAt.text = getString(R.string.created_at, message.createdAt)
 
         messageAdapter.submitItems(message.message)
         repliesAdapter.submitItems(message.suggestedReplies)
@@ -151,21 +151,21 @@ class IncomingMessageActivity : BaseActivity() {
         loadProtectedImage(message.fromUser.avatarImageUrl, ivFromAvatar)
 
         if (message.reply != null) {
-            tvCurrentReply.text = "Reply: ${message.reply.reply.label}"
+            tvCurrentReply.text = getString(R.string.reply_prefix, message.reply.reply.label)
             rvSuggestedReplies.isEnabled = false
             loadProtectedImage(message.reply.reply.imageUrl, ivCurrentReply)
             ivCurrentReply.isVisible = true
         } else {
-            tvCurrentReply.text = "No reply yet"
-            rvSuggestedReplies.isEnabled = true
+            tvCurrentReply.text = getString(R.string.no_reply_yet)
+                rvSuggestedReplies.isEnabled = true
             ivCurrentReply.isVisible = false
         }
 
         if (mode == MODE_REPLY) {
-            tvFromUser.text = "Reply from ${message.toUser.name}"
+            tvFromUser.text = getString(R.string.reply_from,message.toUser.name)
             tvCurrentReply.text = message.reply?.let {
-                "Reply: ${it.reply.label}"
-            } ?: "Reply is not available yet"
+                getString(R.string.reply_prefix, message.reply.reply.label)
+            } ?: getString(R.string.reply_not_available)
 
             repliesAdapter.submitItems(
                 message.reply?.let { listOf(it.reply) } ?: emptyList()
@@ -215,7 +215,7 @@ class IncomingMessageActivity : BaseActivity() {
 
                 Toast.makeText(
                     this@IncomingMessageActivity,
-                    "Reply sent",
+                    getString(R.string.reply_sent),
                     Toast.LENGTH_SHORT
                 ).show()
 
@@ -224,7 +224,7 @@ class IncomingMessageActivity : BaseActivity() {
             } catch (e: Exception) {
                 Toast.makeText(
                     this@IncomingMessageActivity,
-                    "Failed to send reply: ${e.message}",
+                    getString(R.string.failed_send_reply, e.message),
                     Toast.LENGTH_LONG
                 ).show()
             } finally {

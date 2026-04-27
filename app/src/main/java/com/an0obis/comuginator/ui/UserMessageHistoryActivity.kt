@@ -48,12 +48,12 @@ class UserMessageHistoryActivity : AppCompatActivity() {
         targetUserName = intent.getStringExtra("targetUserName").orEmpty()
 
         if (targetUserId.isBlank()) {
-            Toast.makeText(this, "No target user", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.no_target_user), Toast.LENGTH_SHORT).show()
             finish()
             return
         }
 
-        tvTitle.text = "History with ${if (targetUserName.isBlank()) targetUserId else targetUserName}"
+        tvTitle.text = getString(R.string.history_with,if (targetUserName.isBlank()) targetUserId else targetUserName)
 
         historyAdapter = MessageHistoryAdapter { item ->
             repeatMessage(item)
@@ -87,7 +87,7 @@ class UserMessageHistoryActivity : AppCompatActivity() {
 
     private fun loadHistory() {
         progressBar.visibility = View.VISIBLE
-        tvStatus.text = "Loading history..."
+        tvStatus.text = getString(R.string.loading_history)
 
         lifecycleScope.launch {
             try {
@@ -110,12 +110,12 @@ class UserMessageHistoryActivity : AppCompatActivity() {
                 }
 
                 historyAdapter.submitItems(filtered)
-                tvStatus.text = if (filtered.isEmpty()) "No messages yet" else "Loaded ${filtered.size} messages"
+                tvStatus.text = if (filtered.isEmpty()) getString(R.string.no_messages_yet) else getString(R.string.loaded_messages, filtered.size)
             } catch (e: Exception) {
-                tvStatus.text = "Failed to load history"
+                tvStatus.text = getString(R.string.failed_load_history)
                 Toast.makeText(
                     this@UserMessageHistoryActivity,
-                    "Failed to load history: ${e.message}",
+                    getString(R.string.failed_load_history_message, e.message),
                     Toast.LENGTH_LONG
                 ).show()
             } finally {

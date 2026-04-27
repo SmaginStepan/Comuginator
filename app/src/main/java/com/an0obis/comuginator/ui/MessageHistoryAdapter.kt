@@ -17,9 +17,16 @@ class MessageHistoryAdapter(
     private val items = mutableListOf<AacMessageListItemDto>()
 
     fun submitItems(newItems: List<AacMessageListItemDto>) {
+        val oldSize = items.size
         items.clear()
         items.addAll(newItems)
-        notifyDataSetChanged()
+
+        if (oldSize > 0) {
+            notifyItemRangeRemoved(0, oldSize)
+        }
+        if (items.isNotEmpty()) {
+            notifyItemRangeInserted(0, items.size)
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HistoryViewHolder {
@@ -51,16 +58,17 @@ class MessageHistoryAdapter(
         }
 
         fun bind(item: AacMessageListItemDto) {
+            val context = itemView.context
             val fromName = item.fromUser?.name ?: item.fromUserId
-            tvFrom.text = "From: $fromName"
+            tvFrom.text = context.getString(R.string.from_name, fromName)
             tvCreatedAt.text = item.createdAt
 
             cardsAdapter.submitItems(item.message)
 
             tvReply.text = if (item.reply != null) {
-                "Reply: ${item.reply.reply.label}"
+                context.getString(R.string.reply_value, item.reply.reply.label)
             } else {
-                "Reply: —"
+                context.getString(R.string.reply_empty)
             }
 
             btnRepeat.setOnClickListener {

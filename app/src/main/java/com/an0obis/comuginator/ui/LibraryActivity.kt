@@ -63,7 +63,7 @@ class LibraryActivity : AppCompatActivity() {
                 val resp = ApiClient.api.getLibrarySets("Bearer $token")
 
                 adapter.submit(resp.sets)
-                tvStatus.text = "${resp.sets.size} sets"
+                tvStatus.text = getString(R.string.sets_count, resp.sets.size)
 
             } catch (e: Exception) {
                 tvStatus.text = e.message
@@ -79,7 +79,7 @@ class LibraryActivity : AppCompatActivity() {
                 ApiClient.api.createLibrarySet(
                     "Bearer $token",
                     com.an0obis.comuginator.api.CreateLibrarySetRequest(
-                        name = "New set"
+                        name = getString(R.string.new_set)
                     )
                 )
 

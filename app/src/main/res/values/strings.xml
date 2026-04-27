@@ -9,10 +9,11 @@
     <string name="send">Send</string>
     <string name="search">Search</string>
     <string name="save">Save</string>
+    <string name="apply">Apply</string>
     <string name="history">History</string>
     <string name="library">Library</string>
     <string name="settings">Settings</string>
-    <string name="loading">Loading...</string>
+    <string name="loading">Loading&#8230;</string>
 
     <string name="child_home">Child Home</string>
     <string name="child_home_preview">Child Home</string>
@@ -33,7 +34,7 @@
     <string name="current_reply">Current reply</string>
     <string name="no_reply_yet">No reply yet</string>
     <string name="repeat">Repeat</string>
-    <string name="send_to_placeholder">Send to ...</string>
+    <string name="send_to_placeholder">Send to &#8230;</string>
     <string name="send_to_name">Send to %1$s</string>
 
     <string name="add_single_photo">Add single photo</string>
@@ -116,7 +117,7 @@
     <string name="system_setting_only_newer_android">This setting is only needed on newer Android versions</string>
     <string name="could_not_open_system_settings">Could not open system settings</string>
 
-    <string name="loading_library">Loading library...</string>
+    <string name="loading_library">Loading library&#8230;</string>
     <string name="load_library_failed">Load library failed: %1$s</string>
     <string name="clipboard_unavailable">Clipboard is unavailable</string>
     <string name="clipboard_empty">Clipboard is empty</string>
@@ -124,7 +125,7 @@
     <string name="no_image_in_clipboard">No image found in clipboard</string>
     <string name="all_sets">(all sets)</string>
     <string name="items_count_plain">%1$d items</string>
-    <string name="searching_arasaac">Searching ARASAAC...</string>
+    <string name="searching_arasaac">Searching ARASAAC&#8230;</string>
     <string name="nothing_found">Nothing found</string>
     <string name="choose_arasaac_card">Choose ARASAAC card</string>
     <string name="arasaac_search_failed">ARASAAC search failed: %1$s</string>
@@ -133,11 +134,117 @@
     <string name="save_failed">Save failed: %1$s</string>
     <string name="rename_set_title">Rename set</string>
     <string name="failed_with_message">Failed: %1$s</string>
-    <string name="changing_cover">Changing cover...</string>
-    <string name="renaming">Renaming...</string>
-    <string name="deleting_set">Deleting set...</string>
-    <string name="removing_from_set">Removing from set...</string>
-    <string name="deleting_item">Deleting item...</string>
-    <string name="adding_item">Adding item...</string>
+    <string name="changing_cover">Changing cover&#8230;</string>
+    <string name="renaming">Renaming&#8230;</string>
+    <string name="deleting_set">Deleting set&#8230;</string>
+    <string name="removing_from_set">Removing from set&#8230;</string>
+    <string name="deleting_item">Deleting item&#8230;</string>
+    <string name="adding_item">Adding item&#8230;</string>
+    <string name="failed_to_load_message">Failed to message: %1$s</string>
+
+    <!-- FamilyActivity -->
+    <string name="rename_user">Rename user</string>
+    <string name="rename_device">Rename device</string>
+    <string name="role_parent">Parent</string>
+    <string name="role_child">Child</string>
+    <string name="refresh">Refresh</string>
+    <string name="send_heartbeat">Send heartbeat</string>
+    <string name="rename_family">Rename family</string>
+
+    <string name="updating_family_name">Updating family name&#8230;</string>
+    <string name="family_name_updated">Family name updated</string>
+    <string name="update_family_failed">Update family failed: %1$s</string>
+
+    <string name="updating_user_name">Updating user name&#8230;</string>
+    <string name="user_name_updated">User name updated</string>
+    <string name="update_user_failed">Update user failed: %1$s</string>
+
+    <string name="updating_device_name">Updating device name&#8230;</string>
+    <string name="device_name_updated">Device name updated</string>
+    <string name="update_device_failed">Update device failed: %1$s</string>
+
+    <string name="loading_family">Loading family&#8230;</string>
+    <string name="family_loaded">Family loaded</string>
+    <string name="load_family_failed">Load family failed: %1$s</string>
+
+    <string name="creating_invite">Creating %1$s invite&#8230;</string>
+    <string name="invite_code_result">Invite code: %1$s</string>
+    <string name="role_result">Role: %1$s</string>
+    <string name="expires_result">Expires: %1$s</string>
+    <string name="invite_created">Invite created</string>
+    <string name="create_invite_failed">Create invite failed: %1$s</string>
+
+    <string name="no_name">(no name)</string>
+    <string name="family_prefix">Family: %1$s</string>
+    <string name="me_prefix">Me: %1$s</string>
+
+    <string name="sending_volume_command">Sending volume command&#8230;</string>
+    <string name="volume_command_sent">Volume command sent: %1$d</string>
+
+    <string name="failed_send_volume_command">Failed to send volume command: %1$s</string>
+
+    <string name="updating_avatar">Updating avatar&#8230;</string>
+    <string name="avatar_updated">Avatar updated</string>
+    <string name="update_avatar_failed">Update avatar failed: %1$s</string>
+
+    <string name="volume_value">Volume: %1$d%%</string>
+    <string name="set_volume">Set volume:</string>
+
+
+    <string name="check_incoming_failed">Check incoming message failed: %1$s</string>
+
+    <!-- IncomingMessageActivity -->
+    <string name="failed_load_message">Failed to load message: %1$s</string>
+    <string name="created_at">Created: %1$s</string>
+    <string name="reply_prefix">Reply: %1$s</string>
+    <string name="reply_not_available">Reply is not available yet</string>
+    <string name="reply_from">Reply from %1$s</string>
+    <string name="reply_sent">Reply sent</string>
+    <string name="failed_send_reply">Failed to send reply: %1$s</string>
+
+    <!-- LibraryActivity -->
+    <string name="sets_count">%1$d sets</string>
+    <string name="new_set">New set</string>
+
+    <!-- LibraryItemPickerActivity -->
+    <string name="choose_user_avatar">Choose user avatar</string>
+    <string name="choose_set_cover">Choose set cover</string>
+    <string name="add_item_to_set">Add item to set</string>
+    <string name="photo_number">Photo %1$s</string>
+
+    <!-- MainActivity -->
+    <string name="user_name_required">User name is required</string>
+    <string name="device_name_required">Device name is required</string>
+    <string name="choose_create_or_join">Choose: create family group or join family group</string>
+
+    <string name="family_name">Family name</string>
+    <string name="create_family">Create family</string>
+    <string name="enter_family_name">Enter family name</string>
+
+    <string name="creating_family">Creating family&#8230;</string>
+    <string name="family_created">Family created&#8230;</string>
+    <string name="create_family_failed">Create family failed: %1$s</string>
+
+    <string name="invite_code_required">Invite code is required</string>
+    <string name="joining_family">Joining family&#8230;</string>
+    <string name="joined_family">Joined family&#8230;</string>
+    <string name="join_family_failed">Join family failed: %1$s</string>
+
+    <!-- MessageHistoryAdapter -->
+    <string name="from_name">From: %1$s</string>
+    <string name="reply_value">Reply: %1$s</string>
+    <string name="reply_empty">Reply: —</string>
+
+    <!-- UserMessageHistoryActivity -->
+    <string name="no_target_user">No target user</string>
+    <string name="history_with">History with %1$s</string>
+    <string name="loading_history">Loading history&#8230;</string>
+    <string name="no_messages_yet">No messages yet</string>
+    <string name="loaded_messages">Loaded %1$d messages</string>
+    <string name="failed_load_history">Failed to load history</string>
+    <string name="failed_load_history_message">Failed to load history: %1$s</string>
+
+    <!-- NotificationHelper -->
+    <string name="messages_channel_name">Messages</string>
 
 </resources>

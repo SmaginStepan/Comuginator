@@ -1,6 +1,5 @@
 package com.an0obis.comuginator.ui
 
-import android.app.Activity
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
@@ -42,6 +41,8 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import coil.imageLoader
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class LibraryItemPickerActivity : AppCompatActivity() {
 
@@ -174,9 +175,9 @@ class LibraryItemPickerActivity : AppCompatActivity() {
 
     private fun setupUi() {
         tvTitle.text = when (targetMode) {
-            TargetMode.USER_AVATAR -> "Choose user avatar"
-            TargetMode.SET_COVER -> "Choose set cover"
-            TargetMode.ADD_TO_SET -> "Add item to set"
+            TargetMode.USER_AVATAR -> getString(R.string.choose_user_avatar)
+            TargetMode.SET_COVER -> getString(R.string.choose_set_cover)
+            TargetMode.ADD_TO_SET -> getString(R.string.add_item_to_set)
         }
 
         btnChooseFromLibrary.visibility =
@@ -287,7 +288,7 @@ class LibraryItemPickerActivity : AppCompatActivity() {
     }
 
     private fun pasteImageFromClipboard() {
-        val clipboard = getSystemService(android.content.ClipboardManager::class.java)
+        val clipboard = getSystemService(ClipboardManager::class.java)
 
         if (clipboard == null) {
             tvStatus.text = getString(R.string.clipboard_unavailable)
@@ -452,7 +453,7 @@ class LibraryItemPickerActivity : AppCompatActivity() {
                     .setAdapter(dialogAdapter) { _, which ->
                         startConfirmForArasaac(results[which])
                     }
-                    .setNegativeButton("Cancel", null)
+                    .setNegativeButton(getString(R.string.cancel), null)
                     .show()
 
                 tvStatus.text = ""
@@ -498,14 +499,20 @@ class LibraryItemPickerActivity : AppCompatActivity() {
 
     private suspend fun uploadPhotoToLibrary(uri: Uri, label: String): AacCardDto {
         val mimeType = contentResolver.getType(uri) ?: "image/jpeg"
-        val inputStream = contentResolver.openInputStream(uri)
-            ?: throw IllegalStateException("Cannot open selected file")
 
-        val tempFile = File.createTempFile("library_upload_", ".tmp", cacheDir)
-        inputStream.use { input ->
-            tempFile.outputStream().use { output ->
-                input.copyTo(output)
+        val tempFile = withContext(Dispatchers.IO) {
+            val inputStream = contentResolver.openInputStream(uri)
+                ?: throw IllegalStateException("Cannot open selected file")
+
+            val file = File.createTempFile("library_upload_", ".tmp", cacheDir)
+
+            inputStream.use { input ->
+                file.outputStream().use { output ->
+                    input.copyTo(output)
+                }
             }
+
+            file
         }
 
         val fileBody = tempFile.asRequestBody(mimeType.toMediaTypeOrNull())
@@ -521,7 +528,7 @@ class LibraryItemPickerActivity : AppCompatActivity() {
             auth = authHeaderOrThrow(),
             file = filePart,
             label = labelPart
-        ).item
+        )
     }
 
     private fun authHeaderOrThrow(): String {
@@ -541,7 +548,7 @@ class LibraryItemPickerActivity : AppCompatActivity() {
 
     private fun fallbackPhotoName(): String {
         val fmt = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
-        return "Photo ${fmt.format(Date())}"
+        return getString(R.string.photo_number, fmt.format(Date()))
     }
 
     private fun hideLibraryBrowse() {
@@ -567,7 +574,7 @@ class LibraryItemPickerActivity : AppCompatActivity() {
 
     private fun finishWithItem(itemId: String) {
         setResult(
-            Activity.RESULT_OK,
+            RESULT_OK,
             Intent().putExtra(EXTRA_RESULT_ITEM_ID, itemId)
         )
         finish()

@@ -25,7 +25,6 @@ import com.an0obis.comuginator.api.UpdateNameRequest
 import com.an0obis.comuginator.ui.family.FamilyAdapter
 import com.an0obis.comuginator.ui.family.FamilyListItem
 import com.an0obis.comuginator.api.UpdateMyAvatarRequest
-import android.app.Activity
 import android.widget.PopupMenu
 import androidx.activity.result.contract.ActivityResultContracts
 import com.an0obis.comuginator.service.CommandSyncScheduler
@@ -54,7 +53,7 @@ class FamilyActivity : BaseActivity() {
             val userId = pendingAvatarUserId
             pendingAvatarUserId = null
 
-            if (result.resultCode == Activity.RESULT_OK) {
+            if (result.resultCode == RESULT_OK) {
                 val itemId = LibraryItemPickerActivity.parseResultItemId(result.data)
                 if (!userId.isNullOrBlank() && !itemId.isNullOrBlank()) {
                     updateUserAvatar(userId, itemId)
@@ -99,14 +98,14 @@ class FamilyActivity : BaseActivity() {
             },
             onRenameUserClick = { userId, userName ->
                 showRenameDialog(
-                    title = "Rename user",
+                    title = getString(R.string.rename_user),
                     initialValue = userName,
                     onApply = { newName -> updateUserName(userId, newName) }
                 )
             },
             onRenameDeviceClick = { deviceId, deviceName ->
                 showRenameDialog(
-                    title = "Rename device",
+                    title = getString(R.string.rename_device),
                     initialValue = deviceName,
                     onApply = { newName -> updateDeviceName(deviceId, newName) }
                 )
@@ -118,16 +117,20 @@ class FamilyActivity : BaseActivity() {
         btnFamilyAdd = findViewById(R.id.btnFamilyAdd)
         btnFamilyAdd.setOnClickListener { view ->
 
+            val parentId = 1
+            val childId = 2
             val popup = PopupMenu(view.context, view)
-            popup.menu.add("Parent")
-            popup.menu.add("Child")
+            popup.menu.add(0, parentId, 0, getString(R.string.role_parent))
+            popup.menu.add(0, childId, 1, getString(R.string.role_child))
+
             popup.setOnMenuItemClickListener { btn ->
-                when (btn.title.toString()) {
-                    "Parent" -> {
+
+                when (btn.itemId) {
+                    parentId -> {
                         createInvite("PARENT")
                         true
                     }
-                    "Child" -> {
+                    childId  -> {
                         createInvite("CHILD")
                         true
                     }
@@ -139,32 +142,36 @@ class FamilyActivity : BaseActivity() {
         }
         btnFamilyMore = findViewById(R.id.btnFamilyMore)
         btnFamilyMore.setOnClickListener {view ->
+            val renameId = 1
+            val refreshId = 2
+            val heartBeatId = 3
+            val settingsId = 4
 
             val popup = PopupMenu(view.context, view)
-            popup.menu.add("Rename")
-            popup.menu.add("Refresh")
-            popup.menu.add("Send heartbeat")
-            popup.menu.add("Settings")
+            popup.menu.add(0, renameId, 0, getString(R.string.rename))
+            popup.menu.add(0, refreshId, 1, getString(R.string.refresh))
+            popup.menu.add(0, heartBeatId, 2, getString(R.string.send_heartbeat))
+            popup.menu.add(0, settingsId, 3, getString(R.string.settings))
 
             popup.setOnMenuItemClickListener { btn ->
-                when (btn.title.toString()) {
-                    "Rename" -> {
+                when (btn.itemId) {
+                    renameId -> {
                         showRenameDialog(
-                            title = "Rename family",
+                            title = getString(R.string.rename_family),
                             initialValue = tvFamily.text.toString().removePrefix("Family: ").trim(),
                             onApply = { newName -> updateFamilyName(newName) }
                         )
                         true
                     }
-                    "Settings" -> {
+                    settingsId -> {
                         startActivity(Intent(this, SettingsActivity::class.java))
                         true
                     }
-                    "Refresh" -> {
+                    refreshId -> {
                         loadFamily()
                         true
                     }
-                    "Send heartbeat" -> {
+                    heartBeatId -> {
                         sendHeartbeat()
                         true
                     }
@@ -195,8 +202,8 @@ class FamilyActivity : BaseActivity() {
         androidx.appcompat.app.AlertDialog.Builder(this)
             .setTitle(title)
             .setView(editText)
-            .setNegativeButton("Cancel", null)
-            .setPositiveButton("Save") { _, _ ->
+            .setNegativeButton(getString(R.string.cancel), null)
+            .setPositiveButton(getString(R.string.save)) { _, _ ->
                 val value = editText.text?.toString()?.trim().orEmpty()
                 if (value.isNotEmpty()) {
                     onApply(value)
@@ -209,7 +216,7 @@ class FamilyActivity : BaseActivity() {
         scope.launch {
             try {
                 runOnUiThread {
-                    tvStatus.text = "Updating family name..."
+                    tvStatus.text = getString(R.string.updating_family_name)
                     setButtonsEnabled(false)
                 }
 
@@ -219,14 +226,14 @@ class FamilyActivity : BaseActivity() {
                 )
 
                 runOnUiThread {
-                    tvStatus.text = "Family name updated"
+                    tvStatus.text = getString(R.string.family_name_updated)
                 }
 
                 loadFamily()
             } catch (e: Exception) {
                 if (handleUnauthorized(e)) return@launch
                 runOnUiThread {
-                    tvStatus.text = "Update family failed: ${e.message}"
+                    tvStatus.text = getString(R.string.update_family_failed, e.message)
                     setButtonsEnabled(true)
                 }
             }
@@ -237,7 +244,7 @@ class FamilyActivity : BaseActivity() {
         scope.launch {
             try {
                 runOnUiThread {
-                    tvStatus.text = "Updating user name..."
+                    tvStatus.text = getString(R.string.updating_user_name)
                     setButtonsEnabled(false)
                 }
 
@@ -248,14 +255,14 @@ class FamilyActivity : BaseActivity() {
                 )
 
                 runOnUiThread {
-                    tvStatus.text = "User name updated"
+                    tvStatus.text = getString(R.string.user_name_updated)
                 }
 
                 loadFamily()
             } catch (e: Exception) {
                 if (handleUnauthorized(e)) return@launch
                 runOnUiThread {
-                    tvStatus.text = "Update user failed: ${e.message}"
+                    tvStatus.text = getString(R.string.update_user_failed, e.message)
                     setButtonsEnabled(true)
                 }
             }
@@ -266,7 +273,7 @@ class FamilyActivity : BaseActivity() {
         scope.launch {
             try {
                 runOnUiThread {
-                    tvStatus.text = "Updating device name..."
+                    tvStatus.text = getString(R.string.updating_device_name)
                     setButtonsEnabled(false)
                 }
 
@@ -277,14 +284,14 @@ class FamilyActivity : BaseActivity() {
                 )
 
                 runOnUiThread {
-                    tvStatus.text = "Device name updated"
+                    tvStatus.text = getString(R.string.device_name_updated)
                 }
 
                 loadFamily()
             } catch (e: Exception) {
                 if (handleUnauthorized(e)) return@launch
                 runOnUiThread {
-                    tvStatus.text = "Update device failed: ${e.message}"
+                    tvStatus.text = getString(R.string.update_device_failed, e.message)
                     setButtonsEnabled(true)
                 }
             }
@@ -321,7 +328,7 @@ class FamilyActivity : BaseActivity() {
         scope.launch {
             try {
                 runOnUiThread {
-                    tvStatus.text = "Loading family..."
+                    tvStatus.text = getString(R.string.loading_family)
                     setButtonsEnabled(false)
                 }
 
@@ -330,7 +337,7 @@ class FamilyActivity : BaseActivity() {
 
                 runOnUiThread {
                     renderFamily(response)
-                    tvStatus.text = "Family loaded"
+                    tvStatus.text = getString(R.string.family_loaded)
                     setButtonsEnabled(true)
                 }
 
@@ -338,7 +345,7 @@ class FamilyActivity : BaseActivity() {
             } catch (e: Exception) {
                 if (handleUnauthorized(e)) return@launch
                 runOnUiThread {
-                    tvStatus.text = "Load family failed: ${e.message}"
+                    tvStatus.text = getString(R.string.load_family_failed, e.message)
                     setButtonsEnabled(true)
                 }
             }
@@ -349,7 +356,7 @@ class FamilyActivity : BaseActivity() {
         scope.launch {
             try {
                 runOnUiThread {
-                    tvStatus.text = "Creating $role invite..."
+                    tvStatus.text = getString(R.string.creating_invite,role)
                     setButtonsEnabled(false)
                 }
 
@@ -363,17 +370,17 @@ class FamilyActivity : BaseActivity() {
 
                 runOnUiThread {
                     tvInvite.text = buildString {
-                        append("Invite code: ${response.code}\n")
-                        append("Role: $role\n")
-                        append("Expires: ${response.expiresAt}")
+                        append(getString(R.string.invite_code_result, response.code))
+                        append(getString(R.string.role_result, role))
+                        append(getString(R.string.expires_result, response.expiresAt))
                     }
-                    tvStatus.text = "Invite created"
+                    tvStatus.text = getString(R.string.invite_created)
                     setButtonsEnabled(true)
                 }
             } catch (e: Exception) {
                 if (handleUnauthorized(e)) return@launch
                 runOnUiThread {
-                    tvStatus.text = "Create invite failed: ${e.message}"
+                    tvStatus.text = getString(R.string.create_invite_failed,e.message)
                     setButtonsEnabled(true)
                 }
             }
@@ -386,7 +393,7 @@ class FamilyActivity : BaseActivity() {
         for (user in users) {
             out += FamilyListItem.UserHeader(
                 userId = user.id,
-                userName = user.name ?: "(no name)",
+                userName = user.name ?: getString(R.string.no_name),
                 role = user.role,
                 avatarImageUrl = user.avatarImageUrl
             )
@@ -409,8 +416,8 @@ class FamilyActivity : BaseActivity() {
     }
 
     private fun renderFamily(response: FamilyMeResponse) {
-        val familyName = response.family.name ?: "(no name)"
-        tvFamily.text = "Family: $familyName"
+        val familyName = response.family.name ?: getString(R.string.no_name)
+        tvFamily.text = getString(R.string.family_prefix, familyName)
 
         currentMeRole = response.me.role
         currentMyDeviceId = response.me.deviceId
@@ -437,14 +444,14 @@ class FamilyActivity : BaseActivity() {
             },
             onRenameUserClick = { userId, userName ->
                 showRenameDialog(
-                    title = "Rename user",
+                    title = getString(R.string.rename_user),
                     initialValue = userName,
                     onApply = { newName -> updateUserName(userId, newName) }
                 )
             },
             onRenameDeviceClick = { deviceId, deviceName ->
                 showRenameDialog(
-                    title = "Rename device",
+                    title = getString(R.string.rename_device),
                     initialValue = deviceName,
                     onApply = { newName -> updateDeviceName(deviceId, newName) }
                 )
@@ -470,7 +477,7 @@ class FamilyActivity : BaseActivity() {
         scope.launch {
             try {
                 runOnUiThread {
-                    tvStatus.text = "Sending volume command..."
+                    tvStatus.text = getString(R.string.sending_volume_command)
                     setButtonsEnabled(false)
                 }
 
@@ -484,12 +491,12 @@ class FamilyActivity : BaseActivity() {
                 )
 
                 runOnUiThread {
-                    tvStatus.text = "Volume command sent: $volumePercent%"
+                    tvStatus.text = getString(R.string.volume_command_sent,volumePercent)
                     setButtonsEnabled(true)
                 }
             } catch (e: Exception) {
                 runOnUiThread {
-                    tvStatus.text = "Failed to send volume command: ${e.message}"
+                    tvStatus.text = getString(R.string.failed_send_volume_command,e.message)
                     setButtonsEnabled(true)
                 }
             }
@@ -511,7 +518,7 @@ class FamilyActivity : BaseActivity() {
         scope.launch {
             try {
                 runOnUiThread {
-                    tvStatus.text = "Updating avatar..."
+                    tvStatus.text = getString(R.string.updating_avatar)
                     setButtonsEnabled(false)
                 }
 
@@ -524,14 +531,14 @@ class FamilyActivity : BaseActivity() {
                 )
 
                 runOnUiThread {
-                    tvStatus.text = "Avatar updated"
+                    tvStatus.text = getString(R.string.avatar_updated)
                 }
 
                 loadFamily()
             } catch (e: Exception) {
                 if (handleUnauthorized(e)) return@launch
                 runOnUiThread {
-                    tvStatus.text = "Update avatar failed: ${e.message}"
+                    tvStatus.text = getString(R.string.update_avatar_failed, e.message)
                     setButtonsEnabled(true)
                 }
             }
@@ -551,7 +558,7 @@ class FamilyActivity : BaseActivity() {
         }
 
         val valueText = TextView(this).apply {
-            text = "Volume: $initialValue%"
+            text =  getString(R.string.volume_value, initialValue)
             textSize = 16f
         }
 
@@ -561,7 +568,7 @@ class FamilyActivity : BaseActivity() {
 
             setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                    valueText.text = "Volume: $progress%"
+                    valueText.text = getString(R.string.volume_value, progress)
                 }
 
                 override fun onStartTrackingTouch(seekBar: SeekBar?) = Unit
@@ -573,10 +580,10 @@ class FamilyActivity : BaseActivity() {
         container.addView(seekBar)
 
         androidx.appcompat.app.AlertDialog.Builder(this)
-            .setTitle("Set volume: $deviceName")
+            .setTitle(getString(R.string.set_volume) + deviceName)
             .setView(container)
-            .setNegativeButton("Cancel", null)
-            .setPositiveButton("Apply") { _, _ ->
+            .setNegativeButton(getString(R.string.cancel), null)
+            .setPositiveButton(getString(R.string.apply)) { _, _ ->
                 sendSetVolumeCommand(deviceId, seekBar.progress)
             }
             .show()
@@ -622,7 +629,7 @@ class FamilyActivity : BaseActivity() {
             } catch (e: Exception) {
                 if (handleUnauthorized(e)) return@launch
                 runOnUiThread {
-                    tvStatus.text = "Check incoming message failed: ${e.message}"
+                    tvStatus.text = getString(R.string.check_incoming_failed, e.message)
                 }
             }
         }
