@@ -33,6 +33,10 @@ class SessionStore(context: Context) {
 
     fun authHeader(): String? = token?.let { "Bearer $it" }
 
+    var role: String?
+        get() = prefs.getString("role", null)
+        set(value) = prefs.edit().putString("role", value).apply()
+
     fun clear() {
         prefs.edit().clear().apply()
     }

@@ -195,6 +195,7 @@ class MainActivity : BaseActivity() {
                 store.deviceId = response.deviceId
                 store.userName = userName
                 store.deviceName = deviceName
+                store.role = response.role
 
                 runOnUiThread {
                     tvStatus.text =
@@ -254,6 +255,7 @@ class MainActivity : BaseActivity() {
                 store.deviceId = response.deviceId
                 store.userName = userName
                 store.deviceName = deviceName
+                store.role = response.role
 
                 runOnUiThread {
                     tvStatus.text =

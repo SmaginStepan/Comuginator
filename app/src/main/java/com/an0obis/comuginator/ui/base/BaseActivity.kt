@@ -18,6 +18,8 @@ import com.an0obis.comuginator.service.PowerConnectionReceiver
 import com.an0obis.comuginator.service.TelemetryScheduler
 import com.an0obis.comuginator.storage.FcmTokenStore
 import com.an0obis.comuginator.storage.SessionStore
+import com.an0obis.comuginator.ui.ChildHomeActivity
+import com.an0obis.comuginator.ui.IncomingMessageActivity
 import com.an0obis.comuginator.ui.MainActivity
 import com.google.firebase.messaging.FirebaseMessaging
 import retrofit2.HttpException
@@ -64,11 +66,27 @@ open class BaseActivity: AppCompatActivity() {
             )
 
             CommandSyncScheduler.enqueueImmediate(applicationContext, "app_start")
+            if (store.role == "CHILD" && shouldForceChildHome()) {
+                startActivity(
+                    Intent(this, ChildHomeActivity::class.java).apply {
+                        putExtra(ChildHomeActivity.EXTRA_EDITOR_MODE, false)
+                        addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    }
+                )
+                finish()
+                return
+            }
+
             onInitialized()
             return
         }
     }
 
+    private fun shouldForceChildHome(): Boolean {
+        return this !is ChildHomeActivity &&
+                this !is IncomingMessageActivity &&
+                this !is MainActivity
+    }
     open fun onInitialized() {
         // if session and token is ready
     }

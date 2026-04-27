@@ -326,6 +326,7 @@ class FamilyActivity : BaseActivity() {
                 }
 
                 val response = ApiClient.api.getMyFamily(authHeaderOrThrow())
+                store.role = response.me.role
 
                 runOnUiThread {
                     renderFamily(response)
