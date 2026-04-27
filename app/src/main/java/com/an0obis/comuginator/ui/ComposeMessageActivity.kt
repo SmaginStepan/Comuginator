@@ -24,6 +24,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import android.net.Uri
 import android.app.AlertDialog
+import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -152,7 +153,7 @@ class ComposeMessageActivity : AppCompatActivity() {
         selectedAdapter.submitItems(vm.selectedCards.toList())
         replyAdapter.submitItems(vm.replyCards.toList())
 
-        tvTarget.text = "Send to $targetUserName"
+        tvTarget.text = getString(R.string.send_to_name, targetUserName)
 
         tvMessageHeader.setOnClickListener {
             vm.currentAddMode = ComposeMessageViewModel.AddMode.MESSAGE
@@ -266,6 +267,7 @@ class ComposeMessageActivity : AppCompatActivity() {
             val type = object : TypeToken<List<AacCardDto>>() {}.type
             Gson().fromJson<List<AacCardDto>>(json, type) ?: emptyList()
         } catch (e: Exception) {
+            Log.e("ComposeMessageActivity", "parseInitialCards failed", e)
             emptyList()
         }
     }
@@ -358,7 +360,7 @@ class ComposeMessageActivity : AppCompatActivity() {
 
                 if (sets.isEmpty()) {
                     runOnUiThread {
-                        tvTarget.text = "No library sets"
+                        tvTarget.text = getString(R.string.no_library_sets)
                     }
                     return@launch
                 }
@@ -367,16 +369,16 @@ class ComposeMessageActivity : AppCompatActivity() {
 
                 runOnUiThread {
                     AlertDialog.Builder(this@ComposeMessageActivity)
-                        .setTitle("Choose set")
+                        .setTitle(R.string.choose_set)
                         .setItems(labels) { _, which ->
                             addAllItemsFromSet(sets[which].id)
                         }
-                        .setNegativeButton("Cancel", null)
+                        .setNegativeButton(R.string.cancel, null)
                         .show()
                 }
             } catch (e: Exception) {
                 runOnUiThread {
-                    tvTarget.text = "Load sets failed: ${e.message}"
+                    tvTarget.text = getString(R.string.load_sets_failed, e.message)
                 }
             }
         }
@@ -393,7 +395,7 @@ class ComposeMessageActivity : AppCompatActivity() {
                     runOnUiThread {
                         android.widget.Toast.makeText(
                             this@ComposeMessageActivity,
-                            "Set is empty",
+                            getString(R.string.set_is_empty),
                             android.widget.Toast.LENGTH_SHORT
                         ).show()
                     }
@@ -417,7 +419,7 @@ class ComposeMessageActivity : AppCompatActivity() {
 
                     android.widget.Toast.makeText(
                         this@ComposeMessageActivity,
-                        "Added ${items.size} items",
+                        getString(R.string.added_items, items.size),
                         android.widget.Toast.LENGTH_SHORT
                     ).show()
                 }
@@ -425,7 +427,7 @@ class ComposeMessageActivity : AppCompatActivity() {
                 runOnUiThread {
                     android.widget.Toast.makeText(
                         this@ComposeMessageActivity,
-                        "Load set failed: ${e.message}",
+                        getString(R.string.load_sets_failed, e.message),
                         android.widget.Toast.LENGTH_SHORT
                     ).show()
                 }
@@ -504,7 +506,7 @@ class ComposeMessageActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 e.printStackTrace()
                 runOnUiThread {
-                    tvTarget.text = "Upload failed: ${e.message}"
+                    tvTarget.text = getString(R.string.upload_failed, e.message)
                 }
             }
         }
@@ -512,14 +514,14 @@ class ComposeMessageActivity : AppCompatActivity() {
 
     private fun askPhotoLabelAndUpload(uri: Uri) {
         val input = EditText(this).apply {
-            hint = "Label"
+            hint = getString(R.string.label)
         }
 
         AlertDialog.Builder(this)
-            .setTitle("Photo label")
+            .setTitle(R.string.photo_label)
             .setView(input)
-            .setNegativeButton("Cancel", null)
-            .setPositiveButton("Upload") { _, _ ->
+            .setNegativeButton(R.string.cancel, null)
+            .setPositiveButton(R.string.upload) { _, _ ->
                 val label = input.text?.toString()?.trim().orEmpty()
                 if (label.isNotBlank()) {
                     uploadFamilyPhoto(uri, label)

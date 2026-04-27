@@ -47,7 +47,7 @@ class ChildHomeActivity : BaseActivity() {
 
     private val pickItemLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode != Activity.RESULT_OK) return@registerForActivityResult
+            if (result.resultCode != RESULT_OK) return@registerForActivityResult
 
             val itemId = LibraryItemPickerActivity.parseResultItemId(result.data) ?: return@registerForActivityResult
             val editing = pendingEditNode
@@ -125,10 +125,10 @@ class ChildHomeActivity : BaseActivity() {
 
     private fun confirmDeleteNode(node: ChildHomeNodeDto) {
         AlertDialog.Builder(this)
-            .setTitle("Delete node?")
+            .setTitle(R.string.child_home_delete_node_title)
             .setMessage(node.item?.label ?: node.id)
-            .setNegativeButton("Cancel", null)
-            .setPositiveButton("Delete") { _, _ ->
+            .setNegativeButton(R.string.cancel, null)
+            .setPositiveButton(R.string.delete) { _, _ ->
                 deleteNode(node)
             }
             .show()
@@ -138,7 +138,7 @@ class ChildHomeActivity : BaseActivity() {
         val types = arrayOf("MENU", "ACTION")
 
         AlertDialog.Builder(this)
-            .setTitle("Node type")
+            .setTitle(R.string.child_home_node_type_title)
             .setItems(types) { _, which ->
                 val type = types[which]
                 createNode(itemId, type)
@@ -151,7 +151,7 @@ class ChildHomeActivity : BaseActivity() {
         val checked = if (node.type == "ACTION") 1 else 0
 
         AlertDialog.Builder(this)
-            .setTitle("Node type")
+            .setTitle(R.string.child_home_node_type_title)
             .setSingleChoiceItems(types, checked) { dialog, which ->
                 dialog.dismiss()
                 updateNode(
@@ -184,7 +184,7 @@ class ChildHomeActivity : BaseActivity() {
 
                 loadNodes(currentParentId)
             } catch (e: Exception) {
-                Toast.makeText(this@ChildHomeActivity, "Create failed: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(this@ChildHomeActivity, getString(R.string.child_home_create_failed, e.message), Toast.LENGTH_LONG).show()
             } finally {
                 progress.visibility = View.GONE
             }
@@ -213,7 +213,7 @@ class ChildHomeActivity : BaseActivity() {
 
                 loadNodes(currentParentId)
             } catch (e: Exception) {
-                Toast.makeText(this@ChildHomeActivity, "Update failed: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(this@ChildHomeActivity, getString(R.string.child_home_update_failed, e.message), Toast.LENGTH_LONG).show()
             } finally {
                 progress.visibility = View.GONE
             }
@@ -234,7 +234,7 @@ class ChildHomeActivity : BaseActivity() {
 
                 loadNodes(currentParentId)
             } catch (e: Exception) {
-                Toast.makeText(this@ChildHomeActivity, "Delete failed: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(this@ChildHomeActivity, getString(R.string.child_home_delete_failed, e.message), Toast.LENGTH_LONG).show()
             } finally {
                 progress.visibility = View.GONE
             }
@@ -280,7 +280,7 @@ class ChildHomeActivity : BaseActivity() {
             } catch (e: Exception) {
                 Toast.makeText(
                     this@ChildHomeActivity,
-                    "Failed to load child home: ${e.message}",
+                    getString(R.string.child_home_load_failed, e.message),
                     Toast.LENGTH_LONG
                 ).show()
             } finally {
@@ -307,13 +307,13 @@ class ChildHomeActivity : BaseActivity() {
 
                 Toast.makeText(
                     this@ChildHomeActivity,
-                    "Sent",
+                    getString(R.string.sent),
                     Toast.LENGTH_SHORT
                 ).show()
             } catch (e: Exception) {
                 Toast.makeText(
                     this@ChildHomeActivity,
-                    "Failed to send request: ${e.message}",
+                    getString(R.string.child_home_send_failed, e.message),
                     Toast.LENGTH_LONG
                 ).show()
             } finally {

@@ -90,16 +90,18 @@ class FamilyAdapter(
 
             btnUserMore.setOnClickListener { view ->
                 val popup = PopupMenu(view.context, view)
-                popup.menu.add("Rename")
-                popup.menu.add("Avatar")
+                val renameId = 1
+                val avatarId = 2
+                popup.menu.add(0, renameId, 0, view.context.getString(R.string.rename))
+                popup.menu.add(0, avatarId, 1,view.context.getString(R.string.avatar))
 
                 popup.setOnMenuItemClickListener { btn ->
-                    when (btn.title.toString()) {
-                        "Rename" -> {
+                    when (btn.itemId) {
+                        renameId  -> {
                             onRenameUserClick(item.userId, item.userName)
                             true
                         }
-                        "Avatar" -> {
+                        avatarId -> {
                             onSetAvatarClick(item.userId)
                             true
                         }
@@ -120,17 +122,24 @@ class FamilyAdapter(
 
         fun bind(item: FamilyListItem.DeviceRow) {
             tvDeviceName.text = item.deviceName
-
+            val context = itemView.context
             val battery = item.batteryPercent?.toString()?.plus("%") ?: "?"
             val charging = when (item.isCharging) {
-                true -> "charging"
-                false -> "not charging"
-                null -> "charging?"
+                true -> context.getString(R.string.charging)
+                false -> context.getString(R.string.not_charging)
+                null -> context.getString(R.string.charging_unknown)
             }
-            val lastSeen = item.lastSeenAt ?: "never"
             val volume = item.volumePercent?.toString()?.plus("%") ?: "?"
 
-            tvDeviceMeta.text = "Battery: $battery · $charging · Volume: $volume · Last seen: $lastSeen"
+            val lastSeen = item.lastSeenAt ?: context.getString(R.string.never)
+
+            tvDeviceMeta.text = context.getString(
+                R.string.device_meta,
+                battery,
+                charging,
+                volume,
+                lastSeen
+            )
 
             val canControlVolume =
                 isParentViewer &&
@@ -145,11 +154,13 @@ class FamilyAdapter(
 
             btnDeviceMore.setOnClickListener { view ->
                 val popup = PopupMenu(view.context, view)
-                popup.menu.add("Rename")
+                val renameId = 1
+
+                popup.menu.add(0, renameId, 0, view.context.getString(R.string.rename))
 
                 popup.setOnMenuItemClickListener { btn ->
-                    when (btn.title.toString()) {
-                        "Rename" -> {
+                    when (btn.itemId) {
+                        renameId -> {
                             onRenameDeviceClick(item.deviceId, item.deviceName)
                             true
                         }
