@@ -213,4 +213,23 @@ interface ApiService {
         @Header("Authorization") auth: String,
         @Path("nodeId") nodeId: String
     ): ChildHomeActionRequestResponse
+
+    @POST("/v1/child-home/nodes")
+    suspend fun createChildHomeNode(
+        @Header("Authorization") auth: String,
+        @Body body: CreateChildHomeNodeRequest
+    ): ChildHomeNodeResponse
+
+    @PATCH("/v1/child-home/nodes/{nodeId}")
+    suspend fun updateChildHomeNode(
+        @Header("Authorization") auth: String,
+        @Path("nodeId") nodeId: String,
+        @Body body: UpdateChildHomeNodeRequest
+    ): ChildHomeNodeResponse
+
+    @DELETE("/v1/child-home/nodes/{nodeId}")
+    suspend fun deleteChildHomeNode(
+        @Header("Authorization") auth: String,
+        @Path("nodeId") nodeId: String
+    ): OkResponse
 }

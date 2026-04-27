@@ -19,6 +19,12 @@ import com.an0obis.comuginator.ui.base.BaseActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import android.app.Activity
+import android.content.Intent
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
+import com.an0obis.comuginator.api.CreateChildHomeNodeRequest
+import com.an0obis.comuginator.api.UpdateChildHomeNodeRequest
 
 class ChildHomeActivity : BaseActivity() {
     companion object {
@@ -38,6 +44,22 @@ class ChildHomeActivity : BaseActivity() {
     private val parentStack = mutableListOf<String?>()
     private var currentParentId: String? = null
     private var authToken: String = ""
+    private var pendingEditNode: ChildHomeNodeDto? = null
+
+    private val pickItemLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode != Activity.RESULT_OK) return@registerForActivityResult
+
+            val itemId = LibraryItemPickerActivity.parseResultItemId(result.data) ?: return@registerForActivityResult
+            val editing = pendingEditNode
+            pendingEditNode = null
+
+            if (editing == null) {
+                showCreateNodeDialog(itemId)
+            } else {
+                showEditNodeDialog(editing, itemId)
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,21 +105,149 @@ class ChildHomeActivity : BaseActivity() {
     }
 
     private fun openAddNode() {
-        Toast.makeText(this, "Add node: TODO", Toast.LENGTH_SHORT).show()
+        pendingEditNode = null
+        pickItemLauncher.launch(
+            LibraryItemPickerActivity.createIntent(
+                this,
+                LibraryItemPickerActivity.TargetMode.USER_AVATAR
+            )
+        )
     }
 
     private fun openEditNode(node: ChildHomeNodeDto) {
-        Toast.makeText(this, "Edit: ${node.item?.label ?: node.id}", Toast.LENGTH_SHORT).show()
+        pendingEditNode = node
+        pickItemLauncher.launch(
+            LibraryItemPickerActivity.createIntent(
+                this,
+                LibraryItemPickerActivity.TargetMode.USER_AVATAR
+            )
+        )
     }
 
     private fun confirmDeleteNode(node: ChildHomeNodeDto) {
-        Toast.makeText(this, "Delete: ${node.item?.label ?: node.id}", Toast.LENGTH_SHORT).show()
+        AlertDialog.Builder(this)
+            .setTitle("Delete node?")
+            .setMessage(node.item?.label ?: node.id)
+            .setNegativeButton("Cancel", null)
+            .setPositiveButton("Delete") { _, _ ->
+                deleteNode(node)
+            }
+            .show()
+    }
+
+    private fun showCreateNodeDialog(itemId: String) {
+        val types = arrayOf("MENU", "ACTION")
+
+        AlertDialog.Builder(this)
+            .setTitle("Node type")
+            .setItems(types) { _, which ->
+                val type = types[which]
+                createNode(itemId, type)
+            }
+            .show()
+    }
+
+    private fun showEditNodeDialog(node: ChildHomeNodeDto, newItemId: String) {
+        val types = arrayOf("MENU", "ACTION")
+        val checked = if (node.type == "ACTION") 1 else 0
+
+        AlertDialog.Builder(this)
+            .setTitle("Node type")
+            .setSingleChoiceItems(types, checked) { dialog, which ->
+                dialog.dismiss()
+                updateNode(
+                    node = node,
+                    newItemId = newItemId,
+                    newType = types[which]
+                )
+            }
+            .show()
+    }
+
+    private fun createNode(itemId: String, type: String) {
+        progress.visibility = View.VISIBLE
+
+        lifecycleScope.launch {
+            try {
+                withContext(Dispatchers.IO) {
+                    ApiClient.api.createChildHomeNode(
+                        auth = "Bearer $authToken",
+                        body = CreateChildHomeNodeRequest(
+                            itemId = itemId,
+                            parentId = currentParentId,
+                            type = type,
+                            targetMode = "ALL_PARENTS",
+                            blinkEnabled = true,
+                            blinkSeconds = 60
+                        )
+                    )
+                }
+
+                loadNodes(currentParentId)
+            } catch (e: Exception) {
+                Toast.makeText(this@ChildHomeActivity, "Create failed: ${e.message}", Toast.LENGTH_LONG).show()
+            } finally {
+                progress.visibility = View.GONE
+            }
+        }
+    }
+
+    private fun updateNode(
+        node: ChildHomeNodeDto,
+        newItemId: String,
+        newType: String
+    ) {
+        progress.visibility = View.VISIBLE
+
+        lifecycleScope.launch {
+            try {
+                withContext(Dispatchers.IO) {
+                    ApiClient.api.updateChildHomeNode(
+                        auth = "Bearer $authToken",
+                        nodeId = node.id,
+                        body = UpdateChildHomeNodeRequest(
+                            itemId = newItemId,
+                            type = newType
+                        )
+                    )
+                }
+
+                loadNodes(currentParentId)
+            } catch (e: Exception) {
+                Toast.makeText(this@ChildHomeActivity, "Update failed: ${e.message}", Toast.LENGTH_LONG).show()
+            } finally {
+                progress.visibility = View.GONE
+            }
+        }
+    }
+
+    private fun deleteNode(node: ChildHomeNodeDto) {
+        progress.visibility = View.VISIBLE
+
+        lifecycleScope.launch {
+            try {
+                withContext(Dispatchers.IO) {
+                    ApiClient.api.deleteChildHomeNode(
+                        auth = "Bearer $authToken",
+                        nodeId = node.id
+                    )
+                }
+
+                loadNodes(currentParentId)
+            } catch (e: Exception) {
+                Toast.makeText(this@ChildHomeActivity, "Delete failed: ${e.message}", Toast.LENGTH_LONG).show()
+            } finally {
+                progress.visibility = View.GONE
+            }
+        }
     }
 
     private fun onNodeClicked(node: ChildHomeNodeDto) {
         if (isEditorMode) {
             if (node.type == "MENU") {
-                loadNodes(node.id)
+                parentStack.add(currentParentId)
+                currentParentId = node.id
+                loadNodes(currentParentId)
             } else {
                 openEditNode(node)
             }
@@ -105,7 +255,11 @@ class ChildHomeActivity : BaseActivity() {
         }
 
         when (node.type) {
-            "MENU" -> loadNodes(node.id)
+            "MENU" -> {
+                parentStack.add(currentParentId)
+                currentParentId = node.id
+                loadNodes(currentParentId)
+            }
             "ACTION" -> requestAction(node)
         }
     }

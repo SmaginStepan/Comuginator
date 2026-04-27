@@ -366,3 +366,30 @@ data class ChildHomeActionRequestResponse(
     val blinkEnabled: Boolean,
     val blinkSeconds: Int
 )
+
+data class CreateChildHomeNodeRequest(
+    val itemId: String,
+    val parentId: String?,
+    val type: String,
+    val sortOrder: Int? = null,
+    val targetMode: String = "ALL_PARENTS",
+    val targetUserIds: List<String>? = null,
+    val blinkEnabled: Boolean = true,
+    val blinkSeconds: Int = 60
+)
+
+data class UpdateChildHomeNodeRequest(
+    val itemId: String? = null,
+    val parentId: String? = null,
+    val type: String? = null,
+    val sortOrder: Int? = null,
+    val targetMode: String? = null,
+    val targetUserIds: List<String>? = null,
+    val blinkEnabled: Boolean? = null,
+    val blinkSeconds: Int? = null
+)
+
+data class ChildHomeNodeResponse(
+    val ok: Boolean,
+    val item: ChildHomeNodeDto
+)
