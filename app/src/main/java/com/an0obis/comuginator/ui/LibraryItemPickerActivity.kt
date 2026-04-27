@@ -524,11 +524,13 @@ class LibraryItemPickerActivity : AppCompatActivity() {
 
         val labelPart = label.toRequestBody("text/plain".toMediaTypeOrNull())
 
-        return ApiClient.api.uploadFamilyPhoto(
+        val resp = ApiClient.api.uploadFamilyPhoto(
             auth = authHeaderOrThrow(),
             file = filePart,
             label = labelPart
         )
+
+        return resp.item
     }
 
     private fun authHeaderOrThrow(): String {
