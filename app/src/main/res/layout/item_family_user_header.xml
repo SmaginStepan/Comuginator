@@ -47,8 +47,7 @@
             android:layout_width="0dp"
             android:layout_height="56dp"
             android:layout_weight="1"
-            android:text="@string/send"
-            style="?android:attr/buttonBarButtonStyle" />
+            android:text="@string/send" />
 
         <Button
             android:id="@+id/btnHistory"
@@ -57,8 +56,7 @@
             android:layout_marginStart="8dp"
             android:layout_weight="1"
             android:maxLines="1"
-            android:text="@string/history"
-            style="?android:attr/buttonBarButtonStyle" />
+            android:text="@string/history" />
     </LinearLayout>
 
 </LinearLayout>
