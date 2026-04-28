@@ -24,13 +24,12 @@ class TelemetryWorker(
             Log.d("TelemetryWorker", "sending heartbeat, reason=$reason")
 
             val sessionStore = SessionStore(applicationContext)
-            val token = sessionStore.token ?: return Result.success()
 
             val snapshot = BatteryTelemetryReader.read(applicationContext)
             val volume = AudioVolumeProvider.getCurrentVolumePercent(applicationContext)
 
             ApiClient.api.heartbeat(
-                auth = "Bearer $token",
+                auth = sessionStore.authHeader()?: return Result.success(),
                 HeartbeatRequest(
                     batteryPercent = snapshot.batteryPercent,
                     volumePercent = volume,

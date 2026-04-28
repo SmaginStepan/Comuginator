@@ -88,7 +88,7 @@ class LibrarySetActivity : AppCompatActivity() {
             openCoverPicker()
         }
 
-        val auth = authHeaderOrNull().orEmpty()
+        val auth = sessionStore.authHeaderOrThrow()
 
         adapter = LibraryItemsAdapter(
             auth,
@@ -117,7 +117,7 @@ class LibrarySetActivity : AppCompatActivity() {
     private fun addExistingItemToSet(itemId: String) {
         lifecycleScope.launch {
             try {
-                val auth = authHeaderOrNull() ?: return@launch
+                val auth = sessionStore.authHeader() ?: return@launch
                 tvStatus.text = getString(R.string.adding_item)
 
                 ApiClient.api.addItemsToSet(
@@ -154,11 +154,10 @@ class LibrarySetActivity : AppCompatActivity() {
     private fun updateCover(itemId: String) {
         lifecycleScope.launch {
             try {
-                val auth = authHeaderOrNull() ?: return@launch
                 tvStatus.text = getString(R.string.changing_cover)
 
                 ApiClient.api.updateLibrarySet(
-                    auth = auth,
+                    auth = sessionStore.authHeaderOrThrow(),
                     setId = setId,
                     body = UpdateLibrarySetRequest(
                         coverItemId = itemId
@@ -178,19 +177,14 @@ class LibrarySetActivity : AppCompatActivity() {
         loadSet()
     }
 
-    private fun authHeaderOrNull(): String? {
-        val token = sessionStore.token ?: return null
-        return "Bearer $token"
-    }
 
     private fun loadSet() {
         lifecycleScope.launch {
             try {
-                val auth = authHeaderOrNull() ?: return@launch
                 tvStatus.text = getString(R.string.loading)
 
                 val response = ApiClient.api.getLibrarySet(
-                    auth = auth,
+                    auth = sessionStore.authHeaderOrThrow(),
                     setId = setId
                 )
 
@@ -227,7 +221,7 @@ class LibrarySetActivity : AppCompatActivity() {
     private fun renameSet(newName: String) {
         lifecycleScope.launch {
             try {
-                val auth = authHeaderOrNull() ?: return@launch
+                val auth = sessionStore.authHeader() ?: return@launch
                 tvStatus.text = getString(R.string.renaming)
 
                 ApiClient.api.updateLibrarySet(
@@ -246,7 +240,7 @@ class LibrarySetActivity : AppCompatActivity() {
     private fun deleteSet() {
         lifecycleScope.launch {
             try {
-                val auth = authHeaderOrNull() ?: return@launch
+                val auth = sessionStore.authHeader() ?: return@launch
                 tvStatus.text = getString(R.string.deleting_set)
 
                 ApiClient.api.deleteLibrarySet(
@@ -264,7 +258,7 @@ class LibrarySetActivity : AppCompatActivity() {
     private fun removeItemFromSet(itemId: String) {
         lifecycleScope.launch {
             try {
-                val auth = authHeaderOrNull() ?: return@launch
+                val auth = sessionStore.authHeader() ?: return@launch
                 tvStatus.text = getString(R.string.removing_from_set)
 
                 ApiClient.api.removeItemFromSet(
@@ -283,7 +277,7 @@ class LibrarySetActivity : AppCompatActivity() {
     private fun deleteLibraryItem(itemId: String) {
         lifecycleScope.launch {
             try {
-                val auth = authHeaderOrNull() ?: return@launch
+                val auth = sessionStore.authHeader() ?: return@launch
                 tvStatus.text = getString(R.string.deleting_item)
 
                 ApiClient.api.deleteLibraryItem(

@@ -30,10 +30,8 @@ class LibraryActivity : AppCompatActivity() {
         val rv = findViewById<RecyclerView>(R.id.rvSets)
         val btnCreate = findViewById<Button>(R.id.btnCreateSet)
 
-        val token = sessionStore.token ?: ""
-        val auth = "Bearer $token"
 
-        adapter = LibrarySetsAdapter(auth) { set ->
+        adapter = LibrarySetsAdapter(sessionStore.authHeaderOrThrow()) { set ->
             val intent = Intent(this, LibrarySetActivity::class.java)
             intent.putExtra("setId", set.id)
             startActivity(intent)
@@ -59,8 +57,7 @@ class LibraryActivity : AppCompatActivity() {
             try {
                 tvStatus.text = getString(R.string.loading)
 
-                val token = sessionStore.token ?: return@launch
-                val resp = ApiClient.api.getLibrarySets("Bearer $token")
+                val resp = ApiClient.api.getLibrarySets(sessionStore.authHeaderOrThrow(),)
 
                 adapter.submit(resp.sets)
                 tvStatus.text = getString(R.string.sets_count, resp.sets.size)
@@ -74,10 +71,9 @@ class LibraryActivity : AppCompatActivity() {
     private fun createSimpleSet() {
         lifecycleScope.launch {
             try {
-                val token = sessionStore.token ?: return@launch
 
                 ApiClient.api.createLibrarySet(
-                    "Bearer $token",
+                    sessionStore.authHeaderOrThrow(),
                     com.an0obis.comuginator.api.CreateLibrarySetRequest(
                         name = getString(R.string.new_set)
                     )

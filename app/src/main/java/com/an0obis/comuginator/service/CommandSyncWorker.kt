@@ -16,13 +16,12 @@ class CommandSyncWorker(
     override suspend fun doWork(): Result {
         return try {
             val sessionStore = SessionStore(applicationContext)
-            val token = sessionStore.token ?: return Result.success()
 
             val response = ApiClient.api.getPendingCommands(
-                auth = "Bearer $token"
+                auth = sessionStore.authHeader() ?: return Result.failure()
             )
 
-            val items = response.items ?: emptyList()
+            val items = response.items
 
             for (command in items) {
                 Log.d("CommandSyncWorker", "command ${command.type}")
@@ -43,7 +42,7 @@ class CommandSyncWorker(
 
                 ApiClient.api.ackCommand(
                     commandId = command.id,
-                    auth = "Bearer $token"
+                    auth = sessionStore.authHeader()?: return Result.failure()
                 )
             }
 

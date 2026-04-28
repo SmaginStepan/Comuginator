@@ -33,7 +33,6 @@ class FamilyActivity : BaseActivity() {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var openingIncomingMessageId: String? = null
-    private lateinit var store: SessionStore
 
     private lateinit var tvFamily: TextView
     private lateinit var tvInvite: TextView
@@ -315,8 +314,7 @@ class FamilyActivity : BaseActivity() {
     }
 
     private fun authHeaderOrThrow(): String {
-        val token = store.token ?: error("No token in SessionStore")
-        return "Bearer $token"
+        return store.authHeader() ?: error("No token in SessionStore")
     }
 
     private fun setButtonsEnabled(enabled: Boolean) {

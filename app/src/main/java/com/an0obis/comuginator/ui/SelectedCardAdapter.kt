@@ -19,9 +19,12 @@ class SelectedCardAdapter(
     private val items = mutableListOf<AacCardDto>()
 
     fun submitItems(newItems: List<AacCardDto>) {
+        val oldSize = items.size
         items.clear()
+        if (oldSize > 0) notifyItemRangeRemoved(0, oldSize)
+
         items.addAll(newItems)
-        notifyDataSetChanged()
+        if (items.isNotEmpty()) notifyItemRangeInserted(0, items.size)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CardViewHolder {
@@ -43,15 +46,15 @@ class SelectedCardAdapter(
         fun bind(item: AacCardDto) {
             tvCardLabel.text = item.label
 
-            val token = SessionStore(itemView.context).token
+            val sessionStore = SessionStore(itemView.context)
 
             val requestBuilder = ImageRequest.Builder(itemView.context)
                 .data(item.imageUrl)
                 .target(ivCardImage)
                 .crossfade(true)
 
-            if (!token.isNullOrBlank() && item.source == "FAMILY_PHOTO") {
-                requestBuilder.addHeader("Authorization", "Bearer $token")
+            if (!sessionStore.isConnected() && item.source == "FAMILY_PHOTO") {
+                requestBuilder.addHeader("Authorization", sessionStore.authHeaderOrThrow())
             }
 
             ImageLoader(itemView.context).enqueue(requestBuilder.build())

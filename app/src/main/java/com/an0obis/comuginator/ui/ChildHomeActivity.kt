@@ -19,7 +19,6 @@ import com.an0obis.comuginator.ui.base.BaseActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import android.app.Activity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import com.an0obis.comuginator.api.CreateChildHomeNodeRequest
@@ -170,7 +169,7 @@ class ChildHomeActivity : BaseActivity() {
             try {
                 withContext(Dispatchers.IO) {
                     ApiClient.api.createChildHomeNode(
-                        auth = "Bearer $authToken",
+                        auth = sessionStore.authHeaderOrThrow(),
                         body = CreateChildHomeNodeRequest(
                             itemId = itemId,
                             parentId = currentParentId,
@@ -202,7 +201,7 @@ class ChildHomeActivity : BaseActivity() {
             try {
                 withContext(Dispatchers.IO) {
                     ApiClient.api.updateChildHomeNode(
-                        auth = "Bearer $authToken",
+                        auth = sessionStore.authHeaderOrThrow(),
                         nodeId = node.id,
                         body = UpdateChildHomeNodeRequest(
                             itemId = newItemId,
@@ -227,7 +226,7 @@ class ChildHomeActivity : BaseActivity() {
             try {
                 withContext(Dispatchers.IO) {
                     ApiClient.api.deleteChildHomeNode(
-                        auth = "Bearer $authToken",
+                        auth = sessionStore.authHeaderOrThrow(),
                         nodeId = node.id
                     )
                 }
@@ -271,7 +270,7 @@ class ChildHomeActivity : BaseActivity() {
             try {
                 val response = withContext(Dispatchers.IO) {
                     ApiClient.api.getChildHomeNodes(
-                        auth = "Bearer $authToken",
+                        auth = sessionStore.authHeaderOrThrow(),
                         parentId = parentId
                     )
                 }
@@ -296,7 +295,7 @@ class ChildHomeActivity : BaseActivity() {
             try {
                 val response = withContext(Dispatchers.IO) {
                     ApiClient.api.requestChildHomeAction(
-                        auth = "Bearer $authToken",
+                        auth = sessionStore.authHeaderOrThrow(),
                         nodeId = node.id
                     )
                 }

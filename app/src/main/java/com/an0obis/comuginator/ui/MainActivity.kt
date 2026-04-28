@@ -22,12 +22,11 @@ import java.util.UUID
 import androidx.appcompat.app.AlertDialog
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import androidx.core.view.isVisible
 
 class MainActivity : BaseActivity() {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-
-    private lateinit var store: SessionStore
 
     private lateinit var etUserName: EditText
     private lateinit var etDeviceName: EditText
@@ -78,7 +77,9 @@ class MainActivity : BaseActivity() {
         if (!savedDeviceName.isNullOrBlank()) {
             etDeviceName.setText(savedDeviceName)
         } else {
-            etDeviceName.setText("${android.os.Build.BRAND} ${android.os.Build.MODEL}")
+            etDeviceName.setText(
+                getString(R.string.default_device_name, android.os.Build.BRAND, android.os.Build.MODEL)
+            )
         }
 
         btnNext.setOnClickListener {
@@ -86,12 +87,12 @@ class MainActivity : BaseActivity() {
             val deviceName = etDeviceName.text.toString().trim()
 
             if (userName.isBlank()) {
-                tvStatus.text = "User name is required"
+                tvStatus.text = getString(R.string.user_name_required)
                 return@setOnClickListener
             }
 
             if (deviceName.isBlank()) {
-                tvStatus.text = "Device name is required"
+                tvStatus.text = getString(R.string.device_name_required)
                 return@setOnClickListener
             }
 
@@ -99,12 +100,11 @@ class MainActivity : BaseActivity() {
             store.deviceName = deviceName
 
             layoutChoice.visibility = View.VISIBLE
-            tvStatus.text = "Choose: create family group or join family group"
+            tvStatus.text = getString(R.string.choose_create_or_join)
         }
 
         btnShowJoin.setOnClickListener {
-            layoutJoin.visibility =
-                if (layoutJoin.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+            layoutJoin.isVisible = !layoutJoin.isVisible
         }
 
         btnCreateFamily.setOnClickListener {
@@ -137,7 +137,7 @@ class MainActivity : BaseActivity() {
     private fun showCreateFamilyDialog() {
         val inputLayout = TextInputLayout(this).apply {
             setPadding(48, 24, 48, 0)
-            hint = "Family name"
+            hint = getString(R.string.family_name)
         }
 
         val input = TextInputEditText(inputLayout.context).apply {
@@ -148,11 +148,11 @@ class MainActivity : BaseActivity() {
         inputLayout.addView(input)
 
         AlertDialog.Builder(this)
-            .setTitle("Create family")
-            .setMessage("Enter family name")
+            .setTitle(R.string.create_family)
+            .setMessage(R.string.enter_family_name)
             .setView(inputLayout)
-            .setNegativeButton("Cancel", null)
-            .setPositiveButton("Create") { _, _ ->
+            .setNegativeButton(R.string.cancel, null)
+            .setPositiveButton(R.string.create) { _, _ ->
                 val familyName = input.text?.toString()?.trim().orEmpty().ifBlank { null }
                 createFamily(familyName)
             }
@@ -164,19 +164,19 @@ class MainActivity : BaseActivity() {
         val deviceName = etDeviceName.text.toString().trim()
 
         if (userName.isBlank()) {
-            tvStatus.text = "User name is required"
+            tvStatus.text = getString(R.string.user_name_required)
             return
         }
 
         if (deviceName.isBlank()) {
-            tvStatus.text = "Device name is required"
+            tvStatus.text = getString(R.string.device_name_required)
             return
         }
 
         scope.launch {
             try {
                 runOnUiThread {
-                    tvStatus.text = "Creating family..."
+                    tvStatus.text = getString(R.string.creating_family)
                     setButtonsEnabled(false)
                 }
 
@@ -198,15 +198,19 @@ class MainActivity : BaseActivity() {
                 store.role = response.role
 
                 runOnUiThread {
-                    tvStatus.text =
-                        "Family created.\nFamily ID: ${response.familyId}\nRole: ${response.role}\nDevice ID: ${response.deviceId}"
+                    tvStatus.text = getString(
+                        R.string.family_created_details,
+                        response.familyId,
+                        response.role,
+                        response.deviceId
+                    )
                     setButtonsEnabled(true)
                     openFamilyScreen()
                 }
             } catch (e: Exception) {
                 if (handleUnauthorized(e)) return@launch
                 runOnUiThread {
-                    tvStatus.text = "Create family failed: ${e.message}"
+                    tvStatus.text = getString(R.string.create_family_failed, e.message)
                     setButtonsEnabled(true)
                 }
             }
@@ -219,24 +223,24 @@ class MainActivity : BaseActivity() {
         val code = etInviteCode.text.toString().trim().uppercase()
 
         if (userName.isBlank()) {
-            tvStatus.text = "User name is required"
+            tvStatus.text = getString(R.string.user_name_required)
             return
         }
 
         if (deviceName.isBlank()) {
-            tvStatus.text = "Device name is required"
+            tvStatus.text = getString(R.string.device_name_required)
             return
         }
 
         if (code.isBlank()) {
-            tvStatus.text = "Invite code is required"
+            tvStatus.text = getString(R.string.invite_code_required)
             return
         }
 
         scope.launch {
             try {
                 runOnUiThread {
-                    tvStatus.text = "Joining family..."
+                    tvStatus.text = getString(R.string.joining_family)
                     setButtonsEnabled(false)
                 }
 
@@ -258,15 +262,19 @@ class MainActivity : BaseActivity() {
                 store.role = response.role
 
                 runOnUiThread {
-                    tvStatus.text =
-                        "Joined family.\nFamily ID: ${response.familyId}\nRole: ${response.role}\nUser created: ${response.userCreated}"
+                    tvStatus.text = getString(
+                        R.string.joined_family_details,
+                        response.familyId,
+                        response.role,
+                        response.userCreated.toString()
+                    )
                     setButtonsEnabled(true)
                     openFamilyScreen()
                 }
             } catch (e: Exception) {
                 if (handleUnauthorized(e)) return@launch
                 runOnUiThread {
-                    tvStatus.text = "Join family failed: ${e.message}"
+                    tvStatus.text = getString(R.string.join_family_failed, e.message)
                     setButtonsEnabled(true)
                 }
             }

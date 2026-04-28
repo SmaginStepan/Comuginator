@@ -5,7 +5,6 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.an0obis.comuginator.api.AacMessageDetailsDto
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.Toast
@@ -48,7 +47,6 @@ class IncomingMessageActivity : BaseActivity() {
     private var messageId: String = ""
     private var commandId: String = ""
     private var ackSent = false
-    private var authToken: String = ""
     private var currentMessage: AacMessageDetailsDto? = null
     private var isSendingReply = false
     private var mode: String = MODE_MESSAGE
@@ -81,14 +79,6 @@ class IncomingMessageActivity : BaseActivity() {
     }
 
     override fun onInitialized() {
-        authToken = try {
-            requireToken()
-        } catch (e: Exception) {
-            Log.e("CommandSyncWorker", "failed", e)
-            Toast.makeText(this, "No auth token", Toast.LENGTH_SHORT).show()
-            finish()
-            return
-        }
 
         messageAdapter = SimpleCardAdapter { }
 
@@ -114,7 +104,7 @@ class IncomingMessageActivity : BaseActivity() {
         lifecycleScope.launch {
             try {
                 val message = withContext(Dispatchers.IO) {
-                    ApiClient.getAacMessage(authToken, messageId)
+                    ApiClient.getAacMessage(store.authHeaderOrThrow(), messageId)
                 }
 
                 currentMessage = message
@@ -123,7 +113,7 @@ class IncomingMessageActivity : BaseActivity() {
                 if (!ackSent && commandId.isNotBlank()) {
                     withContext(Dispatchers.IO) {
                         ApiClient.api.ackCommand(
-                            auth = "Bearer $authToken",
+                            auth = store.authHeaderOrThrow(),
                             commandId = commandId
                         )
                     }
@@ -192,7 +182,7 @@ class IncomingMessageActivity : BaseActivity() {
 
         val request = ImageRequest.Builder(this)
             .data(url)
-            .addHeader("Authorization", "Bearer $authToken")
+            .addHeader("Authorization", store.authHeaderOrThrow())
             .target(imageView)
             .build()
 
@@ -207,7 +197,7 @@ class IncomingMessageActivity : BaseActivity() {
             try {
                 withContext(Dispatchers.IO) {
                     ApiClient.replyToAacMessage(
-                        authToken = authToken,
+                        authToken = store.authHeaderOrThrow(),
                         messageId = messageId,
                         requestBody = SendAacReplyRequest(reply = card)
                     )

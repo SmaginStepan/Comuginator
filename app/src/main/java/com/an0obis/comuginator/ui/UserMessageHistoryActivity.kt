@@ -80,11 +80,6 @@ class UserMessageHistoryActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
-    private fun authHeaderOrThrow(): String {
-        val token = store.token ?: error("No token in SessionStore")
-        return "Bearer $token"
-    }
-
     private fun loadHistory() {
         progressBar.visibility = View.VISIBLE
         tvStatus.text = getString(R.string.loading_history)
@@ -92,14 +87,14 @@ class UserMessageHistoryActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val family = withContext(Dispatchers.IO) {
-                    ApiClient.api.getMyFamily(authHeaderOrThrow())
+                    ApiClient.api.getMyFamily(store.authHeaderOrThrow())
                 }
 
                 val myUserId = family.me.userId
 
                 val messagesResponse = withContext(Dispatchers.IO) {
                     ApiClient.api.getAacMessages(
-                        auth = authHeaderOrThrow(),
+                        auth = store.authHeaderOrThrow(),
                         scope = "all"
                     )
                 }
