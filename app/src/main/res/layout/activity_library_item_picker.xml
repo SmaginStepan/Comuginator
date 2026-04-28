@@ -70,7 +70,10 @@
                 android:id="@+id/etSearch"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/search_by_label" />
+                android:hint="@string/search_by_label"
+                android:inputType="text"
+                android:imeOptions="actionSearch"
+                android:autofillHints=""/>
 
             <AutoCompleteTextView
                 android:id="@+id/actSetFilter"
@@ -106,14 +109,18 @@
                 android:layout_width="160dp"
                 android:layout_height="160dp"
                 android:layout_gravity="center_horizontal"
-                android:scaleType="centerCrop" />
+                android:scaleType="centerCrop"
+                android:contentDescription="@null"/>
 
             <EditText
                 android:id="@+id/etLabel"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:hint="@string/title" />
+                android:inputType="text"
+                android:imeOptions="actionSearch"
+                android:hint="@string/title"
+                android:autofillHints=""/>
 
             <Button
                 android:id="@+id/btnConfirm"

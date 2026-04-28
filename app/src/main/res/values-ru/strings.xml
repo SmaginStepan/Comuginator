@@ -17,7 +17,6 @@
     <string name="status">Статус</string>
     <string name="refresh">Обновить</string>
     <string name="child_home">Экран ребёнка</string>
-    <string name="child_home_preview">Экран ребёнка</string>
     <string name="child_home_delete_node_title">Удалить элемент?</string>
     <string name="child_home_node_type_title">Тип элемента</string>
     <string name="child_home_create_failed">Не удалось создать: %1$s</string>
@@ -37,14 +36,12 @@
     <string name="repeat">Повторить</string>
     <string name="send_to_placeholder">Отправить кому…</string>
     <string name="send_to_name">Отправить: %1$s</string>
-    <string name="add_single_photo">Добавить одно фото</string>
     <string name="add_full_library_set">Добавить весь набор</string>
     <string name="choose_set">Выберите набор</string>
     <string name="no_library_sets">Нет наборов в библиотеке</string>
     <string name="set_is_empty">Набор пуст</string>
     <string name="added_items">Добавлено элементов: %1$d</string>
     <string name="load_sets_failed">Не удалось загрузить наборы: %1$s</string>
-    <string name="load_set_failed">Не удалось загрузить набор: %1$s</string>
     <string name="upload_failed">Не удалось загрузить: %1$s</string>
     <string name="photo_label">Подпись к фото</string>
     <string name="label">Подпись</string>
@@ -107,7 +104,6 @@
     <string name="new_message">Новое сообщение</string>
     <string name="new_reply">Новый ответ</string>
     <string name="tap_to_open">Нажмите, чтобы открыть</string>
-    <string name="messages_channel_name">Сообщения</string>
     <string name="system_setting_only_newer_android">Эта настройка нужна только в новых версиях Android</string>
     <string name="could_not_open_system_settings">Не удалось открыть системные настройки</string>
     <string name="loading_library">Загрузка библиотеки…</string>
@@ -125,12 +121,10 @@
     <string name="label_required">Нужна подпись</string>
     <string name="nothing_selected">Ничего не выбрано</string>
     <string name="save_failed">Не удалось сохранить: %1$s</string>
-    <string name="rename_set_title">Переименовать набор</string>
     <string name="failed_with_message">Ошибка: %1$s</string>
     <string name="changing_cover">Изменение обложки…</string>
     <string name="renaming">Переименование…</string>
     <string name="deleting_set">Удаление набора…</string>
-    <string name="removing_from_set">Удаление из набора…</string>
     <string name="deleting_item">Удаление элемента…</string>
     <string name="adding_item">Добавление элемента…</string>
     <string name="failed_to_load_message">Не удалось загрузить сообщение: %1$s</string>
@@ -160,7 +154,6 @@
     <string name="create_invite_failed">Не удалось создать приглашение: %1$s</string>
     <string name="no_name">(без имени)</string>
     <string name="family_prefix">Семья: %1$s</string>
-    <string name="me_prefix">Я: %1$s</string>
     <string name="sending_volume_command">Отправка команды громкости…</string>
     <string name="volume_command_sent">Команда громкости отправлена: %1$d</string>
     <string name="failed_send_volume_command">Не удалось отправить команду громкости: %1$s</string>
@@ -170,7 +163,6 @@
     <string name="volume_value">Громкость: %1$d%%</string>
     <string name="set_volume">Установить громкость:</string>
     <string name="check_incoming_failed">Не удалось проверить входящее сообщение: %1$s</string>
-    <string name="failed_load_message">Не удалось загрузить сообщение: %1$s</string>
     <string name="created_at">Создано: %1$s</string>
     <string name="reply_prefix">Ответ: %1$s</string>
     <string name="reply_empty">Ответ: —</string>
@@ -192,11 +184,9 @@
     <string name="create_family">Создать семью</string>
     <string name="enter_family_name">Введите название семьи</string>
     <string name="creating_family">Создание семьи…</string>
-    <string name="family_created">Семья создана…</string>
     <string name="create_family_failed">Не удалось создать семью: %1$s</string>
     <string name="invite_code_required">Нужен код приглашения</string>
     <string name="joining_family">Вступление в семью…</string>
-    <string name="joined_family">Вы вступили в семью…</string>
     <string name="join_family_failed">Не удалось вступить в семью: %1$s</string>
     <string name="no_target_user">Получатель не выбран</string>
     <string name="history_with">История с %1$s</string>

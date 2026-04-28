@@ -17,7 +17,6 @@
     <string name="loading">Loading&#8230;</string>
 
     <string name="child_home">Child Home</string>
-    <string name="child_home_preview">Child Home</string>
     <string name="child_home_delete_node_title">Delete node?</string>
     <string name="child_home_node_type_title">Node type</string>
     <string name="child_home_create_failed">Create failed: %1$s</string>
@@ -38,14 +37,12 @@
     <string name="send_to_placeholder">Send to &#8230;</string>
     <string name="send_to_name">Send to %1$s</string>
 
-    <string name="add_single_photo">Add single photo</string>
     <string name="add_full_library_set">Add full Library set</string>
     <string name="choose_set">Choose set</string>
     <string name="no_library_sets">No library sets</string>
     <string name="set_is_empty">Set is empty</string>
     <string name="added_items">Added %1$d items</string>
     <string name="load_sets_failed">Load sets failed: %1$s</string>
-    <string name="load_set_failed">Load set failed: %1$s</string>
     <string name="upload_failed">Upload failed: %1$s</string>
     <string name="photo_label">Photo label</string>
     <string name="label">Label</string>
@@ -133,12 +130,10 @@
     <string name="label_required">Label is required</string>
     <string name="nothing_selected">Nothing selected</string>
     <string name="save_failed">Save failed: %1$s</string>
-    <string name="rename_set_title">Rename set</string>
     <string name="failed_with_message">Failed: %1$s</string>
     <string name="changing_cover">Changing cover&#8230;</string>
     <string name="renaming">Renaming&#8230;</string>
     <string name="deleting_set">Deleting set&#8230;</string>
-    <string name="removing_from_set">Removing from set&#8230;</string>
     <string name="deleting_item">Deleting item&#8230;</string>
     <string name="adding_item">Adding item&#8230;</string>
     <string name="failed_to_load_message">Failed to message: %1$s</string>
@@ -177,7 +172,6 @@
 
     <string name="no_name">(no name)</string>
     <string name="family_prefix">Family: %1$s</string>
-    <string name="me_prefix">Me: %1$s</string>
 
     <string name="sending_volume_command">Sending volume command&#8230;</string>
     <string name="volume_command_sent">Volume command sent: %1$d</string>
@@ -195,7 +189,6 @@
     <string name="check_incoming_failed">Check incoming message failed: %1$s</string>
 
     <!-- IncomingMessageActivity -->
-    <string name="failed_load_message">Failed to load message: %1$s</string>
     <string name="created_at">Created: %1$s</string>
     <string name="reply_prefix">Reply: %1$s</string>
     <string name="reply_not_available">Reply is not available yet</string>
@@ -223,12 +216,11 @@
     <string name="enter_family_name">Enter family name</string>
 
     <string name="creating_family">Creating family&#8230;</string>
-    <string name="family_created">Family created&#8230;</string>
     <string name="create_family_failed">Create family failed: %1$s</string>
 
     <string name="invite_code_required">Invite code is required</string>
     <string name="joining_family">Joining family&#8230;</string>
-    <string name="joined_family">Joined family&#8230;</string>
+
     <string name="join_family_failed">Join family failed: %1$s</string>
 
     <!-- MessageHistoryAdapter -->
@@ -245,8 +237,6 @@
     <string name="failed_load_history">Failed to load history</string>
     <string name="failed_load_history_message">Failed to load history: %1$s</string>
 
-    <!-- NotificationHelper -->
-    <string name="messages_channel_name">Messages</string>
 
     <string name="language">Language</string>
     <string name="language_system">System</string>

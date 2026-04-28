@@ -28,9 +28,10 @@
             android:id="@+id/etUserName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Enter your name"
+            android:hint="@string/enter_your_name"
             android:inputType="textPersonName"
-            android:maxLines="1" />
+            android:maxLines="1"
+            android:autofillHints="name"/>
 
         <TextView
             android:layout_width="match_parent"
@@ -44,7 +45,8 @@
             android:layout_height="wrap_content"
             android:hint="@string/device_name"
             android:inputType="textCapWords"
-            android:maxLines="1" />
+            android:maxLines="1"
+            android:autofillHints=""/>
 
         <Button
             android:id="@+id/btnNext"
@@ -99,9 +101,10 @@
                     android:id="@+id/etInviteCode"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Enter invite code"
+                    android:hint="@string/invite_code"
                     android:inputType="textCapCharacters"
-                    android:maxLines="1" />
+                    android:maxLines="1"
+                    android:autofillHints=""/>
 
                 <Button
                     android:id="@+id/btnJoinFamily"

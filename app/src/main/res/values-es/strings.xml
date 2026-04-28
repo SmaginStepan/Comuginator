@@ -17,7 +17,6 @@
     <string name="status">Estado</string>
     <string name="refresh">Actualizar</string>
     <string name="child_home">Pantalla infantil</string>
-    <string name="child_home_preview">Pantalla infantil</string>
     <string name="child_home_delete_node_title">¿Eliminar elemento?</string>
     <string name="child_home_node_type_title">Tipo de elemento</string>
     <string name="child_home_create_failed">No se pudo crear: %1$s</string>
@@ -37,14 +36,12 @@
     <string name="repeat">Repetir</string>
     <string name="send_to_placeholder">Enviar a…</string>
     <string name="send_to_name">Enviar a %1$s</string>
-    <string name="add_single_photo">Añadir una foto</string>
     <string name="add_full_library_set">Añadir todo el conjunto</string>
     <string name="choose_set">Elegir conjunto</string>
     <string name="no_library_sets">No hay conjuntos en la biblioteca</string>
     <string name="set_is_empty">El conjunto está vacío</string>
     <string name="added_items">Elementos añadidos: %1$d</string>
     <string name="load_sets_failed">No se pudieron cargar los conjuntos: %1$s</string>
-    <string name="load_set_failed">No se pudo cargar el conjunto: %1$s</string>
     <string name="upload_failed">No se pudo subir: %1$s</string>
     <string name="photo_label">Etiqueta de la foto</string>
     <string name="label">Etiqueta</string>
@@ -107,7 +104,6 @@
     <string name="new_message">Nuevo mensaje</string>
     <string name="new_reply">Nueva respuesta</string>
     <string name="tap_to_open">Pulsa para abrir</string>
-    <string name="messages_channel_name">Mensajes</string>
     <string name="system_setting_only_newer_android">Este ajuste solo es necesario en versiones nuevas de Android</string>
     <string name="could_not_open_system_settings">No se pudieron abrir los ajustes del sistema</string>
     <string name="loading_library">Cargando biblioteca…</string>
@@ -125,12 +121,10 @@
     <string name="label_required">La etiqueta es obligatoria</string>
     <string name="nothing_selected">No se ha seleccionado nada</string>
     <string name="save_failed">No se pudo guardar: %1$s</string>
-    <string name="rename_set_title">Renombrar conjunto</string>
     <string name="failed_with_message">Error: %1$s</string>
     <string name="changing_cover">Cambiando portada…</string>
     <string name="renaming">Renombrando…</string>
     <string name="deleting_set">Eliminando conjunto…</string>
-    <string name="removing_from_set">Eliminando del conjunto…</string>
     <string name="deleting_item">Eliminando elemento…</string>
     <string name="adding_item">Añadiendo elemento…</string>
     <string name="failed_to_load_message">No se pudo cargar el mensaje: %1$s</string>
@@ -160,7 +154,6 @@
     <string name="create_invite_failed">No se pudo crear la invitación: %1$s</string>
     <string name="no_name">(sin nombre)</string>
     <string name="family_prefix">Familia: %1$s</string>
-    <string name="me_prefix">Yo: %1$s</string>
     <string name="sending_volume_command">Enviando comando de volumen…</string>
     <string name="volume_command_sent">Comando de volumen enviado: %1$d</string>
     <string name="failed_send_volume_command">No se pudo enviar el comando de volumen: %1$s</string>
@@ -170,7 +163,6 @@
     <string name="volume_value">Volumen: %1$d%%</string>
     <string name="set_volume">Ajustar volumen:</string>
     <string name="check_incoming_failed">No se pudo comprobar el mensaje entrante: %1$s</string>
-    <string name="failed_load_message">No se pudo cargar el mensaje: %1$s</string>
     <string name="created_at">Creado: %1$s</string>
     <string name="reply_prefix">Respuesta: %1$s</string>
     <string name="reply_empty">Respuesta: —</string>
@@ -192,11 +184,9 @@
     <string name="create_family">Crear familia</string>
     <string name="enter_family_name">Introduce el nombre de familia</string>
     <string name="creating_family">Creando familia…</string>
-    <string name="family_created">Familia creada…</string>
     <string name="create_family_failed">No se pudo crear la familia: %1$s</string>
     <string name="invite_code_required">El código de invitación es obligatorio</string>
     <string name="joining_family">Uniéndose a la familia…</string>
-    <string name="joined_family">Te has unido a la familia…</string>
     <string name="join_family_failed">No se pudo unir a la familia: %1$s</string>
     <string name="no_target_user">No hay destinatario</string>
     <string name="history_with">Historial con %1$s</string>

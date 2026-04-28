@@ -10,7 +10,8 @@
         android:id="@+id/ivImage"
         android:layout_width="56dp"
         android:layout_height="56dp"
-        android:scaleType="centerCrop" />
+        android:scaleType="centerCrop"
+        android:contentDescription="@null"/>
 
     <TextView
         android:id="@+id/tvLabel"

@@ -9,7 +9,8 @@
         android:layout_width="match_parent"
         android:layout_height="180dp"
         android:scaleType="centerCrop"
-        android:src="@android:drawable/ic_menu_gallery" />
+        android:src="@android:drawable/ic_menu_gallery"
+        android:contentDescription="@null"/>
 
     <TextView
         android:id="@+id/tvName"
