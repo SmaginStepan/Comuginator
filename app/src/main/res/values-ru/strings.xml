@@ -162,7 +162,7 @@
     <string name="family_prefix">Семья: %1$s</string>
     <string name="me_prefix">Я: %1$s</string>
     <string name="sending_volume_command">Отправка команды громкости…</string>
-    <string name="volume_command_sent">Команда громкости отправлена</string>
+    <string name="volume_command_sent">Команда громкости отправлена: %1$d</string>
     <string name="failed_send_volume_command">Не удалось отправить команду громкости: %1$s</string>
     <string name="updating_avatar">Обновление аватара…</string>
     <string name="avatar_updated">Аватар обновлён</string>
@@ -205,4 +205,8 @@
     <string name="loaded_messages">Загружено сообщений: %1$d</string>
     <string name="failed_load_history">Не удалось загрузить историю</string>
     <string name="failed_load_history_message">Не удалось загрузить историю: %1$s</string>
+
+    <string name="default_device_name">%1$s %2$s</string>
+    <string name="family_created_details">Семья создана.\nID семьи: %1$s\nРоль: %2$s\nID устройства: %3$s</string>
+    <string name="joined_family_details">Вы вступили в семью.\nID семьи: %1$s\nРоль: %2$s\nПользователь создан: %3$s</string>
 </resources>

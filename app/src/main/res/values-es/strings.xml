@@ -162,7 +162,7 @@
     <string name="family_prefix">Familia: %1$s</string>
     <string name="me_prefix">Yo: %1$s</string>
     <string name="sending_volume_command">Enviando comando de volumen…</string>
-    <string name="volume_command_sent">Comando de volumen enviado</string>
+    <string name="volume_command_sent">Comando de volumen enviado: %1$d</string>
     <string name="failed_send_volume_command">No se pudo enviar el comando de volumen: %1$s</string>
     <string name="updating_avatar">Actualizando avatar…</string>
     <string name="avatar_updated">Avatar actualizado</string>
@@ -205,4 +205,7 @@
     <string name="loaded_messages">Mensajes cargados: %1$d</string>
     <string name="failed_load_history">No se pudo cargar el historial</string>
     <string name="failed_load_history_message">No se pudo cargar el historial: %1$s</string>
+    <string name="default_device_name">%1$s %2$s</string>
+    <string name="family_created_details">Familia creada.\nID de familia: %1$s\nRol: %2$s\nID del dispositivo: %3$s</string>
+    <string name="joined_family_details">Te has unido a la familia.\nID de familia: %1$s\nRol: %2$s\nUsuario creado: %3$s</string>
 </resources>
