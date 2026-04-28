@@ -57,9 +57,9 @@ class LibraryActivity : AppCompatActivity() {
             try {
                 tvStatus.text = getString(R.string.loading)
 
-                val resp = ApiClient.api.getLibrarySets(sessionStore.authHeaderOrThrow(),)
+                val resp = ApiClient.api.getLibrarySets(sessionStore.authHeaderOrThrow())
 
-                adapter.submit(resp.sets)
+                adapter.submitItems(resp.sets)
                 tvStatus.text = getString(R.string.sets_count, resp.sets.size)
 
             } catch (e: Exception) {

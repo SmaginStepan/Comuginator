@@ -257,4 +257,6 @@
     <string name="default_device_name">%1$s %2$s</string>
     <string name="family_created_details">Family created.\nFamily ID: %1$s\nRole: %2$s\nDevice ID: %3$s</string>
     <string name="joined_family_details">Joined family.\nFamily ID: %1$s\nRole: %2$s\nUser created: %3$s</string>
+    <string name="enter_your_name">Enter your name</string>
+    <string name="enter_invite_code">Enter invite code</string>
 </resources>

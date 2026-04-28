@@ -11,37 +11,27 @@ import coil.imageLoader
 import coil.request.ImageRequest
 import com.an0obis.comuginator.R
 import com.an0obis.comuginator.api.AacCardDto
+import com.an0obis.comuginator.ui.base.BaseAdapter
+
+class LibraryItemsVH(v: View) : RecyclerView.ViewHolder(v) {
+    val ivImage = v.findViewById<ImageView>(R.id.ivImage)
+    val tvLabel = v.findViewById<TextView>(R.id.tvLabel)
+    val tvSource = v.findViewById<TextView>(R.id.tvSource)
+    val btnDeleteItem = v.findViewById<Button>(R.id.btnDeleteItem)
+}
 
 class LibraryItemsAdapter(
     private val authToken: String,
-    private val onRemoveFromSetClick: (AacCardDto) -> Unit,
     private val onDeleteItemClick: (AacCardDto) -> Unit
-) : RecyclerView.Adapter<LibraryItemsAdapter.VH>() {
+) : BaseAdapter<AacCardDto, LibraryItemsVH>() {
 
-    private val items = mutableListOf<AacCardDto>()
-
-    fun submit(list: List<AacCardDto>) {
-        items.clear()
-        items.addAll(list)
-        notifyDataSetChanged()
-    }
-
-    inner class VH(v: View) : RecyclerView.ViewHolder(v) {
-        val ivImage = v.findViewById<ImageView>(R.id.ivImage)
-        val tvLabel = v.findViewById<TextView>(R.id.tvLabel)
-        val tvSource = v.findViewById<TextView>(R.id.tvSource)
-        val btnDeleteItem = v.findViewById<Button>(R.id.btnDeleteItem)
-    }
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LibraryItemsVH {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_library_card, parent, false)
-        return VH(view)
+        return LibraryItemsVH(view)
     }
 
-    override fun getItemCount(): Int = items.size
-
-    override fun onBindViewHolder(holder: VH, position: Int) {
+    override fun onBindViewHolder(holder: LibraryItemsVH, position: Int) {
         val item = items[position]
 
         holder.tvLabel.text = item.label

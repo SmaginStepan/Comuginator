@@ -17,7 +17,8 @@
             android:layout_height="48dp"
             android:layout_marginEnd="12dp"
             android:scaleType="centerCrop"
-            android:src="@android:drawable/ic_menu_gallery" />
+            android:src="@android:drawable/ic_menu_gallery"
+            android:contentDescription="@null"/>
 
         <TextView
             android:id="@+id/tvUserHeader"
@@ -32,7 +33,7 @@
             android:id="@+id/btnUserMore"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:text="@string/more" />`
+            android:text="@string/more" />
     </LinearLayout>
 
     <LinearLayout
@@ -46,7 +47,8 @@
             android:layout_width="0dp"
             android:layout_height="56dp"
             android:layout_weight="1"
-            android:text="@string/send" />
+            android:text="@string/send"
+            style="?android:attr/buttonBarButtonStyle" />
 
         <Button
             android:id="@+id/btnHistory"
@@ -55,7 +57,8 @@
             android:layout_marginStart="8dp"
             android:layout_weight="1"
             android:maxLines="1"
-            android:text="@string/history" />
+            android:text="@string/history"
+            style="?android:attr/buttonBarButtonStyle" />
     </LinearLayout>
 
 </LinearLayout>

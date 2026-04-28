@@ -92,9 +92,6 @@ class LibrarySetActivity : AppCompatActivity() {
 
         adapter = LibraryItemsAdapter(
             auth,
-            onRemoveFromSetClick = { item ->
-                removeItemFromSet(item.id)
-            },
             onDeleteItemClick = { item ->
                 deleteLibraryItem(item.id)
             }
@@ -192,7 +189,7 @@ class LibrarySetActivity : AppCompatActivity() {
                 tvName.text = set.name
                 tvStatus.text = getString(R.string.items_count_plain, set.items.size)
                 ivCover.load(set.cover?.imageUrl)
-                adapter.submit(set.items)
+                adapter.submitItems(set.items)
 
             } catch (e: Exception) {
                 tvStatus.text = getString(R.string.failed_with_message, e.message)
@@ -249,25 +246,6 @@ class LibrarySetActivity : AppCompatActivity() {
                 )
 
                 finish()
-            } catch (e: Exception) {
-                tvStatus.text = getString(R.string.failed_with_message, e.message)
-            }
-        }
-    }
-
-    private fun removeItemFromSet(itemId: String) {
-        lifecycleScope.launch {
-            try {
-                val auth = sessionStore.authHeader() ?: return@launch
-                tvStatus.text = getString(R.string.removing_from_set)
-
-                ApiClient.api.removeItemFromSet(
-                    auth = auth,
-                    setId = setId,
-                    itemId = itemId
-                )
-
-                loadSet()
             } catch (e: Exception) {
                 tvStatus.text = getString(R.string.failed_with_message, e.message)
             }

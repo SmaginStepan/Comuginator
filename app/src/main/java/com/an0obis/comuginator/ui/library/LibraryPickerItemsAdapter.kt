@@ -10,21 +10,14 @@ import androidx.recyclerview.widget.RecyclerView
 import coil.imageLoader
 import coil.request.ImageRequest
 import com.an0obis.comuginator.R
+import com.an0obis.comuginator.ui.base.BaseAdapter
 
 class LibraryPickerItemsAdapter(
     private val authToken: String,
     private val onClick: (AacCardDto) -> Unit
-) : RecyclerView.Adapter<LibraryPickerItemsAdapter.VH>() {
+) : BaseAdapter<AacCardDto, LibraryPickerItemsAdapter.VH>() {
 
-    private val items = mutableListOf<AacCardDto>()
-
-    fun submit(list: List<AacCardDto>) {
-        items.clear()
-        items.addAll(list)
-        notifyDataSetChanged()
-    }
-
-    inner class VH(v: View) : RecyclerView.ViewHolder(v) {
+    class VH(v: View) : RecyclerView.ViewHolder(v) {
         val ivImage = v.findViewById<ImageView>(R.id.ivImage)
         val tvLabel = v.findViewById<TextView>(R.id.tvLabel)
     }

@@ -359,7 +359,7 @@ class LibraryItemPickerActivity : BaseActivity() {
             query.isBlank() || item.label.contains(query, ignoreCase = true)
         }
 
-        itemsAdapter.submit(currentVisibleItems)
+        itemsAdapter.submitItems(currentVisibleItems)
         tvStatus.text = getString(R.string.items_count_plain, currentVisibleItems.size)
     }
 

@@ -11,21 +11,11 @@ import com.an0obis.comuginator.api.AacCardDto
 import coil.ImageLoader
 import coil.request.ImageRequest
 import com.an0obis.comuginator.storage.SessionStore
+import com.an0obis.comuginator.ui.base.BaseAdapter
 
 class SimpleCardAdapter(
     private val onClick: (AacCardDto) -> Unit
-) : RecyclerView.Adapter<SimpleCardAdapter.CardViewHolder>() {
-
-    private val items = mutableListOf<AacCardDto>()
-
-    fun submitItems(newItems: List<AacCardDto>) {
-        val oldSize = items.size
-        items.clear()
-        if (oldSize > 0) notifyItemRangeRemoved(0, oldSize)
-
-        items.addAll(newItems)
-        if (items.isNotEmpty()) notifyItemRangeInserted(0, items.size)
-    }
+) : BaseAdapter<AacCardDto, SimpleCardAdapter.CardViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CardViewHolder {
         val view = LayoutInflater.from(parent.context)

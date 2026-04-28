@@ -31,7 +31,7 @@ object ApiClient {
             .create(ApiService::class.java)
     }
 
-    suspend fun getAacMessage(authToken: String, messageId: String): AacMessageDetailsDto {
+    fun getAacMessage(authToken: String, messageId: String): AacMessageDetailsDto {
         val request = Request.Builder()
             .url("${BASE_URL}v1/messages/aac/$messageId")
             .header("Authorization", "Bearer $authToken")
@@ -48,7 +48,7 @@ object ApiClient {
         }
     }
 
-    suspend fun replyToAacMessage(
+    fun replyToAacMessage(
         authToken: String,
         messageId: String,
         requestBody: SendAacReplyRequest

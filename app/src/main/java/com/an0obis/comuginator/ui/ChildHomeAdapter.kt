@@ -8,6 +8,7 @@ import coil.Coil
 import coil.request.ImageRequest
 import com.an0obis.comuginator.R
 import com.an0obis.comuginator.api.ChildHomeNodeDto
+import com.an0obis.comuginator.ui.base.BaseAdapter
 
 class ChildHomeAdapter(
     private val authToken: String,
@@ -15,15 +16,7 @@ class ChildHomeAdapter(
     private val onNodeClick: (ChildHomeNodeDto) -> Unit,
     private val onEditClick: (ChildHomeNodeDto) -> Unit,
     private val onDeleteClick: (ChildHomeNodeDto) -> Unit
-) : RecyclerView.Adapter<ChildHomeAdapter.VH>() {
-
-    private val items = mutableListOf<ChildHomeNodeDto>()
-
-    fun submitItems(newItems: List<ChildHomeNodeDto>) {
-        items.clear()
-        items.addAll(newItems)
-        notifyDataSetChanged()
-    }
+) : BaseAdapter<ChildHomeNodeDto, ChildHomeAdapter.VH>() {
 
     class VH(root: ViewGroup) : RecyclerView.ViewHolder(root) {
         val ivNode: android.widget.ImageView = root.findViewById(R.id.ivNode)

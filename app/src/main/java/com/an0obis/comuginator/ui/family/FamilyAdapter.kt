@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import coil.imageLoader
 import coil.request.ImageRequest
 import com.an0obis.comuginator.R
+import com.an0obis.comuginator.ui.base.BaseAdapter
 
 class FamilyAdapter(
     private val isParentViewer: Boolean,
@@ -22,15 +23,8 @@ class FamilyAdapter(
     private val onRenameUserClick: (userId: String, userName: String) -> Unit,
     private val onRenameDeviceClick: (deviceId: String, deviceName: String) -> Unit,
     private val onSetAvatarClick: (userId: String) -> Unit,
-) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+) : BaseAdapter<FamilyListItem, RecyclerView.ViewHolder>() {
 
-    private val items = mutableListOf<FamilyListItem>()
-
-    fun submitItems(newItems: List<FamilyListItem>) {
-        items.clear()
-        items.addAll(newItems)
-        notifyDataSetChanged()
-    }
 
     override fun getItemViewType(position: Int): Int {
         return when (items[position]) {

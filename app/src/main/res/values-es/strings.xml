@@ -208,4 +208,6 @@
     <string name="default_device_name">%1$s %2$s</string>
     <string name="family_created_details">Familia creada.\nID de familia: %1$s\nRol: %2$s\nID del dispositivo: %3$s</string>
     <string name="joined_family_details">Te has unido a la familia.\nID de familia: %1$s\nRol: %2$s\nUsuario creado: %3$s</string>
+    <string name="enter_your_name">Introduce tu nombre</string>
+    <string name="enter_invite_code">Introduce el código de invitación</string>
 </resources>

@@ -10,21 +10,15 @@ import coil.imageLoader
 import coil.request.ImageRequest
 import com.an0obis.comuginator.R
 import com.an0obis.comuginator.api.LibrarySetDto
+import com.an0obis.comuginator.ui.base.BaseAdapter
 
 class LibrarySetsAdapter(
     private val authToken: String,
     private val onClick: (LibrarySetDto) -> Unit
-) : RecyclerView.Adapter<LibrarySetsAdapter.VH>() {
+) : BaseAdapter<LibrarySetDto, LibrarySetsAdapter.VH>() {
 
-    private val items = mutableListOf<LibrarySetDto>()
 
-    fun submit(list: List<LibrarySetDto>) {
-        items.clear()
-        items.addAll(list)
-        notifyDataSetChanged()
-    }
-
-    inner class VH(v: View) : RecyclerView.ViewHolder(v) {
+    class VH(v: View) : RecyclerView.ViewHolder(v) {
         val ivCover = v.findViewById<ImageView>(R.id.ivCover)
         val tvName = v.findViewById<TextView>(R.id.tvName)
         val tvCount = v.findViewById<TextView>(R.id.tvCount)
@@ -42,7 +36,10 @@ class LibrarySetsAdapter(
         val item = items[position]
 
         holder.tvName.text = item.name
-        holder.tvCount.text = "${item.itemsCount} items"
+        holder.tvCount.text = holder.itemView.context.getString(
+            R.string.items_count,
+            item.itemsCount
+        )
 
         val url = item.cover?.imageUrl
 
