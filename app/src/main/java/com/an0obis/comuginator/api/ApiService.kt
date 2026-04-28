@@ -63,7 +63,8 @@ interface ApiService {
     @GET("/v1/arasaac/search")
     suspend fun searchArasaac(
         @Header("Authorization") auth: String,
-        @Query("q") query: String
+        @Query("q") query: String,
+        @Query("lang") lang: String
     ): ArasaacSearchResponse
 
     @POST("/v1/messages/aac")
@@ -88,6 +89,7 @@ interface ApiService {
         @Part("label") label: RequestBody
     ): UploadFamilyPhotoResponse
 
+    @Suppress("unused")
     @GET("/v1/library/items")
     suspend fun getFamilyPhotos(
         @Header("Authorization") auth: String,
@@ -170,6 +172,7 @@ interface ApiService {
         @Path("itemId") itemId: String
     ): LibrarySetResponse
 
+    @Suppress("unused")
     @POST("/v1/library/sets/{setId}/move-items")
     suspend fun moveItemsToAnotherSet(
         @Header("Authorization") auth: String,
@@ -183,6 +186,7 @@ interface ApiService {
         @Body body: CreateArasaacLibraryItemRequest
     ): LibraryItemResponse
 
+    @Suppress("unused")
     @PATCH("/v1/users/me/avatar")
     suspend fun updateMyAvatar(
         @Header("Authorization") auth: String,

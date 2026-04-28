@@ -1,7 +1,6 @@
 package com.an0obis.comuginator.ui.base
 
 import android.Manifest
-import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
@@ -11,7 +10,9 @@ import android.provider.Settings
 import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
+import androidx.core.os.LocaleListCompat
 import com.an0obis.comuginator.service.CommandSyncScheduler
 import com.an0obis.comuginator.service.FcmTokenSyncScheduler
 import com.an0obis.comuginator.service.PowerConnectionReceiver
@@ -23,21 +24,42 @@ import com.an0obis.comuginator.ui.IncomingMessageActivity
 import com.an0obis.comuginator.ui.MainActivity
 import com.google.firebase.messaging.FirebaseMessaging
 import retrofit2.HttpException
+import androidx.core.net.toUri
 
 open class BaseActivity: AppCompatActivity() {
-    private lateinit var store: SessionStore
+    protected lateinit var store: SessionStore
     private var initialized = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        applyAppLanguage()
         super.onCreate(savedInstanceState)
 
         store = SessionStore(this)
     }
 
-    protected fun requireToken(): String {
-        return store.token ?: error("No token in SessionStore")
+    private fun applyAppLanguage() {
+        val lang = SessionStore(this).appLanguage
+
+        val locales = if (lang.isNullOrBlank() || lang == "system") {
+            LocaleListCompat.getEmptyLocaleList()
+        } else {
+            LocaleListCompat.forLanguageTags(lang)
+        }
+
+        AppCompatDelegate.setApplicationLocales(locales)
     }
 
+    protected fun getArasaacLang(): String {
+        val lang = SessionStore(this).appLanguage
+            ?.takeIf { it != "system" }
+            ?: java.util.Locale.getDefault().language
+
+        return when (lang.lowercase()) {
+            "es" -> "es"
+            "ru" -> "ru"
+            else -> "en"
+        }
+    }
     protected fun ensureInitialized() {
         if (initialized) return
         if (!ensureNotificationsPermission()) return
@@ -96,7 +118,7 @@ open class BaseActivity: AppCompatActivity() {
             Log.d("MainActivity", "POST_NOTIFICATIONS granted=$granted")
 
             if (granted) ensureInitialized()
-            else openNotifSettings(this)
+            else openNotificationSettings()
         }
 
     private fun ensureNotificationsPermission(): Boolean {
@@ -126,11 +148,17 @@ open class BaseActivity: AppCompatActivity() {
         return false
     }
 
-    private fun openNotifSettings(ctx: Context) {
-        val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
-            putExtra(Settings.EXTRA_APP_PACKAGE, ctx.packageName)
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    private fun openNotificationSettings() {
+        val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+            }
+        } else {
+            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                data = "package:$packageName".toUri()
+            }
         }
-        ctx.startActivity(intent)
+
+        startActivity(intent)
     }
 }

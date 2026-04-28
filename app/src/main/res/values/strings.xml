@@ -8,6 +8,7 @@
     <string name="cancel">Cancel</string>
     <string name="send">Send</string>
     <string name="search">Search</string>
+    <string name="create">Create</string>
     <string name="save">Save</string>
     <string name="apply">Apply</string>
     <string name="history">History</string>
@@ -246,5 +247,11 @@
 
     <!-- NotificationHelper -->
     <string name="messages_channel_name">Messages</string>
+
+    <string name="language">Language</string>
+    <string name="language_system">System</string>
+    <string name="language_english">English</string>
+    <string name="language_spanish">Español</string>
+    <string name="language_russian">Русский</string>
 
 </resources>

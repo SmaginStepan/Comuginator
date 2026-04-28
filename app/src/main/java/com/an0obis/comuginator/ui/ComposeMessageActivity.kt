@@ -5,7 +5,6 @@ import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doAfterTextChanged
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -38,8 +37,9 @@ import androidx.activity.viewModels
 import android.view.KeyEvent
 import androidx.lifecycle.lifecycleScope
 import android.view.inputmethod.InputMethodManager
+import com.an0obis.comuginator.ui.base.BaseActivity
 
-class ComposeMessageActivity : AppCompatActivity() {
+class ComposeMessageActivity : BaseActivity() {
 
     companion object {
         const val EXTRA_INITIAL_MESSAGE_CARDS = "initial_message_cards"
@@ -57,7 +57,6 @@ class ComposeMessageActivity : AppCompatActivity() {
                 askPhotoLabelAndUpload(uri)
             }
         }
-    private lateinit var store: SessionStore
     private lateinit var tvTarget: TextView
     private lateinit var tvMessageHeader: TextView
     private lateinit var tvRepliesHeader: TextView
@@ -242,11 +241,6 @@ class ComposeMessageActivity : AppCompatActivity() {
         }
     }
 
-    private fun authHeaderOrThrow(): String {
-        val token = store.token ?: error("No token in SessionStore")
-        return "Bearer $token"
-    }
-
     private fun updateModeUi() {
         val activeColor = 0xFF4444FF.toInt()
         val inactiveColor = 0x00000000
@@ -276,8 +270,9 @@ class ComposeMessageActivity : AppCompatActivity() {
         scope.launch {
             try {
                 val response = ApiClient.api.searchArasaac(
-                    auth = authHeaderOrThrow(),
-                    query = "ok"
+                    auth = store.authHeaderOrThrow(),
+                    query = "yes",
+                    lang = "en"
                 )
 
                 val okCard = response.items.firstOrNull()
@@ -298,10 +293,11 @@ class ComposeMessageActivity : AppCompatActivity() {
     private suspend fun runSearch(query: String) {
         try {
             vm.lastSearchQuery = query
-
+            val lang = getArasaacLang()
             val response = ApiClient.api.searchArasaac(
-                auth = authHeaderOrThrow(),
-                query = query
+                auth = store.authHeaderOrThrow(),
+                query = query,
+                lang = lang
             )
 
             runOnUiThread {
@@ -318,7 +314,7 @@ class ComposeMessageActivity : AppCompatActivity() {
         scope.launch {
             try {
                 ApiClient.api.sendAacMessage(
-                    auth = authHeaderOrThrow(),
+                    auth = store.authHeaderOrThrow(),
                     body = SendAacMessageRequest(
                         targetUserId = targetUserId,
                         cards = vm.selectedCards.map {
@@ -354,7 +350,7 @@ class ComposeMessageActivity : AppCompatActivity() {
     private fun showChooseLibrarySetDialog() {
         scope.launch {
             try {
-                val auth = authHeaderOrThrow()
+                val auth = store.authHeaderOrThrow()
                 val response = ApiClient.api.getLibrarySets(auth)
                 val sets = response.sets
 
@@ -387,7 +383,7 @@ class ComposeMessageActivity : AppCompatActivity() {
     private fun addAllItemsFromSet(setId: String) {
         scope.launch {
             try {
-                val auth = authHeaderOrThrow()
+                val auth = store.authHeaderOrThrow()
                 val response = ApiClient.api.getLibrarySet(auth, setId)
                 val items = response.set.items
 
@@ -482,7 +478,7 @@ class ComposeMessageActivity : AppCompatActivity() {
                 val labelBody = label.toRequestBody("text/plain".toMediaTypeOrNull())
 
                 val response = ApiClient.api.uploadFamilyPhoto(
-                    auth = authHeaderOrThrow(),
+                    auth = store.authHeaderOrThrow(),
                     file = filePart,
                     label = labelBody
                 )

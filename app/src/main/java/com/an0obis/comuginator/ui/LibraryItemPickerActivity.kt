@@ -17,7 +17,6 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
@@ -41,10 +40,11 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import coil.imageLoader
+import com.an0obis.comuginator.ui.base.BaseActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class LibraryItemPickerActivity : AppCompatActivity() {
+class LibraryItemPickerActivity : BaseActivity() {
 
     enum class TargetMode {
         USER_AVATAR,
@@ -411,7 +411,7 @@ class LibraryItemPickerActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 tvStatus.text = getString(R.string.searching_arasaac)
-                val response = ApiClient.api.searchArasaac(authHeaderOrThrow(), query)
+                val response = ApiClient.api.searchArasaac(authHeaderOrThrow(), query, lang = getArasaacLang())
                 val results = response.items
 
                 if (results.isEmpty()) {
@@ -534,8 +534,7 @@ class LibraryItemPickerActivity : AppCompatActivity() {
     }
 
     private fun authHeaderOrThrow(): String {
-        val token = sessionStore.token ?: error("No token")
-        return "Bearer $token"
+        return sessionStore.authHeader()?: error("No token")
     }
 
     private fun extractDisplayName(uri: Uri): String? {
