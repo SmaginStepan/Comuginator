@@ -43,7 +43,7 @@ object NotificationHelper {
         )
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setSmallIcon(R.drawable.ic_notification_comuginator)
             .setContentTitle(senderName ?: context.getString(R.string.new_message))
             .setContentText(context.getString(R.string.tap_to_open))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -86,7 +86,7 @@ object NotificationHelper {
         val settings = SettingsStore(context)
 
         val builder  = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setSmallIcon(R.drawable.ic_notification_comuginator)
             .setContentTitle(context.getString(R.string.new_reply))
             .setContentText(context.getString(R.string.tap_to_open))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
