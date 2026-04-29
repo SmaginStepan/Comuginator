@@ -215,6 +215,6 @@
     <string name="family_created_details">Familia creada.\nID de familia: %1$s\nRol: %2$s\nID del dispositivo: %3$s</string>
     <string name="joined_family_details">Te has unido a la familia.\nID de familia: %1$s\nRol: %2$s\nUsuario creado: %3$s</string>
     <string name="enter_your_name">Introduce tu nombre</string>
-    <string name="start_preview">Запустить превью</string>
-    <string name="stop_preview">Остановить превью</string>
+    <string name="start_preview">Iniciar vista previa</string>
+    <string name="stop_preview">Detener vista previa</string>
 </resources>
