@@ -351,6 +351,7 @@ data class ChildHomeNodeDto(
     val targetMode: String,
     val blinkEnabled: Boolean,
     val blinkSeconds: Int,
+    val labelOverride: String?,
     val item: ChildHomeNodeItemDto?,
     val targets: List<ChildHomeTargetDto> = emptyList()
 )
@@ -386,7 +387,8 @@ data class UpdateChildHomeNodeRequest(
     val targetMode: String? = null,
     val targetUserIds: List<String>? = null,
     val blinkEnabled: Boolean? = null,
-    val blinkSeconds: Int? = null
+    val blinkSeconds: Int? = null,
+    val labelOverride: String? = null
 )
 
 data class ChildHomeNodeResponse(

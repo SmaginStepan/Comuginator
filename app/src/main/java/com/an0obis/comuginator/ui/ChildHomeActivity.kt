@@ -5,6 +5,7 @@ import android.view.View
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
 import android.widget.Button
+import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
@@ -85,6 +86,7 @@ class ChildHomeActivity : BaseActivity() {
             authToken = authToken,
             isEditorMode = isEditorMode,
             onNodeClick = { node -> onNodeClicked(node) },
+            onRenameClick = { node -> openRenameNode(node) },
             onEditClick = { node -> openEditNode(node) },
             onDeleteClick = { node -> confirmDeleteNode(node) }
         )
@@ -112,6 +114,51 @@ class ChildHomeActivity : BaseActivity() {
         )
     }
 
+    private fun openRenameNode(node: ChildHomeNodeDto) {
+        val input = EditText(this)
+        input.setText(node.labelOverride ?: node.item?.label.orEmpty())
+        input.setSelection(input.text.length)
+
+        AlertDialog.Builder(this)
+            .setTitle(R.string.rename)
+            .setView(input)
+            .setNegativeButton(getString(R.string.cancel), null)
+            .setPositiveButton(getString(R.string.save)) { _, _ ->
+                val newName = input.text?.toString()?.trim().orEmpty()
+                if (newName.isNotEmpty()) {
+                    renameNode(node, newName)
+                }
+            }
+            .show()
+    }
+
+    private fun renameNode(node: ChildHomeNodeDto, newName: String) {
+        progress.visibility = View.VISIBLE
+
+        lifecycleScope.launch {
+            try {
+                withContext(Dispatchers.IO) {
+                    ApiClient.api.updateChildHomeNode(
+                        auth = sessionStore.authHeaderOrThrow(),
+                        nodeId = node.id,
+                        body = UpdateChildHomeNodeRequest(
+                            labelOverride = newName
+                        )
+                    )
+                }
+
+                loadNodes(currentParentId)
+            } catch (e: Exception) {
+                Toast.makeText(
+                    this@ChildHomeActivity,
+                    getString(R.string.child_home_update_failed, e.message),
+                    Toast.LENGTH_LONG
+                ).show()
+            } finally {
+                progress.visibility = View.GONE
+            }
+        }
+    }
     private fun openEditNode(node: ChildHomeNodeDto) {
         pendingEditNode = node
         pickItemLauncher.launch(

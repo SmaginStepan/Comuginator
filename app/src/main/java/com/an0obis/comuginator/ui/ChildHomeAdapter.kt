@@ -3,6 +3,7 @@ package com.an0obis.comuginator.ui
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
 import coil.Coil
 import coil.request.ImageRequest
@@ -14,6 +15,7 @@ class ChildHomeAdapter(
     private val authToken: String,
     private val isEditorMode: Boolean,
     private val onNodeClick: (ChildHomeNodeDto) -> Unit,
+    private val onRenameClick: (ChildHomeNodeDto) -> Unit,
     private val onEditClick: (ChildHomeNodeDto) -> Unit,
     private val onDeleteClick: (ChildHomeNodeDto) -> Unit
 ) : BaseAdapter<ChildHomeNodeDto, ChildHomeAdapter.VH>() {
@@ -22,8 +24,7 @@ class ChildHomeAdapter(
         val ivNode: android.widget.ImageView = root.findViewById(R.id.ivNode)
         val tvNodeLabel: android.widget.TextView = root.findViewById(R.id.tvNodeLabel)
         val rootNode: View = root.findViewById(R.id.rootNode)
-        val btnEdit: android.widget.Button = root.findViewById(R.id.btnEditNode)
-        val btnDelete: android.widget.Button = root.findViewById(R.id.btnDeleteNode)
+        val btnChildMore: android.widget.Button = root.findViewById(R.id.btnChildMore)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
@@ -37,10 +38,38 @@ class ChildHomeAdapter(
     override fun onBindViewHolder(holder: VH, position: Int) {
         val node = items[position]
 
-        holder.tvNodeLabel.text = node.item?.label ?: node.type
+        holder.tvNodeLabel.text =
+            node.labelOverride ?: node.item?.label ?: node.type
+        holder.btnChildMore.visibility = if (isEditorMode) View.VISIBLE else View.GONE
+        holder.btnChildMore.setOnClickListener { view ->
+            val popup = PopupMenu(view.context, view)
+            val renameId = 1
+            val editId = 2
+            val deleteId = 3
+            popup.menu.add(0, renameId, 0, view.context.getString(R.string.rename))
+            popup.menu.add(0, editId, 0, view.context.getString(R.string.edit))
+            popup.menu.add(0, deleteId, 1,view.context.getString(R.string.delete))
 
-        holder.btnEdit.visibility = if (isEditorMode) View.VISIBLE else View.GONE
-        holder.btnDelete.visibility = if (isEditorMode) View.VISIBLE else View.GONE
+            popup.setOnMenuItemClickListener { btn ->
+                when (btn.itemId) {
+                    renameId  -> {
+                        onRenameClick(node)
+                        true
+                    }
+                    editId  -> {
+                        onEditClick(node)
+                        true
+                    }
+                    deleteId -> {
+                        onDeleteClick(node)
+                        true
+                    }
+                    else -> false
+                }
+            }
+
+            popup.show()
+        }
 
         val imageUrl = node.item?.imageUrl
         if (!imageUrl.isNullOrBlank()) {
@@ -57,14 +86,6 @@ class ChildHomeAdapter(
 
         holder.rootNode.setOnClickListener {
             onNodeClick(node)
-        }
-
-        holder.btnEdit.setOnClickListener {
-            onEditClick(node)
-        }
-
-        holder.btnDelete.setOnClickListener {
-            onDeleteClick(node)
         }
     }
 }
