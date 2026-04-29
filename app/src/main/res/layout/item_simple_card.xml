@@ -4,8 +4,7 @@
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
     android:orientation="vertical"
-    android:padding="8dp"
-    android:background="#2F2F2F">
+    android:padding="8dp">
 
     <ImageView
         android:id="@+id/ivCardImage"

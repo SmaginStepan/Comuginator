@@ -4,7 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
-    android:background="#EEEEEE"
     android:gravity="center"
     android:orientation="vertical"
     android:padding="12dp">
@@ -28,6 +27,7 @@
 
     <LinearLayout
         android:id="@+id/editorButtons"
+        style="?android:attr/buttonBarStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
@@ -36,12 +36,14 @@
 
         <Button
             android:id="@+id/btnEditNode"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/edit" />
 
         <Button
             android:id="@+id/btnDeleteNode"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
