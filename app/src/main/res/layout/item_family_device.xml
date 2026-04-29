@@ -16,6 +16,7 @@
             android:id="@+id/tvDeviceName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            style="@style/ComuginatorText.Section"
             android:text="@string/device_name"
             android:textStyle="bold" />
 
@@ -23,6 +24,7 @@
             android:id="@+id/tvDeviceMeta"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            style="@style/ComuginatorText.Small"
             android:text="@string/battery_meta_placeholder" />
     </LinearLayout>
 
@@ -30,11 +32,13 @@
         android:id="@+id/btnVolume"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        style="@style/ComuginatorButton"
         android:text="@string/volume" />
 
     <Button
         android:id="@+id/btnDeviceMore"
         android:layout_width="48dp"
         android:layout_height="48dp"
+        style="@style/ComuginatorButton"
         android:text="@string/more" />
 </LinearLayout>

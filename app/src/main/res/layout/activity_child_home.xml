@@ -9,6 +9,7 @@
         android:id="@+id/tvChildHomeTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        style="@style/ComuginatorText.Title"
         android:text="@string/app_name"
         android:textSize="24sp"
         android:textStyle="bold" />
@@ -17,12 +18,14 @@
         android:id="@+id/btnChildHomeBack"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        style="@style/ComuginatorButton"
         android:text="@string/back" />
 
     <Button
         android:id="@+id/btnChildHomeAdd"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        style="@style/ComuginatorButton"
         android:text="@string/add"
         android:visibility="gone" />
 

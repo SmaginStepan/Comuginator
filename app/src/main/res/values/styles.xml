@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="ComuginatorButton">
+        <item name="android:layout_height">48dp</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
+    </style>
+
+    <style name="ComuginatorButton.Primary" parent="ComuginatorButton"/>
+
+    <style name="ComuginatorButton.Secondary" parent="ComuginatorButton"/>
+
+    <style name="ComuginatorButton.Danger" parent="ComuginatorButton"/>
+
+    <style name="ComuginatorText">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+    </style>
+
+    <style name="ComuginatorText.Title">
+        <item name="android:textSize">22sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="ComuginatorText.Section">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="ComuginatorText.Body">
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="ComuginatorText.Small">
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="ComuginatorText.Muted">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">#777777</item>
+    </style>
+
+    <style name="ComuginatorEditText">
+        <item name="android:layout_height">48dp</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:paddingStart">12dp</item>
+        <item name="android:paddingEnd">12dp</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingBottom">8dp</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textColorHint">#888888</item>
+        <item name="android:backgroundTint">#4CAF50</item>
+    </style>
+
+    <style name="ComuginatorEditText.Search" parent="ComuginatorEditText">
+        <item name="android:imeOptions">actionSearch</item>
+        <item name="android:inputType">textNoSuggestions</item>
+    </style>
+
+    <style name="ComuginatorEditText.Text" parent="ComuginatorEditText">
+        <item name="android:inputType">textCapSentences</item>
+    </style>
+
+    <style name="ComuginatorEditText.Name" parent="ComuginatorEditText">
+        <item name="android:inputType">textPersonName</item>
+    </style>
+</resources>

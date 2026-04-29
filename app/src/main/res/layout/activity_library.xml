@@ -8,6 +8,7 @@
         android:id="@+id/tvTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        style="@style/ComuginatorText.Title"
         android:text="@string/library"
         android:textSize="24sp"
         android:padding="16dp" />
@@ -17,6 +18,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingHorizontal="16dp"
+        style="@style/ComuginatorText.Small"
         android:paddingBottom="8dp" />
 
     <androidx.recyclerview.widget.RecyclerView
@@ -30,5 +32,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
+        style="@style/ComuginatorButton"
         android:text="@string/create_set" />
 </LinearLayout>

@@ -14,6 +14,7 @@
             android:id="@+id/tvTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            style="@style/ComuginatorText.Title"
             android:text="@string/app_name"
             android:textSize="28sp"
             android:textStyle="bold"
@@ -22,12 +23,14 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            style="@style/ComuginatorText.Section"
             android:text="@string/user_name" />
 
         <EditText
             android:id="@+id/etUserName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            style="@style/ComuginatorEditText.Name"
             android:hint="@string/enter_your_name"
             android:inputType="textPersonName"
             android:maxLines="1"
@@ -37,12 +40,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            style="@style/ComuginatorText.Section"
             android:text="@string/device_name" />
 
         <EditText
             android:id="@+id/etDeviceName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            style="@style/ComuginatorEditText.Text"
             android:hint="@string/device_name"
             android:inputType="textCapWords"
             android:maxLines="1"
@@ -66,6 +71,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                style="@style/ComuginatorText.Body"
                 android:text="@string/already_have_family"
                 android:textSize="18sp"
                 android:textStyle="bold"
@@ -75,6 +81,7 @@
                 android:id="@+id/btnCreateFamily"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                style="@style/ComuginatorButton"
                 android:text="@string/create_family_group" />
 
             <Button
@@ -82,6 +89,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
+                style="@style/ComuginatorButton"
                 android:text="@string/join_family_group" />
 
             <LinearLayout
@@ -95,10 +103,12 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    style="@style/ComuginatorText.Section"
                     android:text="@string/invite_code" />
 
                 <EditText
                     android:id="@+id/etInviteCode"
+                    style="@style/ComuginatorEditText.Text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/invite_code"
@@ -111,6 +121,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
+                    style="@style/ComuginatorButton"
                     android:text="@string/join" />
             </LinearLayout>
         </LinearLayout>
@@ -120,6 +131,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
+            style="@style/ComuginatorText.Small"
             android:textSize="15sp" />
 
     </LinearLayout>

@@ -22,6 +22,7 @@
         android:ellipsize="end"
         android:gravity="center"
         android:maxLines="2"
+        style="@style/ComuginatorText.Body"
         android:text="@string/card"
         android:textColor="#FFFFFF"
         android:textSize="12sp" />

@@ -8,6 +8,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        style="@style/ComuginatorText.Title"
         android:text="@string/settings"
         android:textSize="24sp"
         android:textStyle="bold" />
@@ -23,6 +24,7 @@
         android:id="@+id/tvEnabled"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        style="@style/ComuginatorText.Section"
         android:text="@string/status"
         android:textSize="16sp"
         android:textStyle="bold" />
@@ -31,6 +33,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
+        style="@style/ComuginatorText.Body"
         android:text="@string/fullscreen_permission_explanation"
         android:textSize="14sp" />
 
@@ -39,12 +42,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
+        style="@style/ComuginatorButton"
         android:text="@string/open_system_fullscreen_permission" />
 
     <Button
         android:id="@+id/btnLanguage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        style="@style/ComuginatorButton"
         android:text="@string/language" />
 
 

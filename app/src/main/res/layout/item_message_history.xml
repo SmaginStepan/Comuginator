@@ -7,12 +7,14 @@
 
     <TextView
         android:id="@+id/tvFrom"
+        style="@style/ComuginatorText.Body"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textStyle="bold" />
 
     <TextView
         android:id="@+id/tvCreatedAt"
+        style="@style/ComuginatorText.Body"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp" />
@@ -26,6 +28,7 @@
 
     <TextView
         android:id="@+id/tvReply"
+        style="@style/ComuginatorText.Body"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp" />
@@ -34,6 +37,7 @@
         android:id="@+id/btnRepeat"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        style="@style/ComuginatorButton"
         android:text="@string/repeat" />
 
 </LinearLayout>

@@ -16,6 +16,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            style="@style/ComuginatorText.Title"
             android:text="@string/family_title_placeholder"
             android:textSize="18sp"
             android:textStyle="bold" />
@@ -24,12 +25,14 @@
             android:id="@+id/btnFamilyAdd"
             android:layout_width="48dp"
             android:layout_height="48dp"
+            style="@style/ComuginatorButton"
             android:text="@string/plus" />
 
         <Button
             android:id="@+id/btnFamilyMore"
             android:layout_width="48dp"
             android:layout_height="48dp"
+            style="@style/ComuginatorButton"
             android:text="@string/more" />
     </LinearLayout>
 
@@ -38,6 +41,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
+        style="@style/ComuginatorButton"
         android:text="@string/library" />
 
     <Button
@@ -45,6 +49,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
+        style="@style/ComuginatorButton"
         android:text="@string/child_home" />
 
     <TextView
@@ -52,6 +57,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
+        style="@style/ComuginatorText.Small"
         android:text="@string/invite_placeholder" />
 
     <TextView
@@ -59,6 +65,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
+        style="@style/ComuginatorText.Small"
         android:text="@string/status_placeholder" />
 
     <androidx.recyclerview.widget.RecyclerView

@@ -25,6 +25,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            style="@style/ComuginatorText.Section"
             android:text="@string/user_name"
             android:textSize="18sp"
             android:textStyle="bold" />
@@ -47,7 +48,7 @@
             android:layout_width="0dp"
             android:layout_height="56dp"
             android:layout_weight="1"
-            style="?android:attr/buttonBarButtonStyle"
+            style="@style/ComuginatorButton"
             android:text="@string/send" />
 
         <Button
@@ -57,7 +58,7 @@
             android:layout_marginStart="8dp"
             android:layout_weight="1"
             android:maxLines="1"
-            style="?android:attr/buttonBarButtonStyle"
+            style="@style/ComuginatorButton"
             android:text="@string/history" />
     </LinearLayout>
 

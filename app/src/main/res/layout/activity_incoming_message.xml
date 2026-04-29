@@ -9,6 +9,7 @@
         android:id="@+id/tvTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        style="@style/ComuginatorText.Title"
         android:text="@string/incoming_message"
         android:textSize="22sp"
         android:textStyle="bold" />
@@ -32,6 +33,7 @@
             android:id="@+id/tvFromUser"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            style="@style/ComuginatorText.Section"
             android:text="@string/from"
             android:textSize="18sp"
             android:textStyle="bold" />
@@ -42,6 +44,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
+        style="@style/ComuginatorText.Section"
         android:textSize="14sp" />
 
     <TextView
@@ -49,6 +52,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
+        style="@style/ComuginatorText.Section"
         android:text="@string/message"
         android:textStyle="bold" />
 
@@ -64,6 +68,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
+        style="@style/ComuginatorText.Section"
         android:text="@string/suggested_replies"
         android:textStyle="bold" />
 
@@ -79,6 +84,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
+        style="@style/ComuginatorText.Section"
         android:text="@string/current_reply"
         android:textStyle="bold" />
     <ImageView
@@ -93,6 +99,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
+        style="@style/ComuginatorText.Body"
         android:text="@string/no_reply_yet" />
 
     <ProgressBar

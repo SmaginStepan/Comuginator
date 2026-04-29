@@ -9,6 +9,7 @@
         android:id="@+id/tvTarget"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        style="@style/ComuginatorText.Title"
         android:text="@string/send_to_placeholder"
         android:textSize="20sp"
         android:textStyle="bold" />
@@ -19,6 +20,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:padding="8dp"
+        style="@style/ComuginatorText.Section"
         android:text="@string/message"
         android:textSize="18sp"
         android:textStyle="bold" />
@@ -35,6 +37,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:padding="8dp"
+        style="@style/ComuginatorText.Section"
         android:text="@string/replies"
         android:textSize="18sp"
         android:textStyle="bold" />
@@ -47,14 +50,15 @@
 
     <EditText
         android:id="@+id/etSearch"
+        style="@style/ComuginatorEditText.Search"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
+        android:autofillHints=""
         android:hint="@string/search_cards"
-        android:inputType="text"
         android:imeOptions="actionSearch"
-        android:singleLine="true"
-        android:autofillHints=""/>
+        android:inputType="text"
+        android:singleLine="true" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvResults"
@@ -74,7 +78,7 @@
             android:layout_width="0dp"
             android:layout_height="56dp"
             android:layout_weight="1"
-            style="?android:attr/buttonBarButtonStyle"
+            style="@style/ComuginatorButton"
             android:text="@string/add_photo" />
 
         <Button
@@ -82,7 +86,7 @@
             android:layout_width="0dp"
             android:layout_height="56dp"
             android:layout_weight="1"
-            style="?android:attr/buttonBarButtonStyle"
+            style="@style/ComuginatorButton"
             android:text="@string/add_full_library_set" />
     </LinearLayout>
 
@@ -92,6 +96,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         android:layout_marginBottom="32dp"
+        style="@style/ComuginatorButton"
         android:text="@string/send" />
 
 </LinearLayout>
