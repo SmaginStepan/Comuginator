@@ -9,59 +9,98 @@ import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.an0obis.comuginator.R
 import com.an0obis.comuginator.api.ApiClient
 import com.an0obis.comuginator.api.ChildHomeNodeDto
+import com.an0obis.comuginator.api.CreateChildHomeNodeRequest
+import com.an0obis.comuginator.api.UpdateChildHomeNodeRequest
 import com.an0obis.comuginator.storage.SessionStore
 import com.an0obis.comuginator.ui.base.BaseActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
-import com.an0obis.comuginator.api.CreateChildHomeNodeRequest
-import com.an0obis.comuginator.api.UpdateChildHomeNodeRequest
 
 class ChildHomeActivity : BaseActivity() {
+
     companion object {
         const val EXTRA_EDITOR_MODE = "editor_mode"
+
+        private const val STATE_PATH_IDS = "child_home_path_ids"
+        private const val STATE_PATH_TITLES = "child_home_path_titles"
+        private const val STATE_PENDING_EDIT_NODE_ID = "pending_edit_node_id"
+        private const val STATE_PENDING_EDIT_NODE_TYPE = "pending_edit_node_type"
     }
+
+    private data class PathEntry(
+        val parentId: String?,
+        val title: String
+    )
+
     private val isEditorMode: Boolean by lazy {
         intent.getBooleanExtra(EXTRA_EDITOR_MODE, false)
     }
+
     private lateinit var sessionStore: SessionStore
     private lateinit var adapter: ChildHomeAdapter
+
     private lateinit var tvTitle: TextView
+    private lateinit var tvBreadcrumbs: TextView
     private lateinit var btnBack: Button
     private lateinit var btnAdd: Button
     private lateinit var progress: ProgressBar
     private lateinit var rv: RecyclerView
 
-    private val parentStack = mutableListOf<String?>()
-    private var currentParentId: String? = null
+    private val path = mutableListOf<PathEntry>()
+
+    private var currentParentId: String?
+        get() = path.lastOrNull()?.parentId
+        set(value) {
+            if (path.isEmpty()) {
+                path.add(PathEntry(value, getString(R.string.home)))
+            } else {
+                val current = path.last()
+                path[path.lastIndex] = current.copy(parentId = value)
+            }
+        }
+
     private var authToken: String = ""
-    private var pendingEditNode: ChildHomeNodeDto? = null
+
+    private var pendingEditNodeId: String? = null
+    private var pendingEditNodeType: String? = null
 
     private val pickItemLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode != RESULT_OK) return@registerForActivityResult
 
-            val itemId = LibraryItemPickerActivity.parseResultItemId(result.data) ?: return@registerForActivityResult
-            val editing = pendingEditNode
-            pendingEditNode = null
+            val itemId =
+                LibraryItemPickerActivity.parseResultItemId(result.data)
+                    ?: return@registerForActivityResult
 
-            if (editing == null) {
+            val editingNodeId = pendingEditNodeId
+            val editingNodeType = pendingEditNodeType
+
+            pendingEditNodeId = null
+            pendingEditNodeType = null
+
+            if (editingNodeId == null || editingNodeType == null) {
                 showCreateNodeDialog(itemId)
             } else {
-                showEditNodeDialog(editing, itemId)
+                showEditNodeDialog(
+                    nodeId = editingNodeId,
+                    currentType = editingNodeType,
+                    newItemId = itemId
+                )
             }
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        restoreState(savedInstanceState)
         ensureInitialized()
     }
 
@@ -72,14 +111,19 @@ class ChildHomeActivity : BaseActivity() {
         authToken = sessionStore.token.orEmpty()
 
         tvTitle = findViewById(R.id.tvChildHomeTitle)
+        tvBreadcrumbs = findViewById(R.id.tvChildHomeBreadcrumbs)
         btnBack = findViewById(R.id.btnChildHomeBack)
+        btnAdd = findViewById(R.id.btnChildHomeAdd)
         progress = findViewById(R.id.progressChildHome)
         rv = findViewById(R.id.rvChildHome)
-        btnAdd = findViewById(R.id.btnChildHomeAdd)
-        btnAdd.visibility = if (isEditorMode) View.VISIBLE else View.GONE
 
+        btnAdd.visibility = if (isEditorMode) View.VISIBLE else View.GONE
         btnAdd.setOnClickListener {
             openAddNode()
+        }
+
+        btnBack.setOnClickListener {
+            goBack()
         }
 
         adapter = ChildHomeAdapter(
@@ -94,18 +138,69 @@ class ChildHomeActivity : BaseActivity() {
         rv.layoutManager = GridLayoutManager(this, 2)
         rv.adapter = adapter
 
-        btnBack.setOnClickListener {
-            if (parentStack.isNotEmpty()) {
-                currentParentId = parentStack.removeAt(parentStack.lastIndex)
-                loadNodes(currentParentId)
-            }
+        if (path.isEmpty()) {
+            path.add(PathEntry(parentId = null, title = getString(R.string.home)))
         }
 
-        loadNodes(null)
+        updateNavigationUi()
+        loadNodes(currentParentId)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
+        outState.putStringArrayList(
+            STATE_PATH_IDS,
+            ArrayList(path.map { it.parentId.orEmpty() })
+        )
+
+        outState.putStringArrayList(
+            STATE_PATH_TITLES,
+            ArrayList(path.map { it.title })
+        )
+
+        outState.putString(STATE_PENDING_EDIT_NODE_ID, pendingEditNodeId)
+        outState.putString(STATE_PENDING_EDIT_NODE_TYPE, pendingEditNodeType)
+    }
+
+    private fun restoreState(savedInstanceState: Bundle?) {
+        if (savedInstanceState == null) return
+
+        val ids = savedInstanceState.getStringArrayList(STATE_PATH_IDS).orEmpty()
+        val titles = savedInstanceState.getStringArrayList(STATE_PATH_TITLES).orEmpty()
+
+        path.clear()
+
+        val count = minOf(ids.size, titles.size)
+        for (i in 0 until count) {
+            path.add(
+                PathEntry(
+                    parentId = ids[i].ifBlank { null },
+                    title = titles[i]
+                )
+            )
+        }
+
+        pendingEditNodeId = savedInstanceState.getString(STATE_PENDING_EDIT_NODE_ID)
+        pendingEditNodeType = savedInstanceState.getString(STATE_PENDING_EDIT_NODE_TYPE)
     }
 
     private fun openAddNode() {
-        pendingEditNode = null
+        pendingEditNodeId = null
+        pendingEditNodeType = null
+
+        pickItemLauncher.launch(
+            LibraryItemPickerActivity.createIntent(
+                this,
+                LibraryItemPickerActivity.TargetMode.USER_AVATAR
+            )
+        )
+    }
+
+    private fun openEditNode(node: ChildHomeNodeDto) {
+        pendingEditNodeId = node.id
+        pendingEditNodeType = node.type
+
         pickItemLauncher.launch(
             LibraryItemPickerActivity.createIntent(
                 this,
@@ -122,8 +217,8 @@ class ChildHomeActivity : BaseActivity() {
         AlertDialog.Builder(this)
             .setTitle(R.string.rename)
             .setView(input)
-            .setNegativeButton(getString(R.string.cancel), null)
-            .setPositiveButton(getString(R.string.save)) { _, _ ->
+            .setNegativeButton(R.string.cancel, null)
+            .setPositiveButton(R.string.save) { _, _ ->
                 val newName = input.text?.toString()?.trim().orEmpty()
                 if (newName.isNotEmpty()) {
                     renameNode(node, newName)
@@ -147,6 +242,7 @@ class ChildHomeActivity : BaseActivity() {
                     )
                 }
 
+                renameCurrentPathEntryIfNeeded(node.id, newName)
                 loadNodes(currentParentId)
             } catch (e: Exception) {
                 Toast.makeText(
@@ -159,20 +255,19 @@ class ChildHomeActivity : BaseActivity() {
             }
         }
     }
-    private fun openEditNode(node: ChildHomeNodeDto) {
-        pendingEditNode = node
-        pickItemLauncher.launch(
-            LibraryItemPickerActivity.createIntent(
-                this,
-                LibraryItemPickerActivity.TargetMode.USER_AVATAR
-            )
-        )
+
+    private fun renameCurrentPathEntryIfNeeded(nodeId: String, newName: String) {
+        val index = path.indexOfFirst { it.parentId == nodeId }
+        if (index >= 0) {
+            path[index] = path[index].copy(title = newName)
+            updateNavigationUi()
+        }
     }
 
     private fun confirmDeleteNode(node: ChildHomeNodeDto) {
         AlertDialog.Builder(this)
             .setTitle(R.string.child_home_delete_node_title)
-            .setMessage(node.item?.label ?: node.id)
+            .setMessage(node.labelOverride ?: node.item?.label ?: node.id)
             .setNegativeButton(R.string.cancel, null)
             .setPositiveButton(R.string.delete) { _, _ ->
                 deleteNode(node)
@@ -186,22 +281,25 @@ class ChildHomeActivity : BaseActivity() {
         AlertDialog.Builder(this)
             .setTitle(R.string.child_home_node_type_title)
             .setItems(types) { _, which ->
-                val type = types[which]
-                createNode(itemId, type)
+                createNode(itemId, types[which])
             }
             .show()
     }
 
-    private fun showEditNodeDialog(node: ChildHomeNodeDto, newItemId: String) {
+    private fun showEditNodeDialog(
+        nodeId: String,
+        currentType: String,
+        newItemId: String
+    ) {
         val types = arrayOf("MENU", "ACTION")
-        val checked = if (node.type == "ACTION") 1 else 0
+        val checked = if (currentType == "ACTION") 1 else 0
 
         AlertDialog.Builder(this)
             .setTitle(R.string.child_home_node_type_title)
             .setSingleChoiceItems(types, checked) { dialog, which ->
                 dialog.dismiss()
                 updateNode(
-                    node = node,
+                    nodeId = nodeId,
                     newItemId = newItemId,
                     newType = types[which]
                 )
@@ -230,7 +328,11 @@ class ChildHomeActivity : BaseActivity() {
 
                 loadNodes(currentParentId)
             } catch (e: Exception) {
-                Toast.makeText(this@ChildHomeActivity, getString(R.string.child_home_create_failed, e.message), Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    this@ChildHomeActivity,
+                    getString(R.string.child_home_create_failed, e.message),
+                    Toast.LENGTH_LONG
+                ).show()
             } finally {
                 progress.visibility = View.GONE
             }
@@ -238,7 +340,7 @@ class ChildHomeActivity : BaseActivity() {
     }
 
     private fun updateNode(
-        node: ChildHomeNodeDto,
+        nodeId: String,
         newItemId: String,
         newType: String
     ) {
@@ -249,7 +351,7 @@ class ChildHomeActivity : BaseActivity() {
                 withContext(Dispatchers.IO) {
                     ApiClient.api.updateChildHomeNode(
                         auth = sessionStore.authHeaderOrThrow(),
-                        nodeId = node.id,
+                        nodeId = nodeId,
                         body = UpdateChildHomeNodeRequest(
                             itemId = newItemId,
                             type = newType
@@ -259,7 +361,11 @@ class ChildHomeActivity : BaseActivity() {
 
                 loadNodes(currentParentId)
             } catch (e: Exception) {
-                Toast.makeText(this@ChildHomeActivity, getString(R.string.child_home_update_failed, e.message), Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    this@ChildHomeActivity,
+                    getString(R.string.child_home_update_failed, e.message),
+                    Toast.LENGTH_LONG
+                ).show()
             } finally {
                 progress.visibility = View.GONE
             }
@@ -280,7 +386,11 @@ class ChildHomeActivity : BaseActivity() {
 
                 loadNodes(currentParentId)
             } catch (e: Exception) {
-                Toast.makeText(this@ChildHomeActivity, getString(R.string.child_home_delete_failed, e.message), Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    this@ChildHomeActivity,
+                    getString(R.string.child_home_delete_failed, e.message),
+                    Toast.LENGTH_LONG
+                ).show()
             } finally {
                 progress.visibility = View.GONE
             }
@@ -288,30 +398,43 @@ class ChildHomeActivity : BaseActivity() {
     }
 
     private fun onNodeClicked(node: ChildHomeNodeDto) {
-        if (isEditorMode) {
-            if (node.type == "MENU") {
-                parentStack.add(currentParentId)
-                currentParentId = node.id
-                loadNodes(currentParentId)
-            } else {
-                openEditNode(node)
-            }
-            return
-        }
-
         when (node.type) {
-            "MENU" -> {
-                parentStack.add(currentParentId)
-                currentParentId = node.id
-                loadNodes(currentParentId)
+            "MENU" -> openMenu(node)
+            "ACTION" -> {
+                if (isEditorMode) {
+                    openEditNode(node)
+                } else {
+                    requestAction(node)
+                }
             }
-            "ACTION" -> requestAction(node)
+        }
+    }
+
+    private fun openMenu(node: ChildHomeNodeDto) {
+        path.add(
+            PathEntry(
+                parentId = node.id,
+                title = node.displayLabel()
+            )
+        )
+
+        updateNavigationUi()
+        loadNodes(currentParentId)
+    }
+
+    private fun goBack() {
+        if (path.size > 1) {
+            path.removeAt(path.lastIndex)
+            updateNavigationUi()
+            loadNodes(currentParentId)
+        } else if (isEditorMode) {
+            finish()
         }
     }
 
     private fun loadNodes(parentId: String?) {
         progress.visibility = View.VISIBLE
-        btnBack.visibility = if (parentStack.isEmpty()) View.GONE else View.VISIBLE
+        updateNavigationUi()
 
         lifecycleScope.launch {
             try {
@@ -366,6 +489,17 @@ class ChildHomeActivity : BaseActivity() {
                 progress.visibility = View.GONE
             }
         }
+    }
+
+    private fun updateNavigationUi() {
+        btnBack.visibility =
+            if (isEditorMode || path.size > 1) View.VISIBLE else View.GONE
+
+        tvBreadcrumbs.text = path.joinToString(" > ") { it.title }
+    }
+
+    private fun ChildHomeNodeDto.displayLabel(): String {
+        return labelOverride ?: item?.label ?: type
     }
 
     private fun blinkRecycler(seconds: Int) {
