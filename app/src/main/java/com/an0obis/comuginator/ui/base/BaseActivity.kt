@@ -30,11 +30,27 @@ open class BaseActivity: AppCompatActivity() {
     protected lateinit var store: SessionStore
     private var initialized = false
 
+    protected var redirectedByRoleGuard: Boolean = false
+        private set
     override fun onCreate(savedInstanceState: Bundle?) {
         applyAppLanguage()
         super.onCreate(savedInstanceState)
 
         store = SessionStore(this)
+
+        if (store.role == "CHILD" && shouldForceChildHome()) {
+            redirectedByRoleGuard = true
+
+            startActivity(
+                Intent(this, ChildHomeActivity::class.java).apply {
+                    putExtra(ChildHomeActivity.EXTRA_EDITOR_MODE, false)
+                    addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                }
+            )
+
+            finish()
+            return
+        }
     }
 
     private fun applyAppLanguage() {

@@ -62,6 +62,7 @@ class FamilyActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (redirectedByRoleGuard) return
         setContentView(R.layout.activity_family)
 
         store = SessionStore(this)
