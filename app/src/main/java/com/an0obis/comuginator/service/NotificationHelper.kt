@@ -5,6 +5,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
@@ -21,7 +22,9 @@ object NotificationHelper {
     fun showNewMessageNotification(
         context: Context,
         messageId: String?,
-        commandId: String?
+        commandId: String?,
+        senderName: String? = null,
+        senderAvatar: Bitmap? = null
     ) {
         ensureChannel(context)
 
@@ -39,14 +42,19 @@ object NotificationHelper {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+        val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentTitle(context.getString(R.string.new_message))
+            .setContentTitle(senderName ?: context.getString(R.string.new_message))
             .setContentText(context.getString(R.string.tap_to_open))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
-            .build()
+
+        if (senderAvatar != null) {
+            builder.setLargeIcon(senderAvatar)
+        }
+
+        val notification = builder.build()
 
         try {
             NotificationManagerCompat.from(context)

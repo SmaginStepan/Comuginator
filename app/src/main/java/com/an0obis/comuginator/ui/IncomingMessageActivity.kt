@@ -103,8 +103,9 @@ class IncomingMessageActivity : BaseActivity() {
 
         lifecycleScope.launch {
             try {
+                val authHeader = store.authHeader() ?: return@launch
                 val message = withContext(Dispatchers.IO) {
-                    ApiClient.getAacMessage(store.authHeaderOrThrow(), messageId)
+                    ApiClient.getAacMessageWithAuthHeader(authHeader, messageId)
                 }
 
                 currentMessage = message
@@ -197,7 +198,7 @@ class IncomingMessageActivity : BaseActivity() {
             try {
                 withContext(Dispatchers.IO) {
                     ApiClient.replyToAacMessage(
-                        authToken = store.authHeaderOrThrow(),
+                        authHeader = store.authHeaderOrThrow(),
                         messageId = messageId,
                         requestBody = SendAacReplyRequest(reply = card)
                     )

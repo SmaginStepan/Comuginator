@@ -70,10 +70,33 @@ class CommandSyncWorker(
     }
 
     private fun handleNewMessageCommand(command: CommandDto) {
+        val messageId = command.payload["messageId"] as? String
+
+        var senderName: String? = null
+        var senderAvatar = null as android.graphics.Bitmap?
+
+        try {
+            if (messageId != null) {
+                val authHeader = SessionStore(applicationContext).authHeader() ?: return
+
+                val message = ApiClient.getAacMessageWithAuthHeader(
+                    authHeader = authHeader,
+                    messageId = messageId
+                )
+
+                senderName = message.fromUser.name
+                senderAvatar = ApiClient.loadBitmap(message.fromUser.avatarImageUrl)
+            }
+        } catch (e: Exception) {
+            Log.w("CommandSyncWorker", "failed to load notification details", e)
+        }
+
         NotificationHelper.showNewMessageNotification(
             context = applicationContext,
-            messageId = command.payload["messageId"] as? String,
-            commandId = command.id
+            messageId = messageId,
+            commandId = command.id,
+            senderName = senderName,
+            senderAvatar = senderAvatar
         )
     }
 
