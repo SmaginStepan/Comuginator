@@ -54,6 +54,10 @@ class ChildHomeActivity : BaseActivity() {
     private lateinit var btnAdd: Button
     private lateinit var progress: ProgressBar
     private lateinit var rv: RecyclerView
+    private lateinit var btnPreview: Button
+
+    private var previewMode: Boolean = false
+    private var blinkingNodeId: String? = null
 
     private val path = mutableListOf<PathEntry>()
 
@@ -114,6 +118,7 @@ class ChildHomeActivity : BaseActivity() {
         tvBreadcrumbs = findViewById(R.id.tvChildHomeBreadcrumbs)
         btnBack = findViewById(R.id.btnChildHomeBack)
         btnAdd = findViewById(R.id.btnChildHomeAdd)
+        btnPreview = findViewById(R.id.btnChildHomePreview)
         progress = findViewById(R.id.progressChildHome)
         rv = findViewById(R.id.rvChildHome)
 
@@ -124,6 +129,13 @@ class ChildHomeActivity : BaseActivity() {
 
         btnBack.setOnClickListener {
             goBack()
+        }
+        btnPreview.setOnClickListener {
+            if (previewMode) {
+                stopPreview()
+            } else {
+                startPreview()
+            }
         }
 
         adapter = ChildHomeAdapter(
@@ -321,7 +333,7 @@ class ChildHomeActivity : BaseActivity() {
                             type = type,
                             targetMode = "ALL_PARENTS",
                             blinkEnabled = true,
-                            blinkSeconds = 60
+                            blinkSeconds = 10
                         )
                     )
                 }
@@ -401,7 +413,7 @@ class ChildHomeActivity : BaseActivity() {
         when (node.type) {
             "MENU" -> openMenu(node)
             "ACTION" -> {
-                if (isEditorMode) {
+                if (isEditorMode && !previewMode) {
                     openEditNode(node)
                 } else {
                     requestAction(node)
@@ -427,7 +439,15 @@ class ChildHomeActivity : BaseActivity() {
             path.removeAt(path.lastIndex)
             updateNavigationUi()
             loadNodes(currentParentId)
-        } else if (isEditorMode) {
+            return
+        }
+
+        if (previewMode) {
+            stopPreview()
+            return
+        }
+
+        if (isEditorMode) {
             finish()
         }
     }
@@ -471,7 +491,7 @@ class ChildHomeActivity : BaseActivity() {
                 }
 
                 if (response.blinkEnabled) {
-                    blinkRecycler(response.blinkSeconds)
+                    blinkNode(node.id, response.blinkSeconds)
                 }
 
                 Toast.makeText(
@@ -492,18 +512,50 @@ class ChildHomeActivity : BaseActivity() {
     }
 
     private fun updateNavigationUi() {
+        val effectiveEditorMode = isEditorMode && !previewMode
+
+        btnAdd.visibility = if (effectiveEditorMode) View.VISIBLE else View.GONE
+
+        btnPreview.visibility = if (isEditorMode) View.VISIBLE else View.GONE
+        btnPreview.text = getString(
+            if (previewMode) R.string.stop_preview else R.string.start_preview
+        )
+
         btnBack.visibility =
-            if (isEditorMode || path.size > 1) View.VISIBLE else View.GONE
+            if (effectiveEditorMode || path.size > 1 || previewMode) View.VISIBLE else View.GONE
+
+        tvTitle.visibility = if (previewMode) View.GONE else View.VISIBLE
+        tvBreadcrumbs.visibility = if (previewMode) View.GONE else View.VISIBLE
 
         tvBreadcrumbs.text = path.joinToString(" > ") { it.title }
+
+        adapter.setEditorMode(effectiveEditorMode)
+    }
+
+    private fun startPreview() {
+        previewMode = true
+        blinkingNodeId = null
+        adapter.showOnlyNode(null)
+        updateNavigationUi()
+    }
+
+    private fun stopPreview() {
+        previewMode = false
+        blinkingNodeId = null
+        rv.clearAnimation()
+        adapter.showOnlyNode(null)
+        updateNavigationUi()
     }
 
     private fun ChildHomeNodeDto.displayLabel(): String {
         return labelOverride ?: item?.label ?: type
     }
 
-    private fun blinkRecycler(seconds: Int) {
+    private fun blinkNode(nodeId: String, seconds: Int) {
         val durationMs = seconds.coerceAtLeast(1) * 1000L
+
+        blinkingNodeId = nodeId
+        adapter.showOnlyNode(nodeId)
 
         val animation = AlphaAnimation(1.0f, 0.25f).apply {
             duration = 400
@@ -514,7 +566,11 @@ class ChildHomeActivity : BaseActivity() {
         rv.startAnimation(animation)
 
         rv.postDelayed({
-            rv.clearAnimation()
+            if (blinkingNodeId == nodeId) {
+                blinkingNodeId = null
+                rv.clearAnimation()
+                adapter.showOnlyNode(null)
+            }
         }, durationMs)
     }
 }

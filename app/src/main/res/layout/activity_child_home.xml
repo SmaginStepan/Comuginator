@@ -32,6 +32,14 @@
         android:text="@string/back" />
 
     <Button
+        android:id="@+id/btnChildHomePreview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="@style/ComuginatorButton.Secondary"
+        android:text="@string/start_preview"
+        android:visibility="gone" />
+
+    <Button
         android:id="@+id/btnChildHomeAdd"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

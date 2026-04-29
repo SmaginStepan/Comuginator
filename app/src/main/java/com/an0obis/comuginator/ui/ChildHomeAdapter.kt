@@ -13,12 +13,25 @@ import com.an0obis.comuginator.ui.base.BaseAdapter
 
 class ChildHomeAdapter(
     private val authToken: String,
-    private val isEditorMode: Boolean,
+    private var isEditorMode: Boolean,
     private val onNodeClick: (ChildHomeNodeDto) -> Unit,
     private val onRenameClick: (ChildHomeNodeDto) -> Unit,
     private val onEditClick: (ChildHomeNodeDto) -> Unit,
     private val onDeleteClick: (ChildHomeNodeDto) -> Unit
 ) : BaseAdapter<ChildHomeNodeDto, ChildHomeAdapter.VH>() {
+
+    private var onlyVisibleNodeId: String? = null
+
+    fun setEditorMode(value: Boolean) {
+        if (isEditorMode == value) return
+        isEditorMode = value
+        notifyItemRangeChanged(0, itemCount)
+    }
+
+    fun showOnlyNode(nodeId: String?) {
+        onlyVisibleNodeId = nodeId
+        notifyItemRangeChanged(0, itemCount)
+    }
 
     class VH(root: ViewGroup) : RecyclerView.ViewHolder(root) {
         val ivNode: android.widget.ImageView = root.findViewById(R.id.ivNode)
@@ -41,6 +54,11 @@ class ChildHomeAdapter(
         holder.tvNodeLabel.text =
             node.labelOverride ?: node.item?.label ?: node.type
         holder.btnChildMore.visibility = if (isEditorMode) View.VISIBLE else View.GONE
+        val shouldHideByBlink = onlyVisibleNodeId != null && onlyVisibleNodeId != node.id
+        holder.itemView.visibility = if (shouldHideByBlink) View.INVISIBLE else View.VISIBLE
+        holder.itemView.alpha = 1f
+        holder.itemView.clearAnimation()
+
         holder.btnChildMore.setOnClickListener { view ->
             val popup = PopupMenu(view.context, view)
             val renameId = 1
