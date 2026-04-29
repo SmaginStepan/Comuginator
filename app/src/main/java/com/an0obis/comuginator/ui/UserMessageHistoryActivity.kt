@@ -105,7 +105,7 @@ class UserMessageHistoryActivity : AppCompatActivity() {
                 }
 
                 historyAdapter.submitItems(filtered)
-                tvStatus.text = if (filtered.isEmpty()) getString(R.string.no_messages_yet) else getString(R.string.loaded_messages, filtered.size)
+                tvStatus.text = if (filtered.isEmpty()) getString(R.string.no_messages_yet) else resources.getQuantityString(R.plurals.loaded_messages, filtered.size, filtered.size)
             } catch (e: Exception) {
                 tvStatus.text = getString(R.string.failed_load_history)
                 Toast.makeText(

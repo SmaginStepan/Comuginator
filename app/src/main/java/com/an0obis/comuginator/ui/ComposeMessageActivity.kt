@@ -415,7 +415,7 @@ class ComposeMessageActivity : BaseActivity() {
 
                     android.widget.Toast.makeText(
                         this@ComposeMessageActivity,
-                        getString(R.string.added_items, items.size),
+                        resources.getQuantityString(R.plurals.added_items, items.size, items.size),
                         android.widget.Toast.LENGTH_SHORT
                     ).show()
                 }

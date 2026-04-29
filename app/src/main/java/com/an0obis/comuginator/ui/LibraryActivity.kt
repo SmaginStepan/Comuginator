@@ -60,7 +60,8 @@ class LibraryActivity : AppCompatActivity() {
                 val resp = ApiClient.api.getLibrarySets(sessionStore.authHeaderOrThrow())
 
                 adapter.submitItems(resp.sets)
-                tvStatus.text = getString(R.string.sets_count, resp.sets.size)
+                tvStatus.text =
+                    resources.getQuantityString(R.plurals.sets_count, resp.sets.size, resp.sets.size)
 
             } catch (e: Exception) {
                 tvStatus.text = e.message

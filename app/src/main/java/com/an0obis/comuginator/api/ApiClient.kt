@@ -43,7 +43,7 @@ object ApiClient {
                 throw IOException("getAacMessage failed: ${response.code}")
             }
 
-            val body = response.body?.string() ?: throw IOException("Empty body")
+            val body = response.body.string()
             return gson.fromJson(body, AacMessageDetailsDto::class.java)
         }
     }
@@ -67,7 +67,7 @@ object ApiClient {
                 throw IOException("replyToAacMessage failed: ${response.code}")
             }
 
-            val raw = response.body?.string() ?: throw IOException("Empty body")
+            val raw = response.body.string()
             return gson.fromJson(raw, SendAacReplyResponse::class.java)
         }
     }

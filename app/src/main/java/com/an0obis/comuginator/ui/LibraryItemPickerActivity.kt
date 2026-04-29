@@ -360,7 +360,8 @@ class LibraryItemPickerActivity : BaseActivity() {
         }
 
         itemsAdapter.submitItems(currentVisibleItems)
-        tvStatus.text = getString(R.string.items_count_plain, currentVisibleItems.size)
+        tvStatus.text =
+            resources.getQuantityString(R.plurals.items_count, currentVisibleItems.size, currentVisibleItems.size)
     }
 
     private fun startConfirmForPhoto(uri: Uri) {

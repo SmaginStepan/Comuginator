@@ -40,7 +40,12 @@
     <string name="choose_set">Выберите набор</string>
     <string name="no_library_sets">Нет наборов в библиотеке</string>
     <string name="set_is_empty">Набор пуст</string>
-    <string name="added_items">Добавлено элементов: %1$d</string>
+    <plurals name="added_items">
+        <item quantity="one">Добавлен %d элемент</item>
+        <item quantity="few">Добавлено %d элемента</item>
+        <item quantity="many">Добавлено %d элементов</item>
+        <item quantity="other">Добавлено %d элемента</item>
+    </plurals>
     <string name="load_sets_failed">Не удалось загрузить наборы: %1$s</string>
     <string name="upload_failed">Не удалось загрузить: %1$s</string>
     <string name="photo_label">Подпись к фото</string>
@@ -67,7 +72,12 @@
     <string name="add_photo">Добавить фото</string>
     <string name="add_arasaac">Добавить ARASAAC</string>
     <string name="change_cover">Изменить обложку</string>
-    <string name="items_count">%1$d элементов</string>
+    <plurals name="items_count">
+        <item quantity="one">%d элемент</item>
+        <item quantity="few">%d элемента</item>
+        <item quantity="many">%d элементов</item>
+        <item quantity="other">%d элемента</item>
+    </plurals>
     <string name="library_item_picker">Выбор элемента библиотеки</string>
     <string name="paste_from_clipboard">Вставить из буфера</string>
     <string name="take_photo">Сделать фото</string>
@@ -113,7 +123,6 @@
     <string name="clipboard_text_not_supported">Текст из буфера пока не поддерживается</string>
     <string name="no_image_in_clipboard">В буфере обмена нет изображения</string>
     <string name="all_sets">(все наборы)</string>
-    <string name="items_count_plain">%1$d элементов</string>
     <string name="searching_arasaac">Поиск ARASAAC…</string>
     <string name="nothing_found">Ничего не найдено</string>
     <string name="choose_arasaac_card">Выберите карточку ARASAAC</string>
@@ -171,7 +180,12 @@
     <string name="reply_from">Ответ от %1$s</string>
     <string name="reply_sent">Ответ отправлен</string>
     <string name="failed_send_reply">Не удалось отправить ответ: %1$s</string>
-    <string name="sets_count">%1$d наборов</string>
+    <plurals name="sets_count">
+        <item quantity="one">%d набор</item>
+        <item quantity="few">%d набора</item>
+        <item quantity="many">%d наборов</item>
+        <item quantity="other">%d набора</item>
+    </plurals>
     <string name="new_set">Новый набор</string>
     <string name="choose_user_avatar">Выбрать аватар пользователя</string>
     <string name="choose_set_cover">Выбрать обложку набора</string>
@@ -192,7 +206,12 @@
     <string name="history_with">История с %1$s</string>
     <string name="loading_history">Загрузка истории…</string>
     <string name="no_messages_yet">Сообщений пока нет</string>
-    <string name="loaded_messages">Загружено сообщений: %1$d</string>
+    <plurals name="loaded_messages">
+        <item quantity="one">Загружено %d сообщение</item>
+        <item quantity="few">Загружено %d сообщения</item>
+        <item quantity="many">Загружено %d сообщений</item>
+        <item quantity="other">Загружено %d сообщения</item>
+    </plurals>
     <string name="failed_load_history">Не удалось загрузить историю</string>
     <string name="failed_load_history_message">Не удалось загрузить историю: %1$s</string>
 

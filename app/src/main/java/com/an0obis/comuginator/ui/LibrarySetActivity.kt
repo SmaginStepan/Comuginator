@@ -187,7 +187,8 @@ class LibrarySetActivity : AppCompatActivity() {
 
                 val set = response.set
                 tvName.text = set.name
-                tvStatus.text = getString(R.string.items_count_plain, set.items.size)
+                tvStatus.text =
+                    resources.getQuantityString(R.plurals.items_count, set.items.size, set.items.size)
                 ivCover.load(set.cover?.imageUrl)
                 adapter.submitItems(set.items)
 

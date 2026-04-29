@@ -41,7 +41,10 @@
     <string name="choose_set">Choose set</string>
     <string name="no_library_sets">No library sets</string>
     <string name="set_is_empty">Set is empty</string>
-    <string name="added_items">Added %1$d items</string>
+    <plurals name="added_items">
+        <item quantity="one">Added %d item</item>
+        <item quantity="other">Added %d items</item>
+    </plurals>
     <string name="load_sets_failed">Load sets failed: %1$s</string>
     <string name="upload_failed">Upload failed: %1$s</string>
     <string name="photo_label">Photo label</string>
@@ -70,7 +73,10 @@
     <string name="add_photo">Add photo</string>
     <string name="add_arasaac">Add ARASAAC</string>
     <string name="change_cover">Change cover</string>
-    <string name="items_count">%1$d items</string>
+    <plurals name="items_count">
+        <item quantity="one">%d item</item>
+        <item quantity="other">%d items</item>
+    </plurals>
 
     <string name="library_item_picker">Library item picker</string>
     <string name="paste_from_clipboard">Paste from clipboard</string>
@@ -122,7 +128,6 @@
     <string name="clipboard_text_not_supported">Clipboard text is not supported yet</string>
     <string name="no_image_in_clipboard">No image found in clipboard</string>
     <string name="all_sets">(all sets)</string>
-    <string name="items_count_plain">%1$d items</string>
     <string name="searching_arasaac">Searching ARASAAC&#8230;</string>
     <string name="nothing_found">Nothing found</string>
     <string name="choose_arasaac_card">Choose ARASAAC card</string>
@@ -197,7 +202,10 @@
     <string name="failed_send_reply">Failed to send reply: %1$s</string>
 
     <!-- LibraryActivity -->
-    <string name="sets_count">%1$d sets</string>
+    <plurals name="sets_count">
+        <item quantity="one">%d set</item>
+        <item quantity="other">%d sets</item>
+    </plurals>
     <string name="new_set">New set</string>
 
     <!-- LibraryItemPickerActivity -->
@@ -233,10 +241,12 @@
     <string name="history_with">History with %1$s</string>
     <string name="loading_history">Loading history&#8230;</string>
     <string name="no_messages_yet">No messages yet</string>
-    <string name="loaded_messages">Loaded %1$d messages</string>
+    <plurals name="loaded_messages">
+        <item quantity="one">Loaded %d message</item>
+        <item quantity="other">Loaded %d messages</item>
+    </plurals>
     <string name="failed_load_history">Failed to load history</string>
     <string name="failed_load_history_message">Failed to load history: %1$s</string>
-
 
     <string name="language">Language</string>
     <string name="language_system">System</string>

@@ -36,10 +36,8 @@ class LibrarySetsAdapter(
         val item = items[position]
 
         holder.tvName.text = item.name
-        holder.tvCount.text = holder.itemView.context.getString(
-            R.string.items_count,
-            item.itemsCount
-        )
+        holder.tvCount.text =
+            holder.itemView.context.resources.getQuantityString(R.plurals.items_count, item.itemsCount, item.itemsCount)
 
         val url = item.cover?.imageUrl
 

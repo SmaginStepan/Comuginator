@@ -40,7 +40,11 @@
     <string name="choose_set">Elegir conjunto</string>
     <string name="no_library_sets">No hay conjuntos en la biblioteca</string>
     <string name="set_is_empty">El conjunto está vacío</string>
-    <string name="added_items">Elementos añadidos: %1$d</string>
+    <plurals name="added_items">
+        <item quantity="one">Elemento añadido: %d</item>
+        <item quantity="many">Elementos añadidos: %d</item>
+        <item quantity="other">Elementos añadidos: %d</item>
+    </plurals>
     <string name="load_sets_failed">No se pudieron cargar los conjuntos: %1$s</string>
     <string name="upload_failed">No se pudo subir: %1$s</string>
     <string name="photo_label">Etiqueta de la foto</string>
@@ -67,7 +71,11 @@
     <string name="add_photo">Añadir foto</string>
     <string name="add_arasaac">Añadir ARASAAC</string>
     <string name="change_cover">Cambiar portada</string>
-    <string name="items_count">%1$d elementos</string>
+    <plurals name="items_count">
+        <item quantity="one">%d elemento</item>
+        <item quantity="many">%d elementos</item>
+        <item quantity="other">%d elementos</item>
+    </plurals>
     <string name="library_item_picker">Selector de elemento</string>
     <string name="paste_from_clipboard">Pegar desde el portapapeles</string>
     <string name="take_photo">Hacer foto</string>
@@ -113,7 +121,6 @@
     <string name="clipboard_text_not_supported">El texto del portapapeles todavía no está soportado</string>
     <string name="no_image_in_clipboard">No hay imagen en el portapapeles</string>
     <string name="all_sets">(todos los conjuntos)</string>
-    <string name="items_count_plain">%1$d elementos</string>
     <string name="searching_arasaac">Buscando en ARASAAC…</string>
     <string name="nothing_found">No se encontró nada</string>
     <string name="choose_arasaac_card">Elegir tarjeta ARASAAC</string>
@@ -171,7 +178,11 @@
     <string name="reply_from">Respuesta de %1$s</string>
     <string name="reply_sent">Respuesta enviada</string>
     <string name="failed_send_reply">No se pudo enviar la respuesta: %1$s</string>
-    <string name="sets_count">%1$d conjuntos</string>
+    <plurals name="sets_count">
+        <item quantity="one">%d conjunto</item>
+        <item quantity="many">%d conjuntos</item>
+        <item quantity="other">%d conjuntos</item>
+    </plurals>
     <string name="new_set">Nuevo conjunto</string>
     <string name="choose_user_avatar">Elegir avatar de usuario</string>
     <string name="choose_set_cover">Elegir portada del conjunto</string>
@@ -192,7 +203,11 @@
     <string name="history_with">Historial con %1$s</string>
     <string name="loading_history">Cargando historial…</string>
     <string name="no_messages_yet">Todavía no hay mensajes</string>
-    <string name="loaded_messages">Mensajes cargados: %1$d</string>
+    <plurals name="loaded_messages">
+        <item quantity="one">Mensaje cargado: %d</item>
+        <item quantity="many">Mensajes cargados: %d</item>
+        <item quantity="other">Mensajes cargados: %d</item>
+    </plurals>
     <string name="failed_load_history">No se pudo cargar el historial</string>
     <string name="failed_load_history_message">No se pudo cargar el historial: %1$s</string>
     <string name="default_device_name">%1$s %2$s</string>
