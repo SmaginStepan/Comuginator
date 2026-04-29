@@ -9,7 +9,6 @@ import android.provider.OpenableColumns
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
@@ -18,6 +17,7 @@ import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
+import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -43,6 +43,7 @@ import coil.imageLoader
 import com.an0obis.comuginator.ui.base.BaseActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import androidx.appcompat.widget.PopupMenu
 
 class LibraryItemPickerActivity : BaseActivity() {
 
@@ -82,7 +83,7 @@ class LibraryItemPickerActivity : BaseActivity() {
 
     private lateinit var libraryFiltersBlock: LinearLayout
     private lateinit var etSearch: EditText
-    private lateinit var actSetFilter: AutoCompleteTextView
+    private lateinit var btnSetFilter: Button
     private lateinit var rvItems: RecyclerView
 
     private lateinit var confirmBlock: LinearLayout
@@ -149,7 +150,7 @@ class LibraryItemPickerActivity : BaseActivity() {
 
         libraryFiltersBlock = findViewById(R.id.libraryFiltersBlock)
         etSearch = findViewById(R.id.etSearch)
-        actSetFilter = findViewById(R.id.actSetFilter)
+        btnSetFilter = findViewById(R.id.btnSetFilter)
         rvItems = findViewById(R.id.rvItems)
 
         btnPasteFromClipboard = findViewById(R.id.btnPasteFromClipboard)
@@ -180,9 +181,7 @@ class LibraryItemPickerActivity : BaseActivity() {
             TargetMode.ADD_TO_SET -> getString(R.string.add_item_to_set)
         }
 
-        btnChooseFromLibrary.visibility =
-            if (targetMode == TargetMode.USER_AVATAR || targetMode == TargetMode.SET_COVER)
-                Button.VISIBLE else Button.GONE
+        btnChooseFromLibrary.isVisible = true
 
         btnTakePhoto.setOnClickListener {
             launchCamera()
@@ -317,19 +316,11 @@ class LibraryItemPickerActivity : BaseActivity() {
 
         tvStatus.text = getString(R.string.no_image_in_clipboard)
     }
-
     private fun setupSetFilter() {
-        val names = mutableListOf(getString(R.string.all_sets))
-        names.addAll(allSets.map { it.name })
+        updateSetFilterButtonText()
 
-        actSetFilter.setAdapter(
-            ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, names)
-        )
-        actSetFilter.setText(names.first(), false)
-
-        actSetFilter.setOnItemClickListener { _, _, position, _ ->
-            selectedSetId = if (position == 0) null else allSets[position - 1].id
-            applyLibraryFilter()
+        btnSetFilter.setOnClickListener {
+            showSetFilterMenu()
         }
 
         if (!libraryFilterWatcherAttached) {
@@ -344,6 +335,38 @@ class LibraryItemPickerActivity : BaseActivity() {
             )
             libraryFilterWatcherAttached = true
         }
+    }
+
+    private fun showSetFilterMenu() {
+        val popup = PopupMenu(this, btnSetFilter)
+
+        popup.menu.add(0, 0, 0, getString(R.string.all_sets))
+
+        allSets.forEachIndexed { index, set ->
+            popup.menu.add(0, index + 1, index + 1, set.name)
+        }
+
+        popup.setOnMenuItemClickListener { item ->
+            selectedSetId = if (item.itemId == 0) {
+                null
+            } else {
+                allSets.getOrNull(item.itemId - 1)?.id
+            }
+
+            updateSetFilterButtonText()
+            applyLibraryFilter()
+            true
+        }
+
+        popup.show()
+    }
+
+    private fun updateSetFilterButtonText() {
+        val selectedName = selectedSetId
+            ?.let { id -> allSets.firstOrNull { it.id == id }?.name }
+            ?: getString(R.string.all_sets)
+
+        btnSetFilter.text = selectedName
     }
 
     private fun applyLibraryFilter() {

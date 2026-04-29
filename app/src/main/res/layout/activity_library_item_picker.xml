@@ -81,12 +81,13 @@
                 android:imeOptions="actionSearch"
                 android:autofillHints=""/>
 
-            <AutoCompleteTextView
-                android:id="@+id/actSetFilter"
+            <Button
+                android:id="@+id/btnSetFilter"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:hint="@string/filter_by_set" />
+                style="@style/ComuginatorButton.Secondary"
+                android:text="@string/all_sets" />
         </LinearLayout>
 
         <TextView
