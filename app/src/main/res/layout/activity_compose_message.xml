@@ -51,8 +51,10 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:hint="@string/search_cards"
+        android:inputType="text"
         android:imeOptions="actionSearch"
-        android:singleLine="true" />
+        android:singleLine="true"
+        android:autofillHints=""/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvResults"
@@ -72,6 +74,7 @@
             android:layout_width="0dp"
             android:layout_height="56dp"
             android:layout_weight="1"
+            style="?android:attr/buttonBarButtonStyle"
             android:text="@string/add_photo" />
 
         <Button
@@ -79,6 +82,7 @@
             android:layout_width="0dp"
             android:layout_height="56dp"
             android:layout_weight="1"
+            style="?android:attr/buttonBarButtonStyle"
             android:text="@string/add_full_library_set" />
     </LinearLayout>
 

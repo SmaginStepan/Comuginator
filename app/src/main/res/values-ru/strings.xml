@@ -219,5 +219,4 @@
     <string name="family_created_details">Семья создана.\nID семьи: %1$s\nРоль: %2$s\nID устройства: %3$s</string>
     <string name="joined_family_details">Вы вступили в семью.\nID семьи: %1$s\nРоль: %2$s\nПользователь создан: %3$s</string>
     <string name="enter_your_name">Введите ваше имя</string>
-    <string name="enter_invite_code">Введите код приглашения</string>
 </resources>

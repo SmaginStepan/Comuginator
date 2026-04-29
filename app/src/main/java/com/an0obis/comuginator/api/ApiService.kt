@@ -165,6 +165,7 @@ interface ApiService {
         @Body body: AddItemsToSetRequest
     ): LibrarySetResponse
 
+    @Suppress("unused")
     @DELETE("/v1/library/sets/{setId}/items/{itemId}")
     suspend fun removeItemFromSet(
         @Header("Authorization") auth: String,

@@ -1,6 +1,7 @@
 package com.an0obis.comuginator.storage
 
 import android.content.Context
+import androidx.core.content.edit
 
 class FcmTokenStore(context: Context) {
     private val prefs = context.getSharedPreferences("fcm_store", Context.MODE_PRIVATE)
@@ -8,7 +9,9 @@ class FcmTokenStore(context: Context) {
     var pendingToken: String?
         get() = prefs.getString("pending_token", null)
         set(value) {
-            prefs.edit().putString("pending_token", value).apply()
+            prefs.edit {
+                putString("pending_token", value)
+            }
         }
 
     fun savePendingToken(token: String) {

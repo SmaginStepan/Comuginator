@@ -53,7 +53,10 @@ class UserMessageHistoryActivity : AppCompatActivity() {
             return
         }
 
-        tvTitle.text = getString(R.string.history_with,if (targetUserName.isBlank()) targetUserId else targetUserName)
+        tvTitle.text = getString(
+            R.string.history_with,
+            targetUserName.ifBlank { targetUserId }
+        )
 
         historyAdapter = MessageHistoryAdapter { item ->
             repeatMessage(item)

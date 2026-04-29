@@ -19,9 +19,9 @@ class LibrarySetsAdapter(
 
 
     class VH(v: View) : RecyclerView.ViewHolder(v) {
-        val ivCover = v.findViewById<ImageView>(R.id.ivCover)
-        val tvName = v.findViewById<TextView>(R.id.tvName)
-        val tvCount = v.findViewById<TextView>(R.id.tvCount)
+        val ivCover: ImageView = v.findViewById(R.id.ivCover)
+        val tvName: TextView = v.findViewById(R.id.tvName)
+        val tvCount: TextView = v.findViewById(R.id.tvCount)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {

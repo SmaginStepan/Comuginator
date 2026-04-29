@@ -14,10 +14,10 @@ import com.an0obis.comuginator.api.AacCardDto
 import com.an0obis.comuginator.ui.base.BaseAdapter
 
 class LibraryItemsVH(v: View) : RecyclerView.ViewHolder(v) {
-    val ivImage = v.findViewById<ImageView>(R.id.ivImage)
-    val tvLabel = v.findViewById<TextView>(R.id.tvLabel)
-    val tvSource = v.findViewById<TextView>(R.id.tvSource)
-    val btnDeleteItem = v.findViewById<Button>(R.id.btnDeleteItem)
+    val ivImage: ImageView = v.findViewById(R.id.ivImage)
+    val tvLabel: TextView = v.findViewById(R.id.tvLabel)
+    val tvSource: TextView = v.findViewById(R.id.tvSource)
+    val btnDeleteItem: Button = v.findViewById(R.id.btnDeleteItem)
 }
 
 class LibraryItemsAdapter(

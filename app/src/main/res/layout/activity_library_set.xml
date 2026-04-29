@@ -41,6 +41,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            style="?android:attr/buttonBarButtonStyle"
             android:text="@string/rename" />
 
         <Button
@@ -49,6 +50,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_weight="1"
+            style="?android:attr/buttonBarButtonStyle"
             android:text="@string/delete_set" />
     </LinearLayout>
 
@@ -64,6 +66,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            style="?android:attr/buttonBarButtonStyle"
             android:text="@string/add_photo" />
 
         <Button
@@ -72,6 +75,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_weight="1"
+            style="?android:attr/buttonBarButtonStyle"
             android:text="@string/add_arasaac" />
     </LinearLayout>
 

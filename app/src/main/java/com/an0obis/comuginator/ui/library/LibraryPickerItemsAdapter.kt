@@ -18,8 +18,8 @@ class LibraryPickerItemsAdapter(
 ) : BaseAdapter<AacCardDto, LibraryPickerItemsAdapter.VH>() {
 
     class VH(v: View) : RecyclerView.ViewHolder(v) {
-        val ivImage = v.findViewById<ImageView>(R.id.ivImage)
-        val tvLabel = v.findViewById<TextView>(R.id.tvLabel)
+        val ivImage: ImageView = v.findViewById(R.id.ivImage)
+        val tvLabel: TextView = v.findViewById(R.id.tvLabel)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
