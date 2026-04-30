@@ -50,7 +50,8 @@ class LibraryItemPickerActivity : BaseActivity() {
     enum class TargetMode {
         USER_AVATAR,
         SET_COVER,
-        ADD_TO_SET
+        ADD_TO_SET,
+        PICK_SINGLE
     }
 
     companion object {
@@ -179,6 +180,7 @@ class LibraryItemPickerActivity : BaseActivity() {
             TargetMode.USER_AVATAR -> getString(R.string.choose_user_avatar)
             TargetMode.SET_COVER -> getString(R.string.choose_set_cover)
             TargetMode.ADD_TO_SET -> getString(R.string.add_item_to_set)
+            TargetMode.PICK_SINGLE -> getString(R.string.add_item_to_set)
         }
 
         btnChooseFromLibrary.isVisible = true

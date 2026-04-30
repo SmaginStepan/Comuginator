@@ -191,6 +191,7 @@
     <string name="choose_user_avatar">Выбрать аватар пользователя</string>
     <string name="choose_set_cover">Выбрать обложку набора</string>
     <string name="add_item_to_set">Добавить элемент в набор</string>
+    <string name="add_item_to_message">Добавить элемент в сообщение</string>
     <string name="photo_number">Фото %1$s</string>
     <string name="user_name_required">Нужно имя пользователя</string>
     <string name="device_name_required">Нужно имя устройства</string>

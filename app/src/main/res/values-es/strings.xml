@@ -188,6 +188,7 @@
     <string name="choose_user_avatar">Elegir avatar de usuario</string>
     <string name="choose_set_cover">Elegir portada del conjunto</string>
     <string name="add_item_to_set">Añadir elemento al conjunto</string>
+    <string name="add_item_to_message">Añadir elemento al mensaje</string>
     <string name="photo_number">Foto %1$s</string>
     <string name="user_name_required">El nombre de usuario es obligatorio</string>
     <string name="device_name_required">El nombre del dispositivo es obligatorio</string>

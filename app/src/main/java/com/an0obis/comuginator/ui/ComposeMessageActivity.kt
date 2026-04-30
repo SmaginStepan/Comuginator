@@ -1,12 +1,8 @@
 package com.an0obis.comuginator.ui
 
 import android.os.Bundle
-import android.view.inputmethod.EditorInfo
 import android.widget.Button
-import android.widget.EditText
 import android.widget.TextView
-import androidx.core.widget.doAfterTextChanged
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.an0obis.comuginator.R
@@ -16,27 +12,16 @@ import com.an0obis.comuginator.api.SendAacMessageRequest
 import com.an0obis.comuginator.storage.SessionStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import android.net.Uri
 import android.app.AlertDialog
+import android.content.Intent
 import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.MultipartBody
-import okhttp3.RequestBody.Companion.asRequestBody
-import okhttp3.RequestBody.Companion.toRequestBody
-import java.io.File
-import java.io.FileOutputStream
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import androidx.activity.viewModels
-import android.view.KeyEvent
-import androidx.lifecycle.lifecycleScope
-import android.view.inputmethod.InputMethodManager
 import com.an0obis.comuginator.ui.base.BaseActivity
 
 class ComposeMessageActivity : BaseActivity() {
@@ -51,29 +36,26 @@ class ComposeMessageActivity : BaseActivity() {
     private lateinit var btnAddPhoto: Button
 
     private lateinit var btnLoadLibrarySet: Button
-    private val pickImageLauncher =
-        registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-            if (uri != null) {
-                askPhotoLabelAndUpload(uri)
-            }
-        }
     private lateinit var tvTarget: TextView
     private lateinit var tvMessageHeader: TextView
     private lateinit var tvRepliesHeader: TextView
-    private lateinit var etSearch: EditText
     private lateinit var btnSendMessage: Button
     private lateinit var rvSelectedCards: RecyclerView
     private lateinit var rvReplyCards: RecyclerView
-    private lateinit var rvResults: RecyclerView
 
     private lateinit var selectedAdapter: SelectedCardAdapter
     private lateinit var replyAdapter: SelectedCardAdapter
-    private lateinit var resultsAdapter: SimpleCardAdapter
 
     private lateinit var targetUserId: String
     private lateinit var targetUserName: String
 
-    private var searchJob: Job? = null
+    private val pickLibraryItemLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode != RESULT_OK) return@registerForActivityResult
+
+            val itemId = LibraryItemPickerActivity.parseResultItemId(result.data) ?: return@registerForActivityResult
+            addLibraryItemById(itemId)
+        }
 
     private val vm: ComposeMessageViewModel by viewModels()
 
@@ -90,11 +72,9 @@ class ComposeMessageActivity : BaseActivity() {
         tvTarget = findViewById(R.id.tvTarget)
         tvMessageHeader = findViewById(R.id.tvMessageHeader)
         tvRepliesHeader = findViewById(R.id.tvRepliesHeader)
-        etSearch = findViewById(R.id.etSearch)
         btnSendMessage = findViewById(R.id.btnSendMessage)
         rvSelectedCards = findViewById(R.id.rvSelectedCards)
         rvReplyCards = findViewById(R.id.rvReplyCards)
-        rvResults = findViewById(R.id.rvResults)
 
         if (!vm.initialized) {
             vm.targetUserId = intent.getStringExtra("targetUserId").orEmpty()
@@ -123,20 +103,6 @@ class ComposeMessageActivity : BaseActivity() {
             }
         )
 
-        resultsAdapter = SimpleCardAdapter(
-            onClick = { card ->
-                when (vm.currentAddMode) {
-                    ComposeMessageViewModel.AddMode.MESSAGE -> {
-                        vm.selectedCards.add(card)
-                        selectedAdapter.submitItems(vm.selectedCards.toList())
-                    }
-                    ComposeMessageViewModel.AddMode.REPLY -> {
-                        vm.replyCards.add(card)
-                        replyAdapter.submitItems(vm.replyCards.toList())
-                    }
-                }
-            }
-        )
 
         rvSelectedCards.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
@@ -146,8 +112,6 @@ class ComposeMessageActivity : BaseActivity() {
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         rvReplyCards.adapter = replyAdapter
 
-        rvResults.layoutManager = GridLayoutManager(this, 3)
-        rvResults.adapter = resultsAdapter
 
         selectedAdapter.submitItems(vm.selectedCards.toList())
         replyAdapter.submitItems(vm.replyCards.toList())
@@ -168,70 +132,16 @@ class ComposeMessageActivity : BaseActivity() {
             sendMessage()
         }
 
-        etSearch.doAfterTextChanged { editable ->
-            val query = editable?.toString()?.trim().orEmpty()
-
-            searchJob?.cancel()
-
-            if (query.isBlank()) {
-                resultsAdapter.submitItems(emptyList())
-                return@doAfterTextChanged
-            }
-
-            searchJob = scope.launch {
-                delay(2000)
-                if (query != vm.lastSearchQuery) {
-                    runSearch(query)
-                }
-            }
-        }
-
-        etSearch.setOnEditorActionListener { _: TextView, actionId: Int, _ ->
-            if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE) {
-                val query = etSearch.text.toString().trim()
-                if (query.isNotBlank()) {
-                    searchJob?.cancel()
-                    scope.launch {
-                        runSearch(query)
-                    }
-                }
-                true
-            } else {
-                false
-            }
-        }
-
         btnAddPhoto = findViewById(R.id.btnAddPhoto)
         btnLoadLibrarySet = findViewById(R.id.btnLoadLibrarySet)
 
         btnAddPhoto.setOnClickListener {
-            pickImageLauncher.launch("image/*")
+            val intent = Intent(this, LibraryItemPickerActivity::class.java)
+            pickLibraryItemLauncher.launch(intent)
         }
 
         btnLoadLibrarySet.setOnClickListener {
             showChooseLibrarySetDialog()
-        }
-
-        etSearch.setOnEditorActionListener { view, actionId, event ->
-            val isSearchAction = actionId == EditorInfo.IME_ACTION_SEARCH
-            val isEnter = event?.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP
-
-            if (isSearchAction || isEnter) {
-                val query = etSearch.text.toString().trim()
-                if (query.isNotBlank()) {
-                    lifecycleScope.launch {
-                        runSearch(query)
-                    }
-                }
-
-                val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-                imm.hideSoftInputFromWindow(view.windowToken, 0)
-                view.clearFocus()
-
-                true
-            } else {
-                false
-            }
         }
 
         updateModeUi()
@@ -241,6 +151,42 @@ class ComposeMessageActivity : BaseActivity() {
         }
     }
 
+    private fun addLibraryItemById(itemId: String) {
+        scope.launch {
+            try {
+                val response = ApiClient.api.getLibraryItems(
+                    auth = store.authHeaderOrThrow(),
+                    source = null
+                )
+
+                val card = response.items.firstOrNull { it.id == itemId }
+                    ?: error("Library item not found: $itemId")
+
+                runOnUiThread {
+                    addCardToCurrentMode(card)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                runOnUiThread {
+                    tvTarget.text = getString(R.string.load_library_failed, e.message)
+                }
+            }
+        }
+    }
+
+    private fun addCardToCurrentMode(card: AacCardDto) {
+        when (vm.currentAddMode) {
+            ComposeMessageViewModel.AddMode.MESSAGE -> {
+                vm.selectedCards.add(card)
+                selectedAdapter.submitItems(vm.selectedCards.toList())
+            }
+
+            ComposeMessageViewModel.AddMode.REPLY -> {
+                vm.replyCards.add(card)
+                replyAdapter.submitItems(vm.replyCards.toList())
+            }
+        }
+    }
     private fun updateModeUi() {
         val activeColor = 0xFF4444FF.toInt()
         val inactiveColor = 0x00000000
@@ -290,23 +236,6 @@ class ComposeMessageActivity : BaseActivity() {
         }
     }
 
-    private suspend fun runSearch(query: String) {
-        try {
-            vm.lastSearchQuery = query
-            val lang = getArasaacLang()
-            val response = ApiClient.api.searchArasaac(
-                auth = store.authHeaderOrThrow(),
-                query = query,
-                lang = lang
-            )
-
-            runOnUiThread {
-                resultsAdapter.submitItems(response.items)
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
 
     private fun sendMessage() {
         if (vm.selectedCards.isEmpty()) return
@@ -429,101 +358,6 @@ class ComposeMessageActivity : BaseActivity() {
                 }
             }
         }
-    }
-
-    private fun getMimeType(uri: Uri): String {
-        return contentResolver.getType(uri) ?: "image/jpeg"
-    }
-
-    private fun guessExtension(mimeType: String): String {
-        return when (mimeType) {
-            "image/png" -> ".png"
-            "image/webp" -> ".webp"
-            "image/jpeg", "image/jpg" -> ".jpg"
-            else -> ".jpg"
-        }
-    }
-
-    private fun createTempFileFromUri(uri: Uri): File {
-        val mimeType = getMimeType(uri)
-        val extension = guessExtension(mimeType)
-
-        val inputStream = contentResolver.openInputStream(uri)
-            ?: error("Cannot open input stream")
-
-        val tempFile = File.createTempFile("upload_", extension, cacheDir)
-
-        inputStream.use { input ->
-            FileOutputStream(tempFile).use { output ->
-                input.copyTo(output)
-            }
-        }
-
-        return tempFile
-    }
-
-    private fun uploadFamilyPhoto(uri: Uri, label: String) {
-        scope.launch {
-            try {
-                val mimeType = getMimeType(uri)
-                val tempFile = createTempFileFromUri(uri)
-
-                val fileBody = tempFile.asRequestBody(mimeType.toMediaTypeOrNull())
-                val filePart = MultipartBody.Part.createFormData(
-                    "file",
-                    tempFile.name,
-                    fileBody
-                )
-
-                val labelBody = label.toRequestBody("text/plain".toMediaTypeOrNull())
-
-                val response = ApiClient.api.uploadFamilyPhoto(
-                    auth = store.authHeaderOrThrow(),
-                    file = filePart,
-                    label = labelBody
-                )
-
-                val card = response.item
-
-                runOnUiThread {
-                    when (vm.currentAddMode) {
-                        ComposeMessageViewModel.AddMode.MESSAGE -> {
-                            vm.selectedCards.add(card)
-                            selectedAdapter.submitItems(vm.selectedCards.toList())
-                        }
-                        ComposeMessageViewModel.AddMode.REPLY -> {
-                            vm.replyCards.add(card)
-                            replyAdapter.submitItems(vm.replyCards.toList())
-                        }
-                    }
-                }
-
-                tempFile.delete()
-            } catch (e: Exception) {
-                e.printStackTrace()
-                runOnUiThread {
-                    tvTarget.text = getString(R.string.upload_failed, e.message)
-                }
-            }
-        }
-    }
-
-    private fun askPhotoLabelAndUpload(uri: Uri) {
-        val input = EditText(this).apply {
-            hint = getString(R.string.label)
-        }
-
-        AlertDialog.Builder(this)
-            .setTitle(R.string.photo_label)
-            .setView(input)
-            .setNegativeButton(R.string.cancel, null)
-            .setPositiveButton(R.string.upload) { _, _ ->
-                val label = input.text?.toString()?.trim().orEmpty()
-                if (label.isNotBlank()) {
-                    uploadFamilyPhoto(uri, label)
-                }
-            }
-            .show()
     }
 
     override fun onDestroy() {

@@ -48,24 +48,7 @@
         android:layout_height="100dp"
         android:layout_marginTop="8dp" />
 
-    <EditText
-        android:id="@+id/etSearch"
-        style="@style/ComuginatorEditText.Search"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:autofillHints=""
-        android:hint="@string/search_cards"
-        android:imeOptions="actionSearch"
-        android:inputType="text"
-        android:singleLine="true" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvResults"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginTop="12dp"
-        android:layout_weight="1" />
 
     <LinearLayout
         android:layout_width="match_parent"

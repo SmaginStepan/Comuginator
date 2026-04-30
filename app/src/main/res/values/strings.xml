@@ -213,6 +213,7 @@
     <string name="choose_user_avatar">Choose user avatar</string>
     <string name="choose_set_cover">Choose set cover</string>
     <string name="add_item_to_set">Add item to set</string>
+    <string name="add_item_to_message">Add item to message</string>
     <string name="photo_number">Photo %1$s</string>
 
     <!-- MainActivity -->
