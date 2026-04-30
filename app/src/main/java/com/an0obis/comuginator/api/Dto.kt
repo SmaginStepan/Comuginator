@@ -332,7 +332,8 @@ data class ChildHomeNodeItemDto(
     val label: String,
     val source: String?,
     val sourceRef: String?,
-    val imageUrl: String?
+    val imageUrl: String?,
+    val isVisible: Boolean = true
 )
 
 data class ChildHomeTargetDto(
@@ -352,6 +353,7 @@ data class ChildHomeNodeDto(
     val blinkEnabled: Boolean,
     val blinkSeconds: Int,
     val labelOverride: String?,
+    val isVisible: Boolean = true,
     val item: ChildHomeNodeItemDto?,
     val targets: List<ChildHomeTargetDto> = emptyList()
 )
@@ -388,7 +390,8 @@ data class UpdateChildHomeNodeRequest(
     val targetUserIds: List<String>? = null,
     val blinkEnabled: Boolean? = null,
     val blinkSeconds: Int? = null,
-    val labelOverride: String? = null
+    val labelOverride: String? = null,
+    val isVisible: Boolean? = null
 )
 
 data class ChildHomeNodeResponse(

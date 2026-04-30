@@ -144,7 +144,8 @@ class ChildHomeActivity : BaseActivity() {
             onNodeClick = { node -> onNodeClicked(node) },
             onRenameClick = { node -> openRenameNode(node) },
             onEditClick = { node -> openEditNode(node) },
-            onDeleteClick = { node -> confirmDeleteNode(node) }
+            onDeleteClick = { node -> confirmDeleteNode(node) },
+            onToggleVisibilityClick = { node -> toggleNodeVisibility(node) }
         )
 
         rv.layoutManager = GridLayoutManager(this, 2)
@@ -156,6 +157,34 @@ class ChildHomeActivity : BaseActivity() {
 
         updateNavigationUi()
         loadNodes(currentParentId)
+    }
+
+    private fun toggleNodeVisibility(node: ChildHomeNodeDto) {
+        progress.visibility = View.VISIBLE
+
+        lifecycleScope.launch {
+            try {
+                withContext(Dispatchers.IO) {
+                    ApiClient.api.updateChildHomeNode(
+                        auth = sessionStore.authHeaderOrThrow(),
+                        nodeId = node.id,
+                        body = UpdateChildHomeNodeRequest(
+                            isVisible = !node.isVisible
+                        )
+                    )
+                }
+
+                loadNodes(currentParentId)
+            } catch (e: Exception) {
+                Toast.makeText(
+                    this@ChildHomeActivity,
+                    getString(R.string.child_home_update_failed, e.message),
+                    Toast.LENGTH_LONG
+                ).show()
+            } finally {
+                progress.visibility = View.GONE
+            }
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -413,12 +442,26 @@ class ChildHomeActivity : BaseActivity() {
         when (node.type) {
             "MENU" -> openMenu(node)
             "ACTION" -> {
-                if (isEditorMode && !previewMode) {
-                    openEditNode(node)
-                } else {
-                    requestAction(node)
+                when {
+                    isEditorMode && !previewMode -> {
+                        openEditNode(node)
+                    }
+
+                    previewMode -> {
+                        previewAction(node)
+                    }
+
+                    else -> {
+                        requestAction(node)
+                    }
                 }
             }
+            }
+    }
+
+    private fun previewAction(node: ChildHomeNodeDto) {
+        if (node.blinkEnabled) {
+            blinkNode(node.id, node.blinkSeconds)
         }
     }
 
@@ -465,7 +508,15 @@ class ChildHomeActivity : BaseActivity() {
                     )
                 }
 
-                adapter.submitItems(response.items)
+                val effectiveEditorMode = isEditorMode && !previewMode
+
+                val visibleItems = if (effectiveEditorMode) {
+                    response.items
+                } else {
+                    response.items.filter { it.isVisible }
+                }
+
+                adapter.submitItems(visibleItems)
             } catch (e: Exception) {
                 Toast.makeText(
                     this@ChildHomeActivity,

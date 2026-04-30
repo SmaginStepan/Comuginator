@@ -3,6 +3,7 @@ package com.an0obis.comuginator.ui
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
 import coil.Coil
@@ -17,7 +18,8 @@ class ChildHomeAdapter(
     private val onNodeClick: (ChildHomeNodeDto) -> Unit,
     private val onRenameClick: (ChildHomeNodeDto) -> Unit,
     private val onEditClick: (ChildHomeNodeDto) -> Unit,
-    private val onDeleteClick: (ChildHomeNodeDto) -> Unit
+    private val onDeleteClick: (ChildHomeNodeDto) -> Unit,
+    private val onToggleVisibilityClick: (ChildHomeNodeDto) -> Unit
 ) : BaseAdapter<ChildHomeNodeDto, ChildHomeAdapter.VH>() {
 
     private var onlyVisibleNodeId: String? = null
@@ -37,7 +39,8 @@ class ChildHomeAdapter(
         val ivNode: android.widget.ImageView = root.findViewById(R.id.ivNode)
         val tvNodeLabel: android.widget.TextView = root.findViewById(R.id.tvNodeLabel)
         val rootNode: View = root.findViewById(R.id.rootNode)
-        val btnChildMore: android.widget.Button = root.findViewById(R.id.btnChildMore)
+        val btnChildMore: Button = root.findViewById(R.id.btnChildMore)
+        val btnToggleVisibility: Button = itemView.findViewById(R.id.btnToggleVisibility)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
@@ -105,5 +108,19 @@ class ChildHomeAdapter(
         holder.rootNode.setOnClickListener {
             onNodeClick(node)
         }
+        holder.btnToggleVisibility.visibility =
+            if (isEditorMode) View.VISIBLE else View.GONE
+
+        holder.btnToggleVisibility.text =
+            holder.itemView.context.getString(
+                if (node.isVisible) R.string.hide else R.string.show
+            )
+
+        holder.btnToggleVisibility.setOnClickListener {
+            onToggleVisibilityClick(node)
+        }
+
+        holder.itemView.alpha =
+            if (isEditorMode && !node.isVisible) 0.35f else 1f
     }
 }
