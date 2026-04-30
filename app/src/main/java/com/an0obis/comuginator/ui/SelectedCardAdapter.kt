@@ -43,7 +43,7 @@ class SelectedCardAdapter(
                 .target(ivCardImage)
                 .crossfade(true)
 
-            if (!sessionStore.isConnected() && item.source == "FAMILY_PHOTO") {
+            if (sessionStore.isConnected() && item.source == "FAMILY_PHOTO") {
                 requestBuilder.addHeader("Authorization", sessionStore.authHeaderOrThrow())
             }
 
