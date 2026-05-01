@@ -70,4 +70,8 @@ dependencies {
 
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+    implementation(libs.core)
+    implementation(libs.zxing.android.embedded)
+
 }

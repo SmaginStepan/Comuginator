@@ -230,4 +230,14 @@
 
     <string name="element_menu">Раздел</string>
     <string name="element_action">Просьба</string>
+
+    <string name="invite_qr_code">QR-код приглашения</string>
+    <string name="scan_qr_code">Сканировать QR-код</string>
+    <string name="invalid_qr_code">Неверный QR-код</string>
+
+    <string name="delete_device">Удалить устройство</string>
+    <string name="delete_device_confirm">Удалить устройство «%1$s»?</string>
+    <string name="deleting_device">Удаление устройства&#8230;</string>
+    <string name="device_deleted">Устройство удалено</string>
+    <string name="delete_device_failed">Не удалось удалить устройство: %1$s</string>
 </resources>

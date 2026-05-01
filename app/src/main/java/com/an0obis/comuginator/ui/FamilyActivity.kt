@@ -28,6 +28,14 @@ import com.an0obis.comuginator.api.UpdateMyAvatarRequest
 import android.widget.PopupMenu
 import androidx.activity.result.contract.ActivityResultContracts
 import com.an0obis.comuginator.service.CommandSyncScheduler
+import android.graphics.Bitmap
+import android.graphics.Color
+import android.view.View
+import android.widget.ImageView
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.qrcode.QRCodeWriter
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.set
 
 class FamilyActivity : BaseActivity() {
 
@@ -35,6 +43,7 @@ class FamilyActivity : BaseActivity() {
 
     private lateinit var tvFamily: TextView
     private lateinit var tvInvite: TextView
+    private lateinit var ivInviteQr: ImageView
     private lateinit var rvFamily: RecyclerView
     private lateinit var familyAdapter: FamilyAdapter
     private var currentMeRole: String = ""
@@ -68,6 +77,7 @@ class FamilyActivity : BaseActivity() {
 
         tvFamily = findViewById(R.id.tvFamily)
         tvInvite = findViewById(R.id.tvInvite)
+        ivInviteQr = findViewById(R.id.ivInviteQr)
         rvFamily = findViewById(R.id.rvFamily)
         btnLibrary = findViewById(R.id.btnLibrary)
 
@@ -111,6 +121,9 @@ class FamilyActivity : BaseActivity() {
             },
             onSetAvatarClick = { userId ->
                 showChooseAvatarDialog(userId)
+            },
+            onDeleteDeviceClick = { deviceId, deviceName ->
+                confirmDeleteDevice(deviceId, deviceName)
             }
         )
         btnFamilyAdd = findViewById(R.id.btnFamilyAdd)
@@ -184,6 +197,9 @@ class FamilyActivity : BaseActivity() {
         rvFamily.layoutManager = LinearLayoutManager(this)
         rvFamily.adapter = familyAdapter
         tvStatus = findViewById(R.id.tvStatus)
+
+        tvInvite.visibility = View.GONE
+        ivInviteQr.visibility = View.GONE
 
         ensureInitialized()
     }
@@ -262,6 +278,45 @@ class FamilyActivity : BaseActivity() {
                 if (handleUnauthorized(e)) return@launch
                 runOnUiThread {
                     tvStatus.text = getString(R.string.update_user_failed, e.message)
+                    setButtonsEnabled(true)
+                }
+            }
+        }
+    }
+
+    private fun confirmDeleteDevice(deviceId: String, deviceName: String) {
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle(R.string.delete_device)
+            .setMessage(getString(R.string.delete_device_confirm, deviceName))
+            .setNegativeButton(R.string.cancel, null)
+            .setPositiveButton(R.string.delete) { _, _ ->
+                deleteDevice(deviceId)
+            }
+            .show()
+    }
+
+    private fun deleteDevice(deviceId: String) {
+        scope.launch {
+            try {
+                runOnUiThread {
+                    tvStatus.text = getString(R.string.deleting_device)
+                    setButtonsEnabled(false)
+                }
+
+                ApiClient.api.deleteDevice(
+                    auth = authHeaderOrThrow(),
+                    deviceId = deviceId
+                )
+
+                runOnUiThread {
+                    tvStatus.text = getString(R.string.device_deleted)
+                }
+
+                loadFamily()
+            } catch (e: Exception) {
+                if (handleUnauthorized(e)) return@launch
+                runOnUiThread {
+                    tvStatus.text = getString(R.string.delete_device_failed, e.message)
                     setButtonsEnabled(true)
                 }
             }
@@ -364,6 +419,8 @@ class FamilyActivity : BaseActivity() {
                         expiresInMinutes = 60
                     )
                 )
+                val qrContent = "comuginator://join?code=${response.code}"
+                val qrBitmap = createQrBitmap(qrContent)
 
                 runOnUiThread {
                     tvInvite.text = buildString {
@@ -371,6 +428,8 @@ class FamilyActivity : BaseActivity() {
                         append(getString(R.string.role_result, role))
                         append(getString(R.string.expires_result, response.expiresAt))
                     }
+                    ivInviteQr.setImageBitmap(qrBitmap)
+                    ivInviteQr.visibility = View.VISIBLE
                     tvStatus.text = getString(R.string.invite_created)
                     setButtonsEnabled(true)
                 }
@@ -455,7 +514,10 @@ class FamilyActivity : BaseActivity() {
             },
             onSetAvatarClick = { userId ->
                 showChooseAvatarDialog(userId)
-            }
+            },
+            onDeleteDeviceClick = { deviceId, deviceName ->
+                confirmDeleteDevice(deviceId, deviceName)
+            },
         )
 
         rvFamily.adapter = familyAdapter
@@ -584,6 +646,19 @@ class FamilyActivity : BaseActivity() {
                 sendSetVolumeCommand(deviceId, seekBar.progress)
             }
             .show()
+    }
+
+    private fun createQrBitmap(content: String, sizePx: Int = 512): Bitmap {
+        val bits = QRCodeWriter().encode(content, BarcodeFormat.QR_CODE, sizePx, sizePx)
+        val bitmap = createBitmap(sizePx, sizePx, Bitmap.Config.RGB_565)
+
+        for (x in 0 until sizePx) {
+            for (y in 0 until sizePx) {
+                bitmap[x, y] = if (bits[x, y]) Color.BLACK else Color.WHITE
+            }
+        }
+
+        return bitmap
     }
 
     override fun onDestroy() {

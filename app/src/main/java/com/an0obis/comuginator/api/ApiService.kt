@@ -116,6 +116,12 @@ interface ApiService {
         @Body body: UpdateNameRequest
     ): UpdateDeviceResponse
 
+    @DELETE("v1/devices/{deviceId}")
+    suspend fun deleteDevice(
+        @Header("Authorization") auth: String,
+        @Path("deviceId") deviceId: String
+    ): OkResponse
+
     @GET("/v1/library/sets")
     suspend fun getLibrarySets(
         @Header("Authorization") auth: String

@@ -224,4 +224,14 @@
 
     <string name="element_menu">Sección</string>
     <string name="element_action">Petición</string>
+
+    <string name="invite_qr_code">Código QR de invitación</string>
+    <string name="scan_qr_code">Escanear código QR</string>
+    <string name="invalid_qr_code">Código QR no válido</string>
+
+    <string name="delete_device">Eliminar dispositivo</string>
+    <string name="delete_device_confirm">¿Eliminar el dispositivo «%1$s»?</string>
+    <string name="deleting_device">Eliminando dispositivo&#8230;</string>
+    <string name="device_deleted">Dispositivo eliminado</string>
+    <string name="delete_device_failed">No se pudo eliminar el dispositivo: %1$s</string>
 </resources>

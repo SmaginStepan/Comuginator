@@ -22,6 +22,7 @@ class FamilyAdapter(
     private val onHistoryClick: (userId: String, userName: String) -> Unit,
     private val onRenameUserClick: (userId: String, userName: String) -> Unit,
     private val onRenameDeviceClick: (deviceId: String, deviceName: String) -> Unit,
+    private val onDeleteDeviceClick: (deviceId: String, deviceName: String) -> Unit,
     private val onSetAvatarClick: (userId: String) -> Unit,
 ) : BaseAdapter<FamilyListItem, RecyclerView.ViewHolder>() {
 
@@ -153,13 +154,19 @@ class FamilyAdapter(
             btnDeviceMore.setOnClickListener { view ->
                 val popup = PopupMenu(view.context, view)
                 val renameId = 1
+                val deleteId = 2
 
                 popup.menu.add(0, renameId, 0, view.context.getString(R.string.rename))
+                popup.menu.add(0, deleteId, 1, view.context.getString(R.string.delete))
 
                 popup.setOnMenuItemClickListener { btn ->
                     when (btn.itemId) {
                         renameId -> {
                             onRenameDeviceClick(item.deviceId, item.deviceName)
+                            true
+                        }
+                        deleteId -> {
+                            onDeleteDeviceClick(item.deviceId, item.deviceName)
                             true
                         }
                         else -> false

@@ -269,4 +269,14 @@
 
     <string name="element_menu">Section</string>
     <string name="element_action">Request</string>
+
+    <string name="invite_qr_code">Invite QR code</string>
+    <string name="scan_qr_code">Scan QR code</string>
+    <string name="invalid_qr_code">Invalid QR code</string>
+
+    <string name="delete_device">Delete device</string>
+    <string name="delete_device_confirm">Delete device "%1$s"?</string>
+    <string name="deleting_device">Deleting device&#8230;</string>
+    <string name="device_deleted">Device deleted</string>
+    <string name="delete_device_failed">Failed to delete device: %1$s</string>
 </resources>

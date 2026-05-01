@@ -23,8 +23,16 @@ import androidx.appcompat.app.AlertDialog
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import androidx.core.view.isVisible
+import com.journeyapps.barcodescanner.ScanContract
+import com.journeyapps.barcodescanner.ScanOptions
 
 class MainActivity : BaseActivity() {
+
+    private companion object {
+        const val STATE_CHOICE_VISIBLE = "choice_visible"
+        const val STATE_JOIN_VISIBLE = "join_visible"
+        const val STATE_STATUS = "status"
+    }
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -41,7 +49,23 @@ class MainActivity : BaseActivity() {
     private lateinit var layoutChoice: LinearLayout
     private lateinit var layoutJoin: LinearLayout
 
+    private lateinit var btnScanQr: Button
+
     private lateinit var stableDeviceId: String
+
+    private val qrScanLauncher =
+        registerForActivityResult(ScanContract()) { result ->
+            val content = result.contents ?: return@registerForActivityResult
+            val code = parseInviteCodeFromQr(content)
+
+            if (code == null) {
+                tvStatus.text = getString(R.string.invalid_qr_code)
+                return@registerForActivityResult
+            }
+
+            etInviteCode.setText(code)
+            layoutJoin.isVisible = true
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,13 +85,20 @@ class MainActivity : BaseActivity() {
         tvStatus = findViewById(R.id.tvStatus)
         layoutChoice = findViewById(R.id.layoutChoice)
         layoutJoin = findViewById(R.id.layoutJoin)
+        btnScanQr = findViewById(R.id.btnScanQr)
 
         stableDeviceId = store.deviceId ?: UUID.randomUUID().toString().also {
             store.deviceId = it
         }
 
-        layoutChoice.visibility = View.GONE
-        layoutJoin.visibility = View.GONE
+        if (savedInstanceState == null) {
+            layoutChoice.visibility = View.GONE
+            layoutJoin.visibility = View.GONE
+        } else {
+            layoutChoice.isVisible = savedInstanceState.getBoolean(STATE_CHOICE_VISIBLE, false)
+            layoutJoin.isVisible = savedInstanceState.getBoolean(STATE_JOIN_VISIBLE, false)
+            tvStatus.text = savedInstanceState.getString(STATE_STATUS).orEmpty()
+        }
 
         if (!store.userName.isNullOrBlank()) {
             etUserName.setText(store.userName)
@@ -115,6 +146,16 @@ class MainActivity : BaseActivity() {
             joinFamily()
         }
 
+        btnScanQr.setOnClickListener {
+            qrScanLauncher.launch(
+                ScanOptions()
+                    .setDesiredBarcodeFormats(ScanOptions.QR_CODE)
+                    .setPrompt(getString(R.string.scan_qr_code))
+                    .setBeepEnabled(false)
+                    .setOrientationLocked(false)
+            )
+        }
+
         ensureInitialized()
     }
 
@@ -122,11 +163,34 @@ class MainActivity : BaseActivity() {
         openFamilyScreen()
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
+        outState.putBoolean(STATE_CHOICE_VISIBLE, layoutChoice.isVisible)
+        outState.putBoolean(STATE_JOIN_VISIBLE, layoutJoin.isVisible)
+        outState.putString(STATE_STATUS, tvStatus.text?.toString().orEmpty())
+    }
+
+    private fun parseInviteCodeFromQr(content: String): String? {
+        val raw = content.trim()
+
+        if (raw.startsWith("comuginator://join?code=")) {
+            return raw.substringAfter("code=")
+                .substringBefore("&")
+                .trim()
+                .uppercase()
+                .takeIf { it.isNotBlank() }
+        }
+
+        return raw.uppercase().takeIf { it.matches(Regex("[A-Z0-9]{4,20}")) }
+    }
+
     private fun setButtonsEnabled(enabled: Boolean) {
         btnNext.isEnabled = enabled
         btnCreateFamily.isEnabled = enabled
         btnShowJoin.isEnabled = enabled
         btnJoinFamily.isEnabled = enabled
+        btnScanQr.isEnabled = enabled
     }
 
     private fun openFamilyScreen() {
