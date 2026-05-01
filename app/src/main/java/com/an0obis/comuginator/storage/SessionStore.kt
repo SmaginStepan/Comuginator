@@ -30,6 +30,20 @@ class SessionStore(context: Context) {
         get() = prefs.getString("deviceName", null)
         set(value) = prefs.edit { putString("deviceName", value) }
 
+    var lastUsedInviteId: String?
+        get() = prefs.getString("last_used_invite_id", null)
+        set(value) {
+            prefs.edit {
+                putString("last_used_invite_id", value)
+            }
+        }
+
+    fun clearLastUsedInviteId() {
+        prefs.edit {
+            remove("last_used_invite_id")
+        }
+    }
+
     fun isConnected(): Boolean = !token.isNullOrBlank()
 
     fun authHeader(): String? = token?.let { "Bearer $it" }

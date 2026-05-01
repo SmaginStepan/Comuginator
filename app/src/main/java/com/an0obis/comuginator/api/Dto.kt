@@ -37,6 +37,7 @@ data class CreateInviteRequest(
 )
 
 data class CreateInviteResponse(
+    val inviteId: String,
     val code: String,
     val expiresAt: String
 )

@@ -36,6 +36,12 @@ import com.google.zxing.BarcodeFormat
 import com.google.zxing.qrcode.QRCodeWriter
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.set
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.IntentFilter
+import androidx.core.content.ContextCompat
+import com.an0obis.comuginator.service.ACTION_INVITE_USED
+import com.an0obis.comuginator.service.EXTRA_INVITE_ID
 
 class FamilyActivity : BaseActivity() {
 
@@ -55,6 +61,8 @@ class FamilyActivity : BaseActivity() {
     private lateinit var btnChildHome: Button
     private var pendingAvatarUserId: String? = null
 
+    private var shownInviteId: String? = null
+
     private val avatarPickerLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             val userId = pendingAvatarUserId
@@ -67,6 +75,13 @@ class FamilyActivity : BaseActivity() {
                 }
             }
         }
+
+    private val inviteUsedReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            val inviteId = intent?.getStringExtra(EXTRA_INVITE_ID)
+            onInviteUsed(inviteId)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -202,6 +217,23 @@ class FamilyActivity : BaseActivity() {
         ivInviteQr.visibility = View.GONE
 
         ensureInitialized()
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        ContextCompat.registerReceiver(
+            this,
+            inviteUsedReceiver,
+            IntentFilter(ACTION_INVITE_USED),
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        )
+
+        val usedInviteId = store.lastUsedInviteId
+        if (usedInviteId == shownInviteId) {
+            clearInviteUi()
+            store.clearLastUsedInviteId()
+        }
     }
 
     private fun showRenameDialog(
@@ -421,15 +453,22 @@ class FamilyActivity : BaseActivity() {
                 )
                 val qrContent = "comuginator://join?code=${response.code}"
                 val qrBitmap = createQrBitmap(qrContent)
+                shownInviteId = response.inviteId
 
                 runOnUiThread {
+                    shownInviteId = response.inviteId
+
                     tvInvite.text = buildString {
                         append(getString(R.string.invite_code_result, response.code))
                         append(getString(R.string.role_result, role))
                         append(getString(R.string.expires_result, response.expiresAt))
                     }
+
+                    tvInvite.visibility = View.VISIBLE
+
                     ivInviteQr.setImageBitmap(qrBitmap)
                     ivInviteQr.visibility = View.VISIBLE
+
                     tvStatus.text = getString(R.string.invite_created)
                     setButtonsEnabled(true)
                 }
@@ -440,6 +479,24 @@ class FamilyActivity : BaseActivity() {
                     setButtonsEnabled(true)
                 }
             }
+        }
+    }
+
+    private fun clearInviteUi() {
+        shownInviteId = null
+
+        tvInvite.text = ""
+        tvInvite.visibility = View.GONE
+
+        ivInviteQr.setImageDrawable(null)
+        ivInviteQr.visibility = View.GONE
+    }
+
+    private fun onInviteUsed(inviteId: String?) {
+        if (inviteId.isNullOrBlank()) return
+
+        if (inviteId == shownInviteId) {
+            clearInviteUi()
         }
     }
 

@@ -1,6 +1,7 @@
 package com.an0obis.comuginator.service
 
 import android.content.Context
+import android.content.Intent
 import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
@@ -8,6 +9,9 @@ import com.an0obis.comuginator.api.ApiClient
 import com.an0obis.comuginator.api.CommandDto
 import com.an0obis.comuginator.storage.SessionStore
 
+
+const val ACTION_INVITE_USED = "com.an0obis.comuginator.INVITE_USED"
+const val EXTRA_INVITE_ID = "inviteId"
 class CommandSyncWorker(
     appContext: Context,
     params: WorkerParameters
@@ -34,6 +38,19 @@ class CommandSyncWorker(
                     }
                     "aac_reply_available" -> {
                         handleNewReplyCommand(command)
+                    }
+                    "invite_used" -> {
+                        val inviteId = command.payload["inviteId"] as? String
+
+                        if (!inviteId.isNullOrBlank()) {
+                            sessionStore.lastUsedInviteId = inviteId
+
+                            applicationContext.sendBroadcast(
+                                Intent(ACTION_INVITE_USED)
+                                    .setPackage(applicationContext.packageName)
+                                    .putExtra(EXTRA_INVITE_ID, inviteId)
+                            )
+                        }
                     }
                     else -> {
 
