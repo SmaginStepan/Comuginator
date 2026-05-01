@@ -25,10 +25,16 @@ import com.an0obis.comuginator.ui.MainActivity
 import com.google.firebase.messaging.FirebaseMessaging
 import retrofit2.HttpException
 import androidx.core.net.toUri
+import androidx.lifecycle.lifecycleScope
+import com.an0obis.comuginator.api.ApiClient
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 open class BaseActivity: AppCompatActivity() {
     protected lateinit var store: SessionStore
     private var initialized = false
+    private var pendingIncomingCheckRunning = false
 
     protected var redirectedByRoleGuard: Boolean = false
         private set
@@ -176,5 +182,107 @@ open class BaseActivity: AppCompatActivity() {
         }
 
         startActivity(intent)
+    }
+
+    private fun shouldCheckPendingIncomingMessages(): Boolean {
+        if (this is IncomingMessageActivity) return false
+
+        val auth = store.authHeader()
+        if (auth.isNullOrBlank()) return false
+
+        return true
+    }
+
+    private fun checkPendingIncomingMessages() {
+        if (!shouldCheckPendingIncomingMessages()) return
+        if (pendingIncomingCheckRunning) return
+
+        pendingIncomingCheckRunning = true
+
+        lifecycleScope.launch {
+            try {
+                val auth = store.authHeaderOrThrow()
+
+                val result = withContext(Dispatchers.IO) {
+                    val pending = ApiClient.api.getPendingCommands(auth)
+                    val allMessages = ApiClient.api.getAacMessages(auth = auth, scope = "all")
+
+                    val pendingMessageMap = pending.items
+                        .asSequence()
+                        .filter { it.status == "queued" && it.type == "aac_message_available" }
+                        .mapNotNull { cmd ->
+                            val messageId = cmd.payload["messageId"] as? String
+                            if (messageId != null) messageId to cmd.id else null
+                        }
+                        .toMap()
+
+                    val pendingReplyMap = pending.items
+                        .asSequence()
+                        .filter { it.status == "queued" && it.type == "aac_reply_available" }
+                        .mapNotNull { cmd ->
+                            val messageId = cmd.payload["messageId"] as? String
+                            if (messageId != null) messageId to cmd.id else null
+                        }
+                        .toMap()
+
+                    val incomingToAnswer = allMessages.items.firstOrNull { msg ->
+                        msg.toUserId == store.userId &&
+                                msg.reply == null &&
+                                msg.suggestedReplies.isNotEmpty()
+                    }
+
+                    val repliedToMyMessage = allMessages.items.firstOrNull { msg ->
+                        msg.fromUserId == store.userId &&
+                                msg.reply != null &&
+                                pendingReplyMap.containsKey(msg.id)
+                    }
+
+                    when {
+                        incomingToAnswer != null -> Triple(
+                            incomingToAnswer.id,
+                            pendingMessageMap[incomingToAnswer.id].orEmpty(),
+                            IncomingMessageActivity.MODE_MESSAGE
+                        )
+
+                        repliedToMyMessage != null -> Triple(
+                            repliedToMyMessage.id,
+                            pendingReplyMap[repliedToMyMessage.id].orEmpty(),
+                            IncomingMessageActivity.MODE_REPLY
+                        )
+
+                        else -> null
+                    }
+                }
+
+                val target = result ?: return@launch
+                val messageId = target.first
+                val commandId = target.second
+                val mode = target.third
+
+                openIncomingMessage(messageId, commandId, mode)
+            } catch (e: Exception) {
+                handleUnauthorized(e)
+            } finally {
+                pendingIncomingCheckRunning = false
+            }
+        }
+    }
+
+    private fun openIncomingMessage(messageId: String, commandId: String, mode: String) {
+        startActivity(
+            Intent(this, IncomingMessageActivity::class.java).apply {
+                putExtra(IncomingMessageActivity.EXTRA_MESSAGE_ID, messageId)
+                putExtra(IncomingMessageActivity.EXTRA_COMMAND_ID, commandId)
+                putExtra(IncomingMessageActivity.EXTRA_MODE, mode)
+            }
+        )
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        if (initialized) {
+            checkPendingIncomingMessages()
+        }
     }
 }

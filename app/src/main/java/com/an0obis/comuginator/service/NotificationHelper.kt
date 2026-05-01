@@ -55,10 +55,11 @@ object NotificationHelper {
         }
 
         val notification = builder.build()
+        val notificationId =  notificationIdForMessage(messageId)
 
         try {
             NotificationManagerCompat.from(context)
-                .notify(1001, notification)
+                .notify(notificationId, notification)
         } catch (_: SecurityException) {
             Log.d("NotificationHelper", "can't show notification")
         }
@@ -101,10 +102,11 @@ object NotificationHelper {
         }
 
         val notification = builder.build()
+        val notificationId = notificationIdForMessage(messageId)
 
         try {
             NotificationManagerCompat.from(context)
-                .notify(1002, notification)
+                .notify(notificationId, notification)
         } catch (_: SecurityException) {
             Log.d("NotificationHelper", "can't show notification")
         }
@@ -126,5 +128,9 @@ object NotificationHelper {
         )
 
         manager.createNotificationChannel(channel)
+    }
+
+    fun notificationIdForMessage(messageId: String?): Int {
+        return messageId.hashCode()
     }
 }

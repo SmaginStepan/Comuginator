@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.an0obis.comuginator.api.AacMessageDetailsDto
 import android.os.Bundle
 import android.view.View
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.view.isVisible
@@ -22,6 +23,8 @@ import kotlinx.coroutines.withContext
 import androidx.recyclerview.widget.GridLayoutManager
 import coil.Coil
 import coil.request.ImageRequest
+import androidx.core.app.NotificationManagerCompat
+import com.an0obis.comuginator.service.NotificationHelper
 
 class IncomingMessageActivity : BaseActivity() {
 
@@ -44,6 +47,7 @@ class IncomingMessageActivity : BaseActivity() {
     private lateinit var tvRepliesLabel: TextView
     private lateinit var ivCurrentReply: ImageView
     private lateinit var ivFromAvatar: ImageView
+    private lateinit var btnClose: Button
     private var messageId: String = ""
     private var commandId: String = ""
     private var ackSent = false
@@ -69,13 +73,29 @@ class IncomingMessageActivity : BaseActivity() {
         messageId = intent.getStringExtra(EXTRA_MESSAGE_ID).orEmpty()
         commandId = intent.getStringExtra(EXTRA_COMMAND_ID).orEmpty()
         mode = intent.getStringExtra(EXTRA_MODE) ?: MODE_MESSAGE
+        btnClose = findViewById(R.id.btnClose)
+
+        btnClose.setOnClickListener {
+            setResult(RESULT_OK)
+            finish()
+        }
 
         if (messageId.isBlank()) {
             finish()
             return
         }
 
+        cancelCurrentNotification()
+
         ensureInitialized()
+    }
+
+    private fun cancelCurrentNotification() {
+        if (messageId.isBlank()) return
+
+        NotificationManagerCompat.from(this).cancel(
+            NotificationHelper.notificationIdForMessage(messageId)
+        )
     }
 
     override fun onInitialized() {
@@ -137,6 +157,7 @@ class IncomingMessageActivity : BaseActivity() {
 
         messageAdapter.submitItems(message.message)
         repliesAdapter.submitItems(message.suggestedReplies)
+        val hasSuggestedReplies = message.suggestedReplies.isNotEmpty()
 
         tvFromUser.text = message.fromUser.name
         loadProtectedImage(message.fromUser.avatarImageUrl, ivFromAvatar)
@@ -165,11 +186,12 @@ class IncomingMessageActivity : BaseActivity() {
 
             tvRepliesLabel.isVisible = false
 
+            btnClose.isVisible = true
             return
         } else {
-            rvSuggestedReplies.isVisible = true
-
-            tvRepliesLabel.isVisible = true
+            rvSuggestedReplies.isVisible = hasSuggestedReplies
+            tvRepliesLabel.isVisible = hasSuggestedReplies
+            btnClose.isVisible = !hasSuggestedReplies
         }
 
         tvFromUser.text = message.fromUser.name
@@ -203,6 +225,7 @@ class IncomingMessageActivity : BaseActivity() {
                         requestBody = SendAacReplyRequest(reply = card)
                     )
                 }
+                cancelCurrentNotification()
 
                 Toast.makeText(
                     this@IncomingMessageActivity,

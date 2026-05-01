@@ -102,6 +102,15 @@
         style="@style/ComuginatorText.Body"
         android:text="@string/no_reply_yet" />
 
+    <Button
+        android:id="@+id/btnClose"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        style="@style/ComuginatorButton.Secondary"
+        android:text="@string/close"
+        android:visibility="gone" />
+
     <ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"

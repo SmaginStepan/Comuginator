@@ -32,7 +32,6 @@ import com.an0obis.comuginator.service.CommandSyncScheduler
 class FamilyActivity : BaseActivity() {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-    private var openingIncomingMessageId: String? = null
 
     private lateinit var tvFamily: TextView
     private lateinit var tvInvite: TextView
@@ -340,7 +339,6 @@ class FamilyActivity : BaseActivity() {
                     setButtonsEnabled(true)
                 }
 
-                checkPendingIncomingMessages()
             } catch (e: Exception) {
                 if (handleUnauthorized(e)) return@launch
                 runOnUiThread {
@@ -588,59 +586,6 @@ class FamilyActivity : BaseActivity() {
             .show()
     }
 
-    private fun checkPendingIncomingMessages() {
-        scope.launch {
-            try {
-                val auth = authHeaderOrThrow()
-
-                val pending = ApiClient.api.getPendingCommands(auth)
-                val inbox = ApiClient.api.getAacMessages(auth = auth, scope = "inbox")
-
-                val pendingMap = pending.items
-                    .asSequence()
-                    .filter { it.status == "queued" && it.type == "aac_message_available" }
-                    .mapNotNull { cmd ->
-                        val messageId = cmd.payload["messageId"] as? String
-                        if (messageId != null) messageId to cmd.id else null
-                    }
-                    .toMap()
-
-                val preferred = inbox.items.firstOrNull { msg ->
-                    msg.reply == null && msg.suggestedReplies.isNotEmpty()
-                }
-
-                val fallback = inbox.items.firstOrNull { msg ->
-                    msg.reply == null &&
-                            msg.suggestedReplies.isEmpty() &&
-                            pendingMap.containsKey(msg.id)
-                }
-
-                val target = preferred ?: fallback ?: return@launch
-
-                if (openingIncomingMessageId == target.id) return@launch
-                openingIncomingMessageId = target.id
-
-                val commandId = pendingMap[target.id].orEmpty()
-
-                runOnUiThread {
-                    openIncomingMessage(target.id, commandId)
-                }
-            } catch (e: Exception) {
-                if (handleUnauthorized(e)) return@launch
-                runOnUiThread {
-                    tvStatus.text = getString(R.string.check_incoming_failed, e.message)
-                }
-            }
-        }
-    }
-
-    private fun openIncomingMessage(messageId: String, commandId: String) {
-        val intent = Intent(this, IncomingMessageActivity::class.java).apply {
-            putExtra(IncomingMessageActivity.EXTRA_MESSAGE_ID, messageId)
-            putExtra(IncomingMessageActivity.EXTRA_COMMAND_ID, commandId)
-        }
-        startActivity(intent)
-    }
     override fun onDestroy() {
         super.onDestroy()
         scope.cancel()

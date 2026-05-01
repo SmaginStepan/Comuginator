@@ -12,6 +12,7 @@
     <string name="send">Отправить</string>
     <string name="hide">Скрыть</string>
     <string name="show">Показать</string>
+    <string name="close">Закрыть</string>
     <string name="history">История</string>
     <string name="library">Библиотека</string>
     <string name="settings">Настройки</string>
