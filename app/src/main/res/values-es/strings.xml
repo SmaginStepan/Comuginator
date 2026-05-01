@@ -221,4 +221,7 @@
     <string name="enter_your_name">Introduce tu nombre</string>
     <string name="start_preview">Iniciar vista previa</string>
     <string name="stop_preview">Detener vista previa</string>
+
+    <string name="element_menu">Sección</string>
+    <string name="element_action">Petición</string>
 </resources>

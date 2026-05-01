@@ -266,4 +266,7 @@
 
     <string name="start_preview">Start preview</string>
     <string name="stop_preview">Stop preview</string>
+
+    <string name="element_menu">Section</string>
+    <string name="element_action">Request</string>
 </resources>

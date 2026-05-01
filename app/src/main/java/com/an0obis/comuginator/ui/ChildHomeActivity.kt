@@ -321,12 +321,25 @@ class ChildHomeActivity : BaseActivity() {
     }
 
     private fun showCreateNodeDialog(itemId: String) {
-        val types = arrayOf("MENU", "ACTION")
+        val labels = arrayOf(
+            getString(R.string.element_menu),
+            getString(R.string.element_action)
+        )
+
+        val values = arrayOf(
+            "MENU",
+            "ACTION"
+        )
 
         AlertDialog.Builder(this)
             .setTitle(R.string.child_home_node_type_title)
-            .setItems(types) { _, which ->
-                createNode(itemId, types[which])
+            .setSingleChoiceItems(labels, 0) { dialog, which ->
+                dialog.dismiss()
+
+                createNode(
+                    itemId = itemId,
+                    type = values[which]
+                )
             }
             .show()
     }
@@ -336,17 +349,27 @@ class ChildHomeActivity : BaseActivity() {
         currentType: String,
         newItemId: String
     ) {
-        val types = arrayOf("MENU", "ACTION")
+        val labels = arrayOf(
+            getString(R.string.element_menu),
+            getString(R.string.element_action)
+        )
+
+        val values = arrayOf(
+            "MENU",
+            "ACTION"
+        )
+
         val checked = if (currentType == "ACTION") 1 else 0
 
         AlertDialog.Builder(this)
             .setTitle(R.string.child_home_node_type_title)
-            .setSingleChoiceItems(types, checked) { dialog, which ->
+            .setSingleChoiceItems(labels, checked) { dialog, which ->
                 dialog.dismiss()
+
                 updateNode(
                     nodeId = nodeId,
                     newItemId = newItemId,
-                    newType = types[which]
+                    newType = values[which]
                 )
             }
             .show()
@@ -460,7 +483,7 @@ class ChildHomeActivity : BaseActivity() {
                     }
                 }
             }
-            }
+        }
     }
 
     private fun previewAction(node: ChildHomeNodeDto) {
@@ -613,7 +636,7 @@ class ChildHomeActivity : BaseActivity() {
 
         blinkingNodeId = nodeId
         adapter.showOnlyNode(nodeId)
-        btnBack.visibility = View.GONE
+        btnBack.visibility = View.INVISIBLE
 
         val animation = AlphaAnimation(1.0f, 0.25f).apply {
             duration = 400
