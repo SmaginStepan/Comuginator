@@ -1,6 +1,7 @@
 package com.an0obis.comuginator.ui
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
@@ -148,7 +149,10 @@ class ChildHomeActivity : BaseActivity() {
             onToggleVisibilityClick = { node -> toggleNodeVisibility(node) }
         )
 
-        rv.layoutManager = GridLayoutManager(this, 2)
+        rv.layoutManager = GridLayoutManager(
+            this,
+            resources.getInteger(R.integer.child_home_span_count)
+        )
         rv.adapter = adapter
 
         if (path.isEmpty()) {
@@ -510,6 +514,8 @@ class ChildHomeActivity : BaseActivity() {
 
                 val effectiveEditorMode = isEditorMode && !previewMode
 
+                Log.d("ChildHomeActivity", "response: $response")
+
                 val visibleItems = if (effectiveEditorMode) {
                     response.items
                 } else {
@@ -607,6 +613,7 @@ class ChildHomeActivity : BaseActivity() {
 
         blinkingNodeId = nodeId
         adapter.showOnlyNode(nodeId)
+        btnBack.visibility = View.GONE
 
         val animation = AlphaAnimation(1.0f, 0.25f).apply {
             duration = 400
@@ -621,6 +628,7 @@ class ChildHomeActivity : BaseActivity() {
                 blinkingNodeId = null
                 rv.clearAnimation()
                 adapter.showOnlyNode(null)
+                updateNavigationUi()
             }
         }, durationMs)
     }
