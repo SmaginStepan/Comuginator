@@ -36,6 +36,7 @@
             android:layout_marginTop="0dp"
             android:gravity="center"
             android:orientation="horizontal">
+
             <Button
                 android:id="@+id/btnToggleVisibility"
                 android:layout_width="wrap_content"

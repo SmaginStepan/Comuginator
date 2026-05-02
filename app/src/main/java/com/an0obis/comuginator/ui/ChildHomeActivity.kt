@@ -154,6 +154,7 @@ class ChildHomeActivity : BaseActivity() {
             resources.getInteger(R.integer.child_home_span_count)
         )
         rv.adapter = adapter
+        rv.itemAnimator = null
 
         if (path.isEmpty()) {
             path.add(PathEntry(parentId = null, title = getString(R.string.home)))
@@ -164,7 +165,7 @@ class ChildHomeActivity : BaseActivity() {
     }
 
     private fun toggleNodeVisibility(node: ChildHomeNodeDto) {
-        progress.visibility = View.VISIBLE
+        showLoading()
 
         lifecycleScope.launch {
             try {
@@ -178,7 +179,10 @@ class ChildHomeActivity : BaseActivity() {
                     )
                 }
 
-                loadNodes(currentParentId)
+                adapter.updateNodeVisibility(
+                    node.id,
+                    !node.isVisible
+                )
             } catch (e: Exception) {
                 Toast.makeText(
                     this@ChildHomeActivity,
@@ -186,7 +190,7 @@ class ChildHomeActivity : BaseActivity() {
                     Toast.LENGTH_LONG
                 ).show()
             } finally {
-                progress.visibility = View.GONE
+                hideLoading()
             }
         }
     }
@@ -273,7 +277,7 @@ class ChildHomeActivity : BaseActivity() {
     }
 
     private fun renameNode(node: ChildHomeNodeDto, newName: String) {
-        progress.visibility = View.VISIBLE
+        showLoading()
 
         lifecycleScope.launch {
             try {
@@ -296,7 +300,7 @@ class ChildHomeActivity : BaseActivity() {
                     Toast.LENGTH_LONG
                 ).show()
             } finally {
-                progress.visibility = View.GONE
+                hideLoading()
             }
         }
     }
@@ -376,7 +380,7 @@ class ChildHomeActivity : BaseActivity() {
     }
 
     private fun createNode(itemId: String, type: String) {
-        progress.visibility = View.VISIBLE
+        showLoading()
 
         lifecycleScope.launch {
             try {
@@ -402,7 +406,7 @@ class ChildHomeActivity : BaseActivity() {
                     Toast.LENGTH_LONG
                 ).show()
             } finally {
-                progress.visibility = View.GONE
+                hideLoading()
             }
         }
     }
@@ -412,7 +416,7 @@ class ChildHomeActivity : BaseActivity() {
         newItemId: String,
         newType: String
     ) {
-        progress.visibility = View.VISIBLE
+        showLoading()
 
         lifecycleScope.launch {
             try {
@@ -435,13 +439,13 @@ class ChildHomeActivity : BaseActivity() {
                     Toast.LENGTH_LONG
                 ).show()
             } finally {
-                progress.visibility = View.GONE
+                hideLoading()
             }
         }
     }
 
     private fun deleteNode(node: ChildHomeNodeDto) {
-        progress.visibility = View.VISIBLE
+        showLoading()
 
         lifecycleScope.launch {
             try {
@@ -460,7 +464,7 @@ class ChildHomeActivity : BaseActivity() {
                     Toast.LENGTH_LONG
                 ).show()
             } finally {
-                progress.visibility = View.GONE
+                hideLoading()
             }
         }
     }
@@ -522,8 +526,28 @@ class ChildHomeActivity : BaseActivity() {
         }
     }
 
-    private fun loadNodes(parentId: String?) {
+    private fun showLoading() {
+        progress.clearAnimation()
+        progress.alpha = 0f
         progress.visibility = View.VISIBLE
+        progress.animate()
+            .alpha(1f)
+            .setDuration(180)
+            .start()
+    }
+
+    private fun hideLoading() {
+        progress.clearAnimation()
+        progress.animate()
+            .alpha(0f)
+            .setDuration(180)
+            .withEndAction {
+                progress.visibility = View.GONE
+            }
+            .start()
+    }
+    private fun loadNodes(parentId: String?) {
+        showLoading()
         updateNavigationUi()
 
         lifecycleScope.launch {
@@ -553,13 +577,13 @@ class ChildHomeActivity : BaseActivity() {
                     Toast.LENGTH_LONG
                 ).show()
             } finally {
-                progress.visibility = View.GONE
+                hideLoading()
             }
         }
     }
 
     private fun requestAction(node: ChildHomeNodeDto) {
-        progress.visibility = View.VISIBLE
+        showLoading()
 
         lifecycleScope.launch {
             try {
@@ -586,7 +610,7 @@ class ChildHomeActivity : BaseActivity() {
                     Toast.LENGTH_LONG
                 ).show()
             } finally {
-                progress.visibility = View.GONE
+                hideLoading()
             }
         }
     }
@@ -616,6 +640,7 @@ class ChildHomeActivity : BaseActivity() {
         previewMode = true
         blinkingNodeId = null
         adapter.showOnlyNode(null)
+        loadNodes(currentParentId)
         updateNavigationUi()
     }
 
@@ -624,6 +649,7 @@ class ChildHomeActivity : BaseActivity() {
         blinkingNodeId = null
         rv.clearAnimation()
         adapter.showOnlyNode(null)
+        loadNodes(currentParentId)
         updateNavigationUi()
     }
 

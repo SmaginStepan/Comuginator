@@ -1,5 +1,6 @@
 package com.an0obis.comuginator.ui
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -35,6 +36,16 @@ class ChildHomeAdapter(
         notifyItemRangeChanged(0, itemCount)
     }
 
+    fun updateNodeVisibility(nodeId: String, isVisible: Boolean) {
+        val index = items.indexOfFirst { it.id == nodeId }
+        if (index == -1) return
+
+        val old = items[index]
+        items[index] = old.copy(isVisible = isVisible)
+
+        notifyItemChanged(index)
+    }
+
     class VH(root: ViewGroup) : RecyclerView.ViewHolder(root) {
         val ivNode: android.widget.ImageView = root.findViewById(R.id.ivNode)
         val tvNodeLabel: android.widget.TextView = root.findViewById(R.id.tvNodeLabel)
@@ -58,9 +69,15 @@ class ChildHomeAdapter(
             node.labelOverride ?: node.item?.label ?: node.type
         holder.btnChildMore.visibility = if (isEditorMode) View.VISIBLE else View.GONE
         val shouldHideByBlink = onlyVisibleNodeId != null && onlyVisibleNodeId != node.id
+        val nodeAlpha = if (isEditorMode && !node.isVisible) 0.35f else 1f
+        Log.d("ChildHomeAdapter", "onBindViewHolder: $position $nodeAlpha")
+
+        holder.itemView.clearAnimation()
+        holder.rootNode.clearAnimation()
+
         holder.itemView.visibility = if (shouldHideByBlink) View.INVISIBLE else View.VISIBLE
         holder.itemView.alpha = 1f
-        holder.itemView.clearAnimation()
+        holder.rootNode.alpha = nodeAlpha
 
         holder.btnChildMore.setOnClickListener { view ->
             val popup = PopupMenu(view.context, view)
@@ -119,8 +136,5 @@ class ChildHomeAdapter(
         holder.btnToggleVisibility.setOnClickListener {
             onToggleVisibilityClick(node)
         }
-
-        holder.itemView.alpha =
-            if (isEditorMode && !node.isVisible) 0.35f else 1f
     }
 }
