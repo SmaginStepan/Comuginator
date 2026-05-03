@@ -27,6 +27,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             style="@style/ComuginatorButton.Secondary"
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp"
             android:text="@string/back" />
 
         <Button
@@ -35,6 +37,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             style="@style/ComuginatorButton.Secondary"
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp"
             android:text="@string/start_preview"
             android:visibility="gone" />
 
@@ -53,6 +57,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             style="@style/ComuginatorButton.Secondary"
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp"
             android:text="@string/add"
             android:visibility="gone" />
 
@@ -62,6 +68,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             style="@style/ComuginatorButton.Secondary"
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp"
             android:text="@string/hide_invisible"
             android:visibility="gone" />
 
@@ -71,6 +79,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             style="@style/ComuginatorButton.Secondary"
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp"
             android:text="@string/show_hidden"
             android:visibility="gone" />
     </LinearLayout>
