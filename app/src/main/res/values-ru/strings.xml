@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Comuginator</string>
     <string name="back">← Назад</string>
-    <string name="add">Добавить</string>
+    <string name="add">+ Добавить</string>
     <string name="edit">Изменить</string>
     <string name="delete">Удалить</string>
     <string name="cancel">Отмена</string>
@@ -240,4 +240,6 @@
     <string name="deleting_device">Удаление устройства&#8230;</string>
     <string name="device_deleted">Устройство удалено</string>
     <string name="delete_device_failed">Не удалось удалить устройство: %1$s</string>
+
+    <string name="hide_invisible">Скрыть невидимые</string>
 </resources>

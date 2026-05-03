@@ -53,13 +53,13 @@ class ChildHomeActivity : BaseActivity() {
     private lateinit var tvBreadcrumbs: TextView
     private lateinit var btnBack: Button
     private lateinit var btnAdd: Button
+    private lateinit var btnHideInvisible: Button
     private lateinit var progress: ProgressBar
     private lateinit var rv: RecyclerView
     private lateinit var btnPreview: Button
 
     private var previewMode: Boolean = false
     private var blinkingNodeId: String? = null
-
     private val path = mutableListOf<PathEntry>()
 
     private var currentParentId: String?
@@ -119,17 +119,21 @@ class ChildHomeActivity : BaseActivity() {
         tvBreadcrumbs = findViewById(R.id.tvChildHomeBreadcrumbs)
         btnBack = findViewById(R.id.btnChildHomeBack)
         btnAdd = findViewById(R.id.btnChildHomeAdd)
+        btnHideInvisible = findViewById(R.id.btnHideInvisible)
         btnPreview = findViewById(R.id.btnChildHomePreview)
         progress = findViewById(R.id.progressChildHome)
         rv = findViewById(R.id.rvChildHome)
 
-        btnAdd.visibility = if (isEditorMode) View.VISIBLE else View.GONE
+
         btnAdd.setOnClickListener {
             openAddNode()
         }
 
         btnBack.setOnClickListener {
             goBack()
+        }
+        btnHideInvisible.setOnClickListener {
+            hideInvisible()
         }
         btnPreview.setOnClickListener {
             if (previewMode) {
@@ -161,9 +165,12 @@ class ChildHomeActivity : BaseActivity() {
         }
 
         updateNavigationUi()
-        loadNodes(currentParentId)
+        loadNodes(currentParentId, false)
     }
 
+    private fun hideInvisible() {
+        loadNodes(currentParentId, true)
+    }
     private fun toggleNodeVisibility(node: ChildHomeNodeDto) {
         showLoading()
 
@@ -183,6 +190,8 @@ class ChildHomeActivity : BaseActivity() {
                     node.id,
                     !node.isVisible
                 )
+
+                updateNavigationUi()
             } catch (e: Exception) {
                 Toast.makeText(
                     this@ChildHomeActivity,
@@ -292,7 +301,7 @@ class ChildHomeActivity : BaseActivity() {
                 }
 
                 renameCurrentPathEntryIfNeeded(node.id, newName)
-                loadNodes(currentParentId)
+                loadNodes(currentParentId, false)
             } catch (e: Exception) {
                 Toast.makeText(
                     this@ChildHomeActivity,
@@ -398,7 +407,7 @@ class ChildHomeActivity : BaseActivity() {
                     )
                 }
 
-                loadNodes(currentParentId)
+                loadNodes(currentParentId, false)
             } catch (e: Exception) {
                 Toast.makeText(
                     this@ChildHomeActivity,
@@ -431,7 +440,7 @@ class ChildHomeActivity : BaseActivity() {
                     )
                 }
 
-                loadNodes(currentParentId)
+                loadNodes(currentParentId, false)
             } catch (e: Exception) {
                 Toast.makeText(
                     this@ChildHomeActivity,
@@ -456,7 +465,7 @@ class ChildHomeActivity : BaseActivity() {
                     )
                 }
 
-                loadNodes(currentParentId)
+                loadNodes(currentParentId, false)
             } catch (e: Exception) {
                 Toast.makeText(
                     this@ChildHomeActivity,
@@ -505,14 +514,14 @@ class ChildHomeActivity : BaseActivity() {
         )
 
         updateNavigationUi()
-        loadNodes(currentParentId)
+        loadNodes(currentParentId, false)
     }
 
     private fun goBack() {
         if (path.size > 1) {
             path.removeAt(path.lastIndex)
             updateNavigationUi()
-            loadNodes(currentParentId)
+            loadNodes(currentParentId, false)
             return
         }
 
@@ -546,7 +555,7 @@ class ChildHomeActivity : BaseActivity() {
             }
             .start()
     }
-    private fun loadNodes(parentId: String?) {
+    private fun loadNodes(parentId: String?, hideInvisible: Boolean) {
         showLoading()
         updateNavigationUi()
 
@@ -559,9 +568,9 @@ class ChildHomeActivity : BaseActivity() {
                     )
                 }
 
-                val effectiveEditorMode = isEditorMode && !previewMode
+                val effectiveEditorMode = isEditorMode && !hideInvisible && !previewMode
 
-                Log.d("ChildHomeActivity", "response: $response")
+                Log.d("ChildHomeActivity", "$effectiveEditorMode response: $response ")
 
                 val visibleItems = if (effectiveEditorMode) {
                     response.items
@@ -570,6 +579,7 @@ class ChildHomeActivity : BaseActivity() {
                 }
 
                 adapter.submitItems(visibleItems)
+                updateNavigationUi()
             } catch (e: Exception) {
                 Toast.makeText(
                     this@ChildHomeActivity,
@@ -617,8 +627,15 @@ class ChildHomeActivity : BaseActivity() {
 
     private fun updateNavigationUi() {
         val effectiveEditorMode = isEditorMode && !previewMode
+        val hasInvisibleNodeInVisible = adapter.readItems().any { !it.isVisible }
 
         btnAdd.visibility = if (effectiveEditorMode) View.VISIBLE else View.GONE
+        if (effectiveEditorMode) {
+            btnHideInvisible.visibility = View.VISIBLE
+            btnHideInvisible.isEnabled = hasInvisibleNodeInVisible
+        } else {
+            btnHideInvisible.visibility = View.GONE
+        }
 
         btnPreview.visibility = if (isEditorMode) View.VISIBLE else View.GONE
         btnPreview.text = getString(
@@ -628,7 +645,7 @@ class ChildHomeActivity : BaseActivity() {
         btnBack.visibility =
             if (effectiveEditorMode || path.size > 1 || previewMode) View.VISIBLE else View.GONE
 
-        tvTitle.visibility = if (previewMode) View.GONE else View.VISIBLE
+        tvTitle.visibility = View.VISIBLE
         tvBreadcrumbs.visibility = if (previewMode) View.GONE else View.VISIBLE
 
         tvBreadcrumbs.text = path.joinToString(" > ") { it.title }
@@ -640,7 +657,7 @@ class ChildHomeActivity : BaseActivity() {
         previewMode = true
         blinkingNodeId = null
         adapter.showOnlyNode(null)
-        loadNodes(currentParentId)
+        loadNodes(currentParentId, false)
         updateNavigationUi()
     }
 
@@ -649,7 +666,7 @@ class ChildHomeActivity : BaseActivity() {
         blinkingNodeId = null
         rv.clearAnimation()
         adapter.showOnlyNode(null)
-        loadNodes(currentParentId)
+        loadNodes(currentParentId, false)
         updateNavigationUi()
     }
 

@@ -2,7 +2,7 @@
     <string name="app_name">Comuginator</string>
 
     <string name="back">← Back</string>
-    <string name="add">Add</string>
+    <string name="add">+ Add</string>
     <string name="edit">Edit</string>
     <string name="delete">Delete</string>
     <string name="cancel">Cancel</string>
@@ -279,4 +279,7 @@
     <string name="deleting_device">Deleting device&#8230;</string>
     <string name="device_deleted">Device deleted</string>
     <string name="delete_device_failed">Failed to delete device: %1$s</string>
+
+    <string name="hide_invisible">Hide invisible</string>
+
 </resources>

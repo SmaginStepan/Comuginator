@@ -8,6 +8,10 @@ abstract class BaseAdapter<TItem, TViewHolder : RecyclerView.ViewHolder>: Recycl
 
     override fun getItemCount(): Int = items.size
 
+    fun readItems(): List<TItem> {
+        return items.toList()
+    }
+
     fun submitItems(newItems: List<TItem>) {
         val oldSize = items.size
 

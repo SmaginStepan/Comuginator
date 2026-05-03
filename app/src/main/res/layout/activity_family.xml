@@ -36,21 +36,30 @@
             android:text="@string/more" />
     </LinearLayout>
 
-    <Button
-        android:id="@+id/btnLibrary"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        style="@style/ComuginatorButton"
-        android:text="@string/library" />
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:paddingBottom="0dp">
 
-    <Button
-        android:id="@+id/btnChildHome"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        style="@style/ComuginatorButton"
-        android:text="@string/child_home" />
+        <Button
+            android:id="@+id/btnLibrary"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            style="@style/ComuginatorButton.Secondary"
+            android:text="@string/library" />
+
+        <Button
+            android:id="@+id/btnChildHome"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            style="@style/ComuginatorButton.Secondary"
+            android:text="@string/child_home" />
+
+    </LinearLayout>
 
     <TextView
         android:id="@+id/tvInvite"
@@ -70,19 +79,20 @@
         android:contentDescription="@string/invite_qr_code"
         android:visibility="gone" />
 
-    <TextView
-        android:id="@+id/tvStatus"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        style="@style/ComuginatorText.Small"
-        android:text="@string/status_placeholder" />
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvFamily"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="8dp"
         android:nestedScrollingEnabled="false" />
+
+    <TextView
+        android:id="@+id/tvStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        style="@style/ComuginatorText.Small"
+        android:text="@string/status_placeholder" />
+
 
 </LinearLayout>
