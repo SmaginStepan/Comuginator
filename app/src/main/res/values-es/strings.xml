@@ -236,4 +236,5 @@
     <string name="delete_device_failed">No se pudo eliminar el dispositivo: %1$s</string>
 
     <string name="hide_invisible">Ocultar invisible</string>
+    <string name="show_hidden">Mostrar ocultos</string>
 </resources>

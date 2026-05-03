@@ -54,10 +54,12 @@ class ChildHomeActivity : BaseActivity() {
     private lateinit var btnBack: Button
     private lateinit var btnAdd: Button
     private lateinit var btnHideInvisible: Button
+    private lateinit var btnShowHidden: Button
     private lateinit var progress: ProgressBar
     private lateinit var rv: RecyclerView
     private lateinit var btnPreview: Button
 
+    private var lastLoadedNodesSize: Int? = null
     private var previewMode: Boolean = false
     private var blinkingNodeId: String? = null
     private val path = mutableListOf<PathEntry>()
@@ -120,6 +122,7 @@ class ChildHomeActivity : BaseActivity() {
         btnBack = findViewById(R.id.btnChildHomeBack)
         btnAdd = findViewById(R.id.btnChildHomeAdd)
         btnHideInvisible = findViewById(R.id.btnHideInvisible)
+        btnShowHidden = findViewById(R.id.btnShowHidden)
         btnPreview = findViewById(R.id.btnChildHomePreview)
         progress = findViewById(R.id.progressChildHome)
         rv = findViewById(R.id.rvChildHome)
@@ -141,6 +144,9 @@ class ChildHomeActivity : BaseActivity() {
             } else {
                 startPreview()
             }
+        }
+        btnShowHidden.setOnClickListener {
+            showHidden()
         }
 
         adapter = ChildHomeAdapter(
@@ -164,13 +170,17 @@ class ChildHomeActivity : BaseActivity() {
             path.add(PathEntry(parentId = null, title = getString(R.string.home)))
         }
 
-        updateNavigationUi()
+        updateUi()
         loadNodes(currentParentId, false)
     }
 
     private fun hideInvisible() {
         loadNodes(currentParentId, true)
     }
+    private fun showHidden() {
+        loadNodes(currentParentId, false)
+    }
+
     private fun toggleNodeVisibility(node: ChildHomeNodeDto) {
         showLoading()
 
@@ -191,7 +201,7 @@ class ChildHomeActivity : BaseActivity() {
                     !node.isVisible
                 )
 
-                updateNavigationUi()
+                updateUi()
             } catch (e: Exception) {
                 Toast.makeText(
                     this@ChildHomeActivity,
@@ -318,7 +328,7 @@ class ChildHomeActivity : BaseActivity() {
         val index = path.indexOfFirst { it.parentId == nodeId }
         if (index >= 0) {
             path[index] = path[index].copy(title = newName)
-            updateNavigationUi()
+            updateUi()
         }
     }
 
@@ -513,14 +523,14 @@ class ChildHomeActivity : BaseActivity() {
             )
         )
 
-        updateNavigationUi()
+        updateUi()
         loadNodes(currentParentId, false)
     }
 
     private fun goBack() {
         if (path.size > 1) {
             path.removeAt(path.lastIndex)
-            updateNavigationUi()
+            updateUi()
             loadNodes(currentParentId, false)
             return
         }
@@ -557,7 +567,7 @@ class ChildHomeActivity : BaseActivity() {
     }
     private fun loadNodes(parentId: String?, hideInvisible: Boolean) {
         showLoading()
-        updateNavigationUi()
+        updateUi()
 
         lifecycleScope.launch {
             try {
@@ -572,6 +582,8 @@ class ChildHomeActivity : BaseActivity() {
 
                 Log.d("ChildHomeActivity", "$effectiveEditorMode response: $response ")
 
+                lastLoadedNodesSize = response.items.size
+
                 val visibleItems = if (effectiveEditorMode) {
                     response.items
                 } else {
@@ -579,7 +591,7 @@ class ChildHomeActivity : BaseActivity() {
                 }
 
                 adapter.submitItems(visibleItems)
-                updateNavigationUi()
+                updateUi()
             } catch (e: Exception) {
                 Toast.makeText(
                     this@ChildHomeActivity,
@@ -625,16 +637,31 @@ class ChildHomeActivity : BaseActivity() {
         }
     }
 
-    private fun updateNavigationUi() {
+    private fun updateUi() {
         val effectiveEditorMode = isEditorMode && !previewMode
-        val hasInvisibleNodeInVisible = adapter.readItems().any { !it.isVisible }
+        val items = adapter.readItems()
+        val hasHidden = (lastLoadedNodesSize ?: 0) > items.size
+        val hasInvisibleNodeInVisible = items.any { !it.isVisible }
 
-        btnAdd.visibility = if (effectiveEditorMode) View.VISIBLE else View.GONE
         if (effectiveEditorMode) {
-            btnHideInvisible.visibility = View.VISIBLE
-            btnHideInvisible.isEnabled = hasInvisibleNodeInVisible
+            btnAdd.visibility = View.VISIBLE
+            if (hasHidden) {
+                if (hasInvisibleNodeInVisible) {
+                    btnHideInvisible.visibility = View.VISIBLE
+                    btnShowHidden.visibility = View.GONE
+                } else {
+                    btnHideInvisible.visibility = View.GONE
+                    btnShowHidden.visibility = View.VISIBLE
+                }
+            } else {
+                btnShowHidden.visibility = View.GONE
+                btnHideInvisible.visibility = View.VISIBLE
+                btnHideInvisible.isEnabled = hasInvisibleNodeInVisible
+            }
         } else {
             btnHideInvisible.visibility = View.GONE
+            btnAdd.visibility = View.GONE
+            btnShowHidden.visibility = View.GONE
         }
 
         btnPreview.visibility = if (isEditorMode) View.VISIBLE else View.GONE
@@ -658,7 +685,7 @@ class ChildHomeActivity : BaseActivity() {
         blinkingNodeId = null
         adapter.showOnlyNode(null)
         loadNodes(currentParentId, false)
-        updateNavigationUi()
+        updateUi()
     }
 
     private fun stopPreview() {
@@ -667,7 +694,7 @@ class ChildHomeActivity : BaseActivity() {
         rv.clearAnimation()
         adapter.showOnlyNode(null)
         loadNodes(currentParentId, false)
-        updateNavigationUi()
+        updateUi()
     }
 
     private fun ChildHomeNodeDto.displayLabel(): String {
@@ -694,7 +721,7 @@ class ChildHomeActivity : BaseActivity() {
                 blinkingNodeId = null
                 rv.clearAnimation()
                 adapter.showOnlyNode(null)
-                updateNavigationUi()
+                updateUi()
             }
         }, durationMs)
     }

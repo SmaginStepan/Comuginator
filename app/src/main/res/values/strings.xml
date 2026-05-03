@@ -281,5 +281,6 @@
     <string name="delete_device_failed">Failed to delete device: %1$s</string>
 
     <string name="hide_invisible">Hide invisible</string>
+    <string name="show_hidden">Show hidden</string>
 
 </resources>

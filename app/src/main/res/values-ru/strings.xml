@@ -242,4 +242,5 @@
     <string name="delete_device_failed">Не удалось удалить устройство: %1$s</string>
 
     <string name="hide_invisible">Скрыть невидимые</string>
+    <string name="show_hidden">Показать скрытые</string>
 </resources>
