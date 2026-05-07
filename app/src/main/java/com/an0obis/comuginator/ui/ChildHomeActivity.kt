@@ -725,4 +725,12 @@ class ChildHomeActivity : BaseActivity() {
             }
         }, durationMs)
     }
+
+    override fun onResume() {
+        super.onResume()
+
+        if (!redirectedByRoleGuard) {
+            loadNodes(currentParentId, false)
+        }
+    }
 }

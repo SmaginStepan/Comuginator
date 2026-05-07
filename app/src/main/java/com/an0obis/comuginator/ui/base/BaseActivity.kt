@@ -125,6 +125,7 @@ open class BaseActivity: AppCompatActivity() {
             }
 
             onInitialized()
+            checkPendingIncomingMessages()
             return
         }
     }
@@ -228,17 +229,21 @@ open class BaseActivity: AppCompatActivity() {
                         }
                         .toMap()
 
-                    val incomingToAnswer = allMessages.items.firstOrNull { msg ->
-                        msg.toUserId == store.userId &&
-                                msg.reply == null &&
-                                msg.suggestedReplies.isNotEmpty()
-                    }
+                    val incomingToAnswer = allMessages.items
+                        .filter { msg ->
+                            msg.toUserId == store.userId &&
+                                    msg.reply == null &&
+                                    msg.suggestedReplies.isNotEmpty()
+                        }
+                        .maxByOrNull { it.createdAt }
 
-                    val repliedToMyMessage = allMessages.items.firstOrNull { msg ->
-                        msg.fromUserId == store.userId &&
-                                msg.reply != null &&
-                                pendingReplyMap.containsKey(msg.id)
-                    }
+                    val repliedToMyMessage = allMessages.items
+                        .filter { msg ->
+                            msg.fromUserId == store.userId &&
+                                    msg.reply != null &&
+                                    pendingReplyMap.containsKey(msg.id)
+                        }
+                        .maxByOrNull { it.createdAt }
 
                     when {
                         incomingToAnswer != null -> Triple(
