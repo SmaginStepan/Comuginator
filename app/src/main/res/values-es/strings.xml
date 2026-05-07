@@ -275,4 +275,7 @@
     <string name="send_failed">No se pudo enviar: %1$s</string>
 
     <string name="selected_reply">Respuesta elegida</string>
+
+    <string name="sequence_choose_current_step">Primero elige el paso actual</string>
+    <string name="sequence_step_status">Paso %1$d de %2$d</string>
 </resources>

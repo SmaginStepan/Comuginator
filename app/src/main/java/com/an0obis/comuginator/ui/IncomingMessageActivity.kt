@@ -23,6 +23,7 @@ import kotlinx.coroutines.withContext
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.core.app.NotificationManagerCompat
 import com.an0obis.comuginator.service.NotificationHelper
+import kotlinx.coroutines.delay
 
 class IncomingMessageActivity : BaseActivity() {
 
@@ -46,6 +47,9 @@ class IncomingMessageActivity : BaseActivity() {
     private lateinit var ivCurrentReply: ImageView
     private lateinit var ivFromAvatar: ImageView
     private lateinit var btnClose: Button
+
+    private var sequenceStepIndex = 0
+    private var isSequenceBlinking = false
     private var messageId: String = ""
     private var commandId: String = ""
     private var ackSent = false
@@ -101,8 +105,8 @@ class IncomingMessageActivity : BaseActivity() {
         messageAdapter = SimpleCardAdapter { }
 
         repliesAdapter = SimpleCardAdapter { card ->
-            if (!isSendingReply) {
-                sendReply(card)
+            if (!isSendingReply && !isSequenceBlinking) {
+                handleReplyClick(card)
             }
         }
 
@@ -114,6 +118,112 @@ class IncomingMessageActivity : BaseActivity() {
         rvSuggestedReplies.adapter = repliesAdapter
 
         loadMessage()
+    }
+
+    private fun handleReplyClick(card: AacCardDto) {
+        val message = currentMessage ?: return
+
+        if (message.mode == "SEQUENCE") {
+            val currentCard = message.suggestedReplies.getOrNull(sequenceStepIndex) ?: return
+
+            if (card.id != currentCard.id) {
+                Toast.makeText(
+                    this,
+                    getString(R.string.sequence_choose_current_step),
+                    Toast.LENGTH_SHORT
+                ).show()
+                return
+            }
+
+            sendSequenceStepReply(currentCard)
+        } else {
+            sendReply(card)
+        }
+    }
+
+    private fun sendSequenceStepReply(card: AacCardDto) {
+        val message = currentMessage ?: return
+
+        isSendingReply = true
+        progressBar.visibility = View.VISIBLE
+
+        lifecycleScope.launch {
+            try {
+                withContext(Dispatchers.IO) {
+                    ApiClient.replyToAacMessage(
+                        authHeader = store.authHeaderOrThrow(),
+                        messageId = messageId,
+                        requestBody = SendAacReplyRequest(reply = card)
+                    )
+                }
+
+                tvCurrentReply.text = getString(R.string.reply_prefix, card.label)
+                loadProtectedImage(card.imageUrl, ivCurrentReply)
+                ivCurrentReply.isVisible = true
+
+                progressBar.visibility = View.GONE
+
+                blinkSelectedReplyCard(card)
+
+                val isLastStep = sequenceStepIndex >= message.suggestedReplies.lastIndex
+
+                if (isLastStep) {
+                    cancelCurrentNotification()
+                    Toast.makeText(
+                        this@IncomingMessageActivity,
+                        getString(R.string.reply_sent),
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                    setResult(RESULT_OK)
+                    finish()
+                } else {
+                    sequenceStepIndex += 1
+                    renderSequenceReplies(message)
+                }
+            } catch (e: Exception) {
+                Toast.makeText(
+                    this@IncomingMessageActivity,
+                    getString(R.string.failed_send_reply, e.message),
+                    Toast.LENGTH_LONG
+                ).show()
+            } finally {
+                isSendingReply = false
+                isSequenceBlinking = false
+                progressBar.visibility = View.GONE
+            }
+        }
+    }
+
+    private suspend fun blinkSelectedReplyCard(card: AacCardDto) {
+        isSequenceBlinking = true
+
+        repliesAdapter.submitItems(listOf(card))
+
+        repeat(6) {
+            rvSuggestedReplies.alpha =
+                if (it % 2 == 0) 0.15f else 1f
+
+            delay(500)
+        }
+
+        rvSuggestedReplies.alpha = 1f
+    }
+
+    private fun renderSequenceReplies(message: AacMessageDetailsDto) {
+        val replies = message.suggestedReplies
+
+        repliesAdapter.submitItems(replies)
+
+        tvRepliesLabel.text = getString(
+            R.string.sequence_step_status,
+            sequenceStepIndex + 1,
+            replies.size
+        )
+
+        rvSuggestedReplies.isVisible = replies.isNotEmpty()
+        tvRepliesLabel.isVisible = replies.isNotEmpty()
+        btnClose.isVisible = false
     }
 
     private fun loadMessage() {
@@ -157,9 +267,6 @@ class IncomingMessageActivity : BaseActivity() {
         repliesAdapter.submitItems(message.suggestedReplies)
         val hasSuggestedReplies = message.suggestedReplies.isNotEmpty()
 
-        tvFromUser.text = message.fromUser.name
-        loadProtectedImage(message.fromUser.avatarImageUrl, ivFromAvatar)
-
         if (message.reply != null) {
             tvCurrentReply.text = getString(R.string.reply_prefix, message.reply.reply.label)
             rvSuggestedReplies.isEnabled = false
@@ -167,7 +274,7 @@ class IncomingMessageActivity : BaseActivity() {
             ivCurrentReply.isVisible = true
         } else {
             tvCurrentReply.text = getString(R.string.no_reply_yet)
-                rvSuggestedReplies.isEnabled = true
+            rvSuggestedReplies.isEnabled = true
             ivCurrentReply.isVisible = false
         }
 
@@ -180,22 +287,25 @@ class IncomingMessageActivity : BaseActivity() {
             repliesAdapter.submitItems(
                 message.reply?.let { listOf(it.reply) } ?: emptyList()
             )
-            rvSuggestedReplies.isVisible = false
+            rvSuggestedReplies.isVisible = true
 
             tvRepliesLabel.isVisible = false
 
             btnClose.isVisible = true
             return
         } else {
-            rvSuggestedReplies.isVisible = hasSuggestedReplies
-            tvRepliesLabel.isVisible = hasSuggestedReplies
-            btnClose.isVisible = !hasSuggestedReplies
+            if (message.mode == "SEQUENCE") {
+                renderSequenceReplies(message)
+            } else {
+                sequenceStepIndex = 0
+                rvSuggestedReplies.isVisible = hasSuggestedReplies
+                tvRepliesLabel.isVisible = hasSuggestedReplies
+                btnClose.isVisible = !hasSuggestedReplies
+            }
         }
 
         tvFromUser.text = message.fromUser.name
         loadProtectedImage(message.fromUser.avatarImageUrl, ivFromAvatar)
-
-
     }
 
     private fun sendReply(card: AacCardDto) {
@@ -211,6 +321,15 @@ class IncomingMessageActivity : BaseActivity() {
                         requestBody = SendAacReplyRequest(reply = card)
                     )
                 }
+
+                tvCurrentReply.text = getString(R.string.reply_prefix, card.label)
+                loadProtectedImage(card.imageUrl, ivCurrentReply)
+                ivCurrentReply.isVisible = true
+
+                progressBar.visibility = View.GONE
+
+                blinkSelectedReplyCard(card)
+
                 cancelCurrentNotification()
 
                 Toast.makeText(
@@ -229,6 +348,7 @@ class IncomingMessageActivity : BaseActivity() {
                 ).show()
             } finally {
                 isSendingReply = false
+                isSequenceBlinking = false
                 progressBar.visibility = View.GONE
             }
         }

@@ -70,6 +70,7 @@ class UserMessageHistoryActivity : BaseActivity() {
         val intent = Intent(this, ComposeMessageActivity::class.java).apply {
             putExtra("targetUserId", targetUserId)
             putExtra("targetUserName", targetUserName)
+            putExtra("mode", item.mode)
             putExtra(
                 ComposeMessageActivity.EXTRA_INITIAL_REPLY_CARDS,
                 Gson().toJson(item.suggestedReplies)

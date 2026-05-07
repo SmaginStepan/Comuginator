@@ -175,6 +175,7 @@ data class AacMessageDetailsDto(
     val toUser: AacUserDto,
     val message: List<AacCardDto>,
     val suggestedReplies: List<AacCardDto>,
+    val mode: String = "NORMAL",
     val reply: AacReplyShortDto?,
     val createdAt: String,
     val answeredAt: String?

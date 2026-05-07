@@ -279,4 +279,7 @@
     <string name="send_failed">Не удалось отправить: %1$s</string>
 
     <string name="selected_reply">Выбранный ответ</string>
+
+    <string name="sequence_choose_current_step">Сначала выберите текущий шаг</string>
+    <string name="sequence_step_status">Шаг %1$d из %2$d</string>
 </resources>
