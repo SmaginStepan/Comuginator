@@ -46,9 +46,7 @@
 
             <Button
                 android:id="@+id/btnChildMore"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                style="@style/ComuginatorButton"
+                style="@style/ComuginatorButton.More"
                 android:text="@string/more" />
 
         </LinearLayout>

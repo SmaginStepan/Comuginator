@@ -21,6 +21,11 @@
 
     <style name="ComuginatorButton.Danger" parent="ComuginatorButton"/>
 
+    <style name="ComuginatorButton.More" parent="ComuginatorButton">
+        <item name="android:layout_width">48dp</item>
+        <item name="android:layout_height">48dp</item>
+    </style>
+
     <style name="ComuginatorText">
         <item name="android:textSize">16sp</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
