@@ -7,79 +7,100 @@
 
     <TextView
         android:id="@+id/tvTarget"
+        style="@style/ComuginatorText.Title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        style="@style/ComuginatorText.Title"
-        android:text="@string/send_to_placeholder"
-        android:textSize="20sp"
+        android:text="@string/send_to_name"
+        android:textSize="22sp"
         android:textStyle="bold" />
 
     <TextView
-        android:id="@+id/tvMessageHeader"
+        android:id="@+id/tvStatus"
+        style="@style/ComuginatorText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:padding="8dp"
-        style="@style/ComuginatorText.Section"
-        android:text="@string/message"
+        android:layout_marginTop="8dp"
+        android:text="@string/compose_no_replies" />
+
+    <TextView
+        style="@style/ComuginatorText.Title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="@string/compose_mode"
         android:textSize="18sp"
         android:textStyle="bold" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvSelectedCards"
-        android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:layout_marginTop="8dp" />
-
-    <TextView
-        android:id="@+id/tvRepliesHeader"
+    <RadioGroup
+        android:id="@+id/rgMode"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:padding="8dp"
-        style="@style/ComuginatorText.Section"
-        android:text="@string/replies"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/rbNormal"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:checked="true"
+            android:text="@string/compose_mode_normal" />
+
+        <RadioButton
+            android:id="@+id/rbSequence"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/compose_mode_sequence" />
+
+    </RadioGroup>
+
+    <TextView
+        style="@style/ComuginatorText.Title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="@string/suggested_replies"
         android:textSize="18sp"
         android:textStyle="bold" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvReplyCards"
         android:layout_width="match_parent"
-        android:layout_height="100dp"
+        android:layout_height="150dp"
         android:layout_marginTop="8dp" />
-
-
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical"
+        android:layout_marginTop="12dp"
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/btnAddPhoto"
+            android:id="@+id/btnAddFromLibrary"
+            style="@style/ComuginatorButton.Secondary"
             android:layout_width="0dp"
-            android:layout_height="56dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
             android:layout_weight="1"
-            style="@style/ComuginatorButton"
-            android:text="@string/add_photo" />
+            android:text="@string/choose_from_library" />
 
         <Button
-            android:id="@+id/btnLoadLibrarySet"
+            android:id="@+id/btnAddLibrarySet"
+            style="@style/ComuginatorButton.Secondary"
             android:layout_width="0dp"
-            android:layout_height="56dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
             android:layout_weight="1"
-            style="@style/ComuginatorButton"
-            android:text="@string/add_full_library_set" />
+            android:text="@string/add_set" />
+
     </LinearLayout>
 
     <Button
         android:id="@+id/btnSendMessage"
+        style="@style/ComuginatorButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:layout_marginBottom="32dp"
-        style="@style/ComuginatorButton"
-        android:text="@string/send" />
+        android:text="@string/send_message" />
 
 </LinearLayout>

@@ -138,8 +138,9 @@ data class ArasaacSearchResponse(
 
 data class SendAacMessageRequest(
     val targetUserId: String,
+    val mode: String = "NORMAL",
     val cards: List<AacCardDto>,
-    val suggestedReplies: List<AacCardDto> = emptyList()
+    val suggestedReplies: List<AacCardDto>
 )
 
 data class SendAacMessageResponse(
@@ -199,6 +200,7 @@ data class AacMessageListItemDto(
     val suggestedReplies: List<AacCardDto>,
     val reply: AacReplyShortDto?,
     val createdAt: String,
+    val mode: String = "NORMAL",
     val answeredAt: String?
 )
 

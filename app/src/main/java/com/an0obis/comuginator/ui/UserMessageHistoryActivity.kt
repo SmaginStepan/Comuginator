@@ -6,7 +6,6 @@ import android.view.View
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -18,18 +17,17 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import com.google.gson.Gson
+import android.widget.ImageView
+import com.an0obis.comuginator.ui.base.BaseActivity
 
-class UserMessageHistoryActivity : AppCompatActivity() {
-
-    private lateinit var store: SessionStore
+class UserMessageHistoryActivity : BaseActivity() {
 
     private lateinit var tvTitle: TextView
     private lateinit var tvStatus: TextView
     private lateinit var progressBar: ProgressBar
     private lateinit var rvHistory: RecyclerView
-
+    private lateinit var ivTargetAvatar: ImageView
     private lateinit var historyAdapter: MessageHistoryAdapter
-
     private var targetUserId: String = ""
     private var targetUserName: String = ""
 
@@ -43,6 +41,7 @@ class UserMessageHistoryActivity : AppCompatActivity() {
         tvStatus = findViewById(R.id.tvStatus)
         progressBar = findViewById(R.id.progressBar)
         rvHistory = findViewById(R.id.rvHistory)
+        ivTargetAvatar = findViewById(R.id.ivTargetAvatar)
 
         targetUserId = intent.getStringExtra("targetUserId").orEmpty()
         targetUserName = intent.getStringExtra("targetUserName").orEmpty()
@@ -72,10 +71,6 @@ class UserMessageHistoryActivity : AppCompatActivity() {
             putExtra("targetUserId", targetUserId)
             putExtra("targetUserName", targetUserName)
             putExtra(
-                ComposeMessageActivity.EXTRA_INITIAL_MESSAGE_CARDS,
-                Gson().toJson(item.message)
-            )
-            putExtra(
                 ComposeMessageActivity.EXTRA_INITIAL_REPLY_CARDS,
                 Gson().toJson(item.suggestedReplies)
             )
@@ -91,6 +86,19 @@ class UserMessageHistoryActivity : AppCompatActivity() {
             try {
                 val family = withContext(Dispatchers.IO) {
                     ApiClient.api.getMyFamily(store.authHeaderOrThrow())
+                }
+
+                val targetUser = family.users.firstOrNull { it.id == targetUserId }
+
+                withContext(Dispatchers.Main) {
+                    if (targetUser != null) {
+                        tvTitle.text = getString(
+                            R.string.history_with,
+                            targetUser.name ?: targetUserName.ifBlank { targetUserId }
+                        )
+
+                        loadProtectedImage(targetUser.avatarImageUrl, ivTargetAvatar)
+                    }
                 }
 
                 val myUserId = family.me.userId
@@ -121,4 +129,5 @@ class UserMessageHistoryActivity : AppCompatActivity() {
             }
         }
     }
+
 }

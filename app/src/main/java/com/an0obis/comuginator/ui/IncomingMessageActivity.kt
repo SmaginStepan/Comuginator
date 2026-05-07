@@ -21,8 +21,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import androidx.recyclerview.widget.GridLayoutManager
-import coil.Coil
-import coil.request.ImageRequest
 import androidx.core.app.NotificationManagerCompat
 import com.an0obis.comuginator.service.NotificationHelper
 
@@ -198,18 +196,6 @@ class IncomingMessageActivity : BaseActivity() {
         loadProtectedImage(message.fromUser.avatarImageUrl, ivFromAvatar)
 
 
-    }
-
-    private fun loadProtectedImage(url: String?, imageView: ImageView) {
-        if (url.isNullOrBlank()) return
-
-        val request = ImageRequest.Builder(this)
-            .data(url)
-            .addHeader("Authorization", store.authHeaderOrThrow())
-            .target(imageView)
-            .build()
-
-        Coil.imageLoader(this).enqueue(request)
     }
 
     private fun sendReply(card: AacCardDto) {

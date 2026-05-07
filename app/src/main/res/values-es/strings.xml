@@ -237,4 +237,42 @@
 
     <string name="hide_invisible">Ocultar invisible</string>
     <string name="show_hidden">Mostrar ocultos</string>
+
+    <string name="compose_mode">Modo</string>
+    <string name="compose_mode_normal">Normal</string>
+    <string name="compose_mode_sequence">Secuencia</string>
+
+    <string name="compose_no_replies">
+        No hay respuestas seleccionadas
+    </string>
+
+    <string name="compose_sequence_status">
+        Secuencia de %1$d pasos
+    </string>
+
+    <string name="compose_normal_one_reply_status">
+        Una respuesta (exclamación)
+    </string>
+
+    <string name="compose_normal_question_status">
+        %1$d respuestas (pregunta)
+    </string>
+
+    <string name="compose_add_at_least_one_reply">
+        Añade al menos una respuesta
+    </string>
+
+    <string name="compose_sequence_needs_two_steps">
+        La secuencia requiere al menos 2 pasos
+    </string>
+
+    <string name="add_set">
+        Añadir conjunto
+    </string>
+
+    <string name="send_message">Enviar</string>
+
+    <string name="send_failed">No se pudo enviar: %1$s</string>
+
+    <string name="selected_reply">Respuesta elegida</string>
 </resources>

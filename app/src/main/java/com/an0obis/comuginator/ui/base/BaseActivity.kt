@@ -8,6 +8,7 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
+import android.widget.ImageView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
@@ -26,6 +27,8 @@ import com.google.firebase.messaging.FirebaseMessaging
 import retrofit2.HttpException
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
+import coil.ImageLoader
+import coil.request.ImageRequest
 import com.an0obis.comuginator.api.ApiClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -276,6 +279,18 @@ open class BaseActivity: AppCompatActivity() {
                 putExtra(IncomingMessageActivity.EXTRA_MODE, mode)
             }
         )
+    }
+
+    protected fun loadProtectedImage(url: String?, imageView: ImageView) {
+        if (url.isNullOrBlank()) return
+
+        val request = ImageRequest.Builder(this)
+            .data(url)
+            .addHeader("Authorization", store.authHeaderOrThrow())
+            .target(imageView)
+            .build()
+
+        ImageLoader(this).enqueue(request)
     }
 
     override fun onResume() {

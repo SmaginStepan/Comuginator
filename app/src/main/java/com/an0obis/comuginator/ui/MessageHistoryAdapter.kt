@@ -17,16 +17,9 @@ class MessageHistoryAdapter(
     private val items = mutableListOf<AacMessageListItemDto>()
 
     fun submitItems(newItems: List<AacMessageListItemDto>) {
-        val oldSize = items.size
         items.clear()
         items.addAll(newItems)
-
-        if (oldSize > 0) {
-            notifyItemRangeRemoved(0, oldSize)
-        }
-        if (items.isNotEmpty()) {
-            notifyItemRangeInserted(0, items.size)
-        }
+        notifyDataSetChanged()
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HistoryViewHolder {
@@ -42,33 +35,52 @@ class MessageHistoryAdapter(
     override fun getItemCount(): Int = items.size
 
     inner class HistoryViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        private val tvFrom: TextView = view.findViewById(R.id.tvFrom)
         private val tvCreatedAt: TextView = view.findViewById(R.id.tvCreatedAt)
-        private val tvReply: TextView = view.findViewById(R.id.tvReply)
-        private val rvCards: RecyclerView = view.findViewById(R.id.rvCards)
+        private val tvMode: TextView = view.findViewById(R.id.tvMode)
+        private val tvSelectedReplyLabel: TextView = view.findViewById(R.id.tvSelectedReplyLabel)
+
+        private val rvSuggestedReplies: RecyclerView = view.findViewById(R.id.rvSuggestedReplies)
+        private val rvSelectedReply: RecyclerView = view.findViewById(R.id.rvSelectedReply)
+
         private val btnRepeat: Button = view.findViewById(R.id.btnRepeat)
 
-        private val cardsAdapter = SimpleCardAdapter { }
+        private val suggestedRepliesAdapter = SimpleCardAdapter { }
+        private val selectedReplyAdapter = SimpleCardAdapter { }
 
         init {
-            rvCards.layoutManager =
+            rvSuggestedReplies.layoutManager =
                 LinearLayoutManager(view.context, LinearLayoutManager.HORIZONTAL, false)
-            rvCards.adapter = cardsAdapter
-            rvCards.setHasFixedSize(true)
+            rvSuggestedReplies.adapter = suggestedRepliesAdapter
+            rvSuggestedReplies.setHasFixedSize(true)
+
+            rvSelectedReply.layoutManager =
+                LinearLayoutManager(view.context, LinearLayoutManager.HORIZONTAL, false)
+            rvSelectedReply.adapter = selectedReplyAdapter
+            rvSelectedReply.setHasFixedSize(true)
         }
 
         fun bind(item: AacMessageListItemDto) {
             val context = itemView.context
-            val fromName = item.fromUser?.name ?: item.fromUserId
-            tvFrom.text = context.getString(R.string.from_name, fromName)
+
             tvCreatedAt.text = item.createdAt
 
-            cardsAdapter.submitItems(item.message)
+            tvMode.text = when (item.mode) {
+                "SEQUENCE" -> context.getString(R.string.compose_mode_sequence)
+                else -> context.getString(R.string.compose_mode_normal)
+            }
 
-            tvReply.text = if (item.reply != null) {
-                context.getString(R.string.reply_value, item.reply.reply.label)
+            suggestedRepliesAdapter.submitItems(item.suggestedReplies)
+
+            val selectedReply = item.reply?.reply
+
+            if (selectedReply != null) {
+                tvSelectedReplyLabel.text = context.getString(R.string.selected_reply)
+                rvSelectedReply.visibility = View.VISIBLE
+                selectedReplyAdapter.submitItems(listOf(selectedReply))
             } else {
-                context.getString(R.string.reply_empty)
+                tvSelectedReplyLabel.text = context.getString(R.string.reply_empty)
+                rvSelectedReply.visibility = View.GONE
+                selectedReplyAdapter.submitItems(emptyList())
             }
 
             btnRepeat.setOnClickListener {

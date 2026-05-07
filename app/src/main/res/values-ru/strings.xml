@@ -243,4 +243,40 @@
 
     <string name="hide_invisible">Скрыть невидимые</string>
     <string name="show_hidden">Показать скрытые</string>
+
+    <string name="compose_mode">Режим</string>
+    <string name="compose_mode_normal">Обычный</string>
+    <string name="compose_mode_sequence">Последовательность</string>
+
+    <string name="compose_no_replies">
+        Не выбраны варианты ответа
+    </string>
+
+    <string name="compose_sequence_status">
+        Последовательность из %1$d шагов
+    </string>
+
+    <string name="compose_normal_one_reply_status">
+        Один вариант ответа (восклицание)
+    </string>
+
+    <string name="compose_normal_question_status">
+        %1$d вариантов ответа (вопрос)
+    </string>
+
+    <string name="compose_add_at_least_one_reply">
+        Добавьте хотя бы один вариант
+    </string>
+
+    <string name="compose_sequence_needs_two_steps">
+        Для последовательности нужно минимум 2 шага
+    </string>
+
+    <string name="add_set">Добавить набор</string>
+
+    <string name="send_message">Отправить</string>
+
+    <string name="send_failed">Не удалось отправить: %1$s</string>
+
+    <string name="selected_reply">Выбранный ответ</string>
 </resources>

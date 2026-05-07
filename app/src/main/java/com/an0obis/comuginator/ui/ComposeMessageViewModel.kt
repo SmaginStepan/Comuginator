@@ -9,15 +9,7 @@ class ComposeMessageViewModel : ViewModel() {
     var targetUserId: String = ""
     var targetUserName: String = ""
 
-    var currentAddMode: AddMode = AddMode.MESSAGE
+    var mode: String = "NORMAL"
 
-    val selectedCards: MutableList<AacCardDto> = mutableListOf()
     val replyCards: MutableList<AacCardDto> = mutableListOf()
-
-    var lastSearchQuery: String = ""
-
-    enum class AddMode {
-        MESSAGE,
-        REPLY
-    }
 }

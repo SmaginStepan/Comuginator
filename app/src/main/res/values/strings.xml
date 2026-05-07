@@ -283,4 +283,38 @@
     <string name="hide_invisible">Hide invisible</string>
     <string name="show_hidden">Show hidden</string>
 
+    <string name="compose_mode">Mode</string>
+    <string name="compose_mode_normal">Normal</string>
+    <string name="compose_mode_sequence">Sequence</string>
+
+    <string name="compose_no_replies">No reply options selected</string>
+
+    <string name="compose_sequence_status">
+        Sequence with %1$d steps
+    </string>
+
+    <string name="compose_normal_one_reply_status">
+        One reply option (exclamation)
+    </string>
+
+    <string name="compose_normal_question_status">
+        %1$d reply options (question)
+    </string>
+
+    <string name="compose_add_at_least_one_reply">
+        Add at least one reply option
+    </string>
+
+    <string name="compose_sequence_needs_two_steps">
+        Sequence mode requires at least 2 steps
+    </string>
+
+    <string name="add_set">Add set</string>
+
+    <string name="send_message">Send</string>
+
+    <string name="send_failed">Failed to send: %1$s</string>
+
+    <string name="selected_reply">Selected reply</string>
+
 </resources>
