@@ -3,6 +3,7 @@ package com.an0obis.comuginator.ui
 import android.app.AlertDialog
 import android.os.Bundle
 import android.widget.Button
+import android.widget.PopupMenu
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.TextView
@@ -22,6 +23,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 
 class ComposeMessageActivity : BaseActivity() {
 
@@ -39,7 +42,7 @@ class ComposeMessageActivity : BaseActivity() {
     private lateinit var rbSequence: RadioButton
     private lateinit var rvReplyCards: RecyclerView
     private lateinit var btnAddFromLibrary: Button
-    private lateinit var btnAddLibrarySet: Button
+    private lateinit var btnAddMore: Button
     private lateinit var btnSendMessage: Button
 
     private lateinit var replyAdapter: SelectedCardAdapter
@@ -66,7 +69,20 @@ class ComposeMessageActivity : BaseActivity() {
         if (!vm.initialized) {
             vm.targetUserId = intent.getStringExtra("targetUserId").orEmpty()
             vm.targetUserName = intent.getStringExtra("targetUserName").orEmpty()
-            vm.mode = "NORMAL"
+            vm.mode = intent.getStringExtra("mode") ?: "NORMAL"
+
+            val initialRepliesJson =
+                intent.getStringExtra(EXTRA_INITIAL_REPLY_CARDS)
+
+            if (!initialRepliesJson.isNullOrBlank()) {
+                val type = object : TypeToken<List<AacCardDto>>() {}.type
+                val initialReplies: List<AacCardDto> =
+                    Gson().fromJson(initialRepliesJson, type)
+
+                vm.replyCards.clear()
+                vm.replyCards.addAll(initialReplies)
+            }
+
             vm.initialized = true
         }
 
@@ -85,7 +101,7 @@ class ComposeMessageActivity : BaseActivity() {
         rbSequence = findViewById(R.id.rbSequence)
         rvReplyCards = findViewById(R.id.rvReplyCards)
         btnAddFromLibrary = findViewById(R.id.btnAddFromLibrary)
-        btnAddLibrarySet = findViewById(R.id.btnAddLibrarySet)
+        btnAddMore = findViewById(R.id.btnAddMore)
         btnSendMessage = findViewById(R.id.btnSendMessage)
     }
 
@@ -127,8 +143,22 @@ class ComposeMessageActivity : BaseActivity() {
             )
         }
 
-        btnAddLibrarySet.setOnClickListener {
-            showChooseLibrarySetDialog()
+        btnAddMore.setOnClickListener {
+            val addFullLibrarySetId = 1
+
+            val popup = PopupMenu(it.context, it)
+            popup.menu.add(0, addFullLibrarySetId, 0, getString(R.string.add_full_library_set))
+            popup.setOnMenuItemClickListener { btn ->
+                when (btn.itemId) {
+                    addFullLibrarySetId -> {
+                        showChooseLibrarySetDialog()
+                        true
+                    }
+                    else -> false
+                }
+            }
+
+            popup.show()
         }
 
         btnSendMessage.setOnClickListener {

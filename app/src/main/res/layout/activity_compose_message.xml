@@ -80,19 +80,16 @@
             android:id="@+id/btnAddFromLibrary"
             style="@style/ComuginatorButton.Secondary"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:layout_weight="1"
-            android:text="@string/choose_from_library" />
+            android:text="@string/add" />
 
         <Button
-            android:id="@+id/btnAddLibrarySet"
+            android:id="@+id/btnAddMore"
             style="@style/ComuginatorButton.Secondary"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_weight="1"
-            android:text="@string/add_set" />
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:text="@string/more" />
 
     </LinearLayout>
 
