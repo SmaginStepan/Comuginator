@@ -14,7 +14,8 @@ import com.an0obis.comuginator.storage.SessionStore
 import com.an0obis.comuginator.ui.base.BaseAdapter
 
 class SimpleCardAdapter(
-    private val onClick: (AacCardDto) -> Unit
+    private val onClick: (AacCardDto) -> Unit = {},
+    private val alphaProvider: ((AacCardDto) -> Float)? = null
 ) : BaseAdapter<AacCardDto, SimpleCardAdapter.CardViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CardViewHolder {
@@ -24,7 +25,10 @@ class SimpleCardAdapter(
     }
 
     override fun onBindViewHolder(holder: CardViewHolder, position: Int) {
+        val item = items[position]
         holder.bind(items[position])
+        holder.itemView.alpha =
+            alphaProvider?.invoke(item) ?: 1f
     }
 
     override fun getItemCount(): Int = items.size

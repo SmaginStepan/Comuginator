@@ -102,13 +102,31 @@ class IncomingMessageActivity : BaseActivity() {
 
     override fun onInitialized() {
 
-        messageAdapter = SimpleCardAdapter { }
+        messageAdapter = SimpleCardAdapter()
 
-        repliesAdapter = SimpleCardAdapter { card ->
-            if (!isSendingReply && !isSequenceBlinking) {
-                handleReplyClick(card)
+        repliesAdapter = SimpleCardAdapter(
+            onClick = { card ->
+                if (!isSendingReply && !isSequenceBlinking) {
+                    handleReplyClick(card)
+                }
+            },
+            alphaProvider = { card ->
+                val message = currentMessage
+
+                if (message?.mode != "SEQUENCE") {
+                    1f
+                } else {
+                    val index =
+                        message.suggestedReplies.indexOfFirst { it.id == card.id }
+
+                    if (index >= 0 && index < sequenceStepIndex) {
+                        0.35f
+                    } else {
+                        1f
+                    }
+                }
             }
-        }
+        )
 
         rvMessageCards.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
@@ -198,16 +216,37 @@ class IncomingMessageActivity : BaseActivity() {
     private suspend fun blinkSelectedReplyCard(card: AacCardDto) {
         isSequenceBlinking = true
 
-        repliesAdapter.submitItems(listOf(card))
+        val message = currentMessage
+        val cards = message?.suggestedReplies ?: emptyList()
+        val selectedIndex = cards.indexOfFirst { it.id == card.id }
+
+        val views = cards.mapIndexedNotNull { index, _ ->
+            rvSuggestedReplies.findViewHolderForAdapterPosition(index)?.itemView
+        }
+
+        views.forEachIndexed { index, view ->
+            if (index == selectedIndex) {
+                view.visibility = View.VISIBLE
+                view.alpha = 1f
+            } else {
+                view.visibility = View.INVISIBLE
+            }
+        }
 
         repeat(6) {
-            rvSuggestedReplies.alpha =
-                if (it % 2 == 0) 0.15f else 1f
+            val selectedView =
+                rvSuggestedReplies.findViewHolderForAdapterPosition(selectedIndex)?.itemView
 
+            selectedView?.alpha = if (it % 2 == 0) 0.15f else 1f
             delay(500)
         }
 
-        rvSuggestedReplies.alpha = 1f
+        views.forEach { view ->
+            view.visibility = View.VISIBLE
+            view.alpha = 1f
+        }
+
+        repliesAdapter.submitItems(cards)
     }
 
     private fun renderSequenceReplies(message: AacMessageDetailsDto) {
