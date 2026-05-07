@@ -17,9 +17,20 @@ class MessageHistoryAdapter(
     private val items = mutableListOf<AacMessageListItemDto>()
 
     fun submitItems(newItems: List<AacMessageListItemDto>) {
-        items.clear()
+        val oldSize = items.size
+
+        if (oldSize > 0) {
+            items.clear()
+            notifyItemRangeRemoved(0, oldSize)
+        } else {
+            items.clear()
+        }
+
         items.addAll(newItems)
-        notifyDataSetChanged()
+
+        if (items.isNotEmpty()) {
+            notifyItemRangeInserted(0, items.size)
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HistoryViewHolder {
