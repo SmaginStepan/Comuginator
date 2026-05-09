@@ -246,7 +246,10 @@ class IncomingMessageActivity : BaseActivity() {
 
         views.forEach { view ->
             view.visibility = View.VISIBLE
-            view.alpha = 1f
+        }
+
+        rvSuggestedReplies.post {
+            applySequenceAlphas()
         }
 
         repliesAdapter.submitItems(cards)
