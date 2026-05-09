@@ -25,6 +25,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import androidx.recyclerview.widget.ItemTouchHelper
 
 class ComposeMessageActivity : BaseActivity() {
 
@@ -116,6 +117,58 @@ class ComposeMessageActivity : BaseActivity() {
         rvReplyCards.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         rvReplyCards.adapter = replyAdapter
+        rvReplyCards.itemAnimator = null
+
+        val touchHelper = ItemTouchHelper(
+            object : ItemTouchHelper.SimpleCallback(
+                ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT,
+                0
+            ) {
+
+                override fun onMove(
+                    recyclerView: RecyclerView,
+                    viewHolder: RecyclerView.ViewHolder,
+                    target: RecyclerView.ViewHolder
+                ): Boolean {
+
+                    val from = viewHolder.bindingAdapterPosition
+                    val to = target.bindingAdapterPosition
+
+                    if (from == RecyclerView.NO_POSITION ||
+                        to == RecyclerView.NO_POSITION
+                    ) {
+                        return false
+                    }
+
+                    val item = vm.replyCards.removeAt(from)
+                    vm.replyCards.add(to, item)
+
+                    replyAdapter.notifyItemMoved(from, to)
+
+                    return true
+                }
+
+                override fun onSwiped(
+                    viewHolder: RecyclerView.ViewHolder,
+                    direction: Int
+                ) {
+                }
+
+                override fun isLongPressDragEnabled(): Boolean {
+                    return true
+                }
+
+                override fun clearView(
+                    recyclerView: RecyclerView,
+                    viewHolder: RecyclerView.ViewHolder
+                ) {
+                    super.clearView(recyclerView, viewHolder)
+                    render()
+                }
+            }
+        )
+
+        touchHelper.attachToRecyclerView(rvReplyCards)
     }
 
     private fun setupMode() {
