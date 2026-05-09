@@ -141,11 +141,42 @@ class IncomingMessageActivity : BaseActivity() {
         loadMessage()
     }
 
+    private fun startCurrentWaitStep(message: AacMessageDetailsDto) {
+        val waitStep = message.suggestedReplies.getOrNull(sequenceStepIndex) ?: return
+        val seconds = waitStep.seconds ?: return
+
+        isSequenceBlinking = true
+        rvSuggestedReplies.isEnabled = false
+
+        lifecycleScope.launch {
+            for (remaining in seconds downTo 1) {
+                tvCurrentReply.text = getString(R.string.wait_timer_remaining, remaining)
+                delay(1000)
+            }
+
+            isSequenceBlinking = false
+            rvSuggestedReplies.isEnabled = true
+
+            val isLastStep = sequenceStepIndex >= message.suggestedReplies.lastIndex
+
+            if (isLastStep) {
+                setResult(RESULT_OK)
+                finish()
+            } else {
+                sequenceStepIndex += 1
+                renderSequenceReplies(message)
+            }
+        }
+    }
+
     private fun handleReplyClick(card: AacCardDto) {
         val message = currentMessage ?: return
+        if (isCurrentStepWait(message)) {
+            return
+        }
 
         if (message.mode == "SEQUENCE") {
-            val currentCard = message.suggestedReplies.getOrNull(sequenceStepIndex) ?: return
+            val currentCard = currentSuggestedCards(message).getOrNull(sequenceStepIndex) ?: return
 
             if (card.id != currentCard.id) {
                 Toast.makeText(
@@ -252,7 +283,17 @@ class IncomingMessageActivity : BaseActivity() {
             applySequenceAlphas()
         }
 
-        repliesAdapter.submitItems(cards)
+        currentMessage?.let { repliesAdapter.submitItems(currentSuggestedCards(it)) }
+    }
+
+    private fun currentSuggestedCards(message: AacMessageDetailsDto): List<AacCardDto> {
+        return message.suggestedReplies.map { it.toCardDto() }
+    }
+
+    private fun isCurrentStepWait(message: AacMessageDetailsDto): Boolean {
+        return message.suggestedReplies
+            .getOrNull(sequenceStepIndex)
+            ?.isWait() == true
     }
 
     private fun applySequenceAlphas() {
@@ -269,7 +310,7 @@ class IncomingMessageActivity : BaseActivity() {
         }
     }
     private fun renderSequenceReplies(message: AacMessageDetailsDto) {
-        val replies = message.suggestedReplies
+        val replies = currentSuggestedCards(message)
 
         repliesAdapter.submitItems(replies.toList())
 
@@ -282,6 +323,10 @@ class IncomingMessageActivity : BaseActivity() {
         rvSuggestedReplies.isVisible = replies.isNotEmpty()
         tvRepliesLabel.isVisible = replies.isNotEmpty()
         btnClose.isVisible = false
+
+        if (isCurrentStepWait(message)) {
+            startCurrentWaitStep(message)
+        }
 
         rvSuggestedReplies.post {
             applySequenceAlphas()
@@ -326,7 +371,7 @@ class IncomingMessageActivity : BaseActivity() {
         tvCreatedAt.text = getString(R.string.created_at, message.createdAt)
 
         messageAdapter.submitItems(message.message)
-        repliesAdapter.submitItems(message.suggestedReplies)
+        repliesAdapter.submitItems(currentSuggestedCards(message))
         val hasSuggestedReplies = message.suggestedReplies.isNotEmpty()
 
         if (message.reply != null) {
@@ -365,7 +410,7 @@ class IncomingMessageActivity : BaseActivity() {
                 sequenceStepIndex = if (currentReplyId == null) {
                     0
                 } else {
-                    val currentIndex = message.suggestedReplies.indexOfFirst { it.id == currentReplyId }
+                    val currentIndex = currentSuggestedCards(message).indexOfFirst { it.id == currentReplyId }
                     if (currentIndex >= 0) currentIndex + 1 else 0
                 }
 

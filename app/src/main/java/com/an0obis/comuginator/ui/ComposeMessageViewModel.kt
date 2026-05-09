@@ -11,5 +11,5 @@ class ComposeMessageViewModel : ViewModel() {
 
     var mode: String = "NORMAL"
 
-    val replyCards: MutableList<AacCardDto> = mutableListOf()
+    val replyCards = mutableListOf<AacCardDto>()
 }

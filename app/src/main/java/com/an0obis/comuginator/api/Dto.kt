@@ -140,7 +140,7 @@ data class SendAacMessageRequest(
     val targetUserId: String,
     val mode: String = "NORMAL",
     val cards: List<AacCardDto>,
-    val suggestedReplies: List<AacCardDto>
+    val suggestedReplies: List<SuggestedReplyItem>
 )
 
 data class SendAacMessageResponse(
@@ -148,13 +148,55 @@ data class SendAacMessageResponse(
     val messageId: String
 )
 
+data class AacSuggestedReplyDto(
+    val type: String? = null,
+
+    val id: String? = null,
+    val label: String? = null,
+    val imageUrl: String? = null,
+    val source: String? = null,
+    val sourceRef: String? = null,
+    val storageKey: String? = null,
+
+    val seconds: Int? = null
+) {
+    fun isWait(): Boolean = type == "WAIT"
+
+    fun toCardDto(): AacCardDto {
+        val waitSeconds = seconds ?: 60
+
+        return if (isWait()) {
+            AacCardDto(
+                id = "WAIT_$waitSeconds",
+                label = "⏱ ${waitSeconds / 60} min",
+                imageUrl = "",
+                source = "WAIT",
+                sourceRef = waitSeconds.toString()
+            )
+        } else {
+            AacCardDto(
+                id = id.orEmpty(),
+                label = label.orEmpty(),
+                imageUrl = imageUrl.orEmpty(),
+                source = source.orEmpty(),
+                sourceRef = sourceRef
+            )
+        }
+    }
+}
+
+data class WaitStepDto(
+    val type: String = "WAIT",
+    val seconds: Int
+) : SuggestedReplyItem
+
 data class AacCardDto(
     val id: String,
     val label: String,
     val imageUrl: String?,
     val source: String? = null,
     val sourceRef: String? = null,
-)
+): SuggestedReplyItem
 
 data class AacUserDto(
     val id: String,
@@ -174,7 +216,7 @@ data class AacMessageDetailsDto(
     val fromUser: AacUserDto,
     val toUser: AacUserDto,
     val message: List<AacCardDto>,
-    val suggestedReplies: List<AacCardDto>,
+    val suggestedReplies: List<AacSuggestedReplyDto>,
     val mode: String = "NORMAL",
     val reply: AacReplyShortDto?,
     val createdAt: String,

@@ -278,4 +278,16 @@
 
     <string name="sequence_choose_current_step">Primero elige el paso actual</string>
     <string name="sequence_step_status">Paso %1$d de %2$d</string>
+
+    <string name="add_timer">Añadir temporizador</string>
+
+    <string name="timer_30_seconds">30 segundos</string>
+    <string name="timer_1_minute">1 minuto</string>
+    <string name="timer_3_minutes">3 minutos</string>
+    <string name="timer_5_minutes">5 minutos</string>
+    <string name="timer_10_minutes">10 minutos</string>
+
+    <string name="timer_seconds_unit">seg.</string>
+    <string name="timer_minutes_unit">min.</string>
+    <string name="wait_timer_remaining">⏱ Esperar: %1$d s</string>
 </resources>

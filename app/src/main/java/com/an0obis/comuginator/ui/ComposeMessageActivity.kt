@@ -26,6 +26,8 @@ import kotlinx.coroutines.launch
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import androidx.recyclerview.widget.ItemTouchHelper
+import com.an0obis.comuginator.api.SuggestedReplyItem
+import com.an0obis.comuginator.api.WaitStepDto
 
 class ComposeMessageActivity : BaseActivity() {
 
@@ -197,12 +199,18 @@ class ComposeMessageActivity : BaseActivity() {
         }
 
         btnAddMore.setOnClickListener {
-            val addFullLibrarySetId = 1
+            val addTimerId = 1
+            val addFullLibrarySetId = 2
 
             val popup = PopupMenu(it.context, it)
+            popup.menu.add(0, addTimerId, 0, getString(R.string.add_timer))
             popup.menu.add(0, addFullLibrarySetId, 0, getString(R.string.add_full_library_set))
             popup.setOnMenuItemClickListener { btn ->
                 when (btn.itemId) {
+                    addTimerId -> {
+                        showAddTimerDialog()
+                        true
+                    }
                     addFullLibrarySetId -> {
                         showChooseLibrarySetDialog()
                         true
@@ -236,6 +244,51 @@ class ComposeMessageActivity : BaseActivity() {
 
             else ->
                 getString(R.string.compose_normal_question_status, vm.replyCards.size)
+        }
+    }
+
+    private fun showAddTimerDialog() {
+        val variants = arrayOf(
+            getString(R.string.timer_30_seconds),
+            getString(R.string.timer_1_minute),
+            getString(R.string.timer_3_minutes),
+            getString(R.string.timer_5_minutes),
+            getString(R.string.timer_10_minutes)
+        )
+
+        val seconds = intArrayOf(30, 60, 180, 300, 600)
+
+        AlertDialog.Builder(this)
+            .setTitle(R.string.add_timer)
+            .setItems(variants) { _, which ->
+                addTimerStep(seconds[which])
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    private fun addTimerStep(seconds: Int) {
+        vm.mode = "SEQUENCE"
+        rbSequence.isChecked = true
+
+        vm.replyCards.add(
+            AacCardDto(
+                id = "WAIT_$seconds",
+                label = formatTimerLabel(seconds),
+                imageUrl = "",
+                source = "WAIT",
+                sourceRef = seconds.toString()
+            )
+        )
+
+        render()
+    }
+
+    private fun formatTimerLabel(seconds: Int): String {
+        return if (seconds < 60) {
+            "⏱ $seconds ${getString(R.string.timer_seconds_unit)}"
+        } else {
+            "⏱ ${seconds / 60} ${getString(R.string.timer_minutes_unit)}"
         }
     }
 
@@ -387,13 +440,24 @@ class ComposeMessageActivity : BaseActivity() {
 
         scope.launch {
             try {
+                val suggestedRepliesForApi: List<SuggestedReplyItem> =
+                    vm.replyCards.map { card ->
+                        if (card.source == "WAIT") {
+                            WaitStepDto(
+                                seconds = card.sourceRef?.toIntOrNull() ?: 60
+                            )
+                        } else {
+                            card
+                        }
+                    }
+
                 ApiClient.api.sendAacMessage(
                     auth = store.authHeaderOrThrow(),
                     body = SendAacMessageRequest(
                         targetUserId = vm.targetUserId,
                         mode = vm.mode,
                         cards = buildMessageCards(),
-                        suggestedReplies = vm.replyCards
+                        suggestedReplies = suggestedRepliesForApi
                     )
                 )
 
