@@ -53,6 +53,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
         style="@style/ComuginatorText.Section"
+        android:visibility="gone"
         android:text="@string/message"
         android:textStyle="bold" />
 
@@ -61,6 +62,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
+        android:visibility="gone"
         android:nestedScrollingEnabled="false" />
 
     <TextView
@@ -107,6 +109,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
+        android:layout_marginBottom="46dp"
         style="@style/ComuginatorButton.Secondary"
         android:text="@string/close"
         android:visibility="gone" />

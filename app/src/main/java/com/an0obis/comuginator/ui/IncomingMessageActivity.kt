@@ -5,6 +5,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.an0obis.comuginator.api.AacMessageDetailsDto
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
@@ -118,8 +119,9 @@ class IncomingMessageActivity : BaseActivity() {
                 } else {
                     val index =
                         message.suggestedReplies.indexOfFirst { it.id == card.id }
-
-                    if (index >= 0 && index < sequenceStepIndex) {
+                    val isPassed = index < sequenceStepIndex
+                    Log.d("IncomingMessageActivity","alpha $index $sequenceStepIndex $isPassed")
+                    if (isPassed) {
                         0.35f
                     } else {
                         1f
@@ -134,6 +136,7 @@ class IncomingMessageActivity : BaseActivity() {
 
         rvSuggestedReplies.layoutManager = GridLayoutManager(this, 3)
         rvSuggestedReplies.adapter = repliesAdapter
+        rvSuggestedReplies.itemAnimator = null
 
         loadMessage()
     }
@@ -249,10 +252,23 @@ class IncomingMessageActivity : BaseActivity() {
         repliesAdapter.submitItems(cards)
     }
 
+    private fun applySequenceAlphas() {
+        val message = currentMessage ?: return
+        if (message.mode != "SEQUENCE") return
+
+        message.suggestedReplies.forEachIndexed { index, _ ->
+            val view = rvSuggestedReplies
+                .findViewHolderForAdapterPosition(index)
+                ?.itemView
+
+            view?.visibility = View.VISIBLE
+            view?.alpha = if (index < sequenceStepIndex) 0.35f else 1f
+        }
+    }
     private fun renderSequenceReplies(message: AacMessageDetailsDto) {
         val replies = message.suggestedReplies
 
-        repliesAdapter.submitItems(replies)
+        repliesAdapter.submitItems(replies.toList())
 
         tvRepliesLabel.text = getString(
             R.string.sequence_step_status,
@@ -263,6 +279,10 @@ class IncomingMessageActivity : BaseActivity() {
         rvSuggestedReplies.isVisible = replies.isNotEmpty()
         tvRepliesLabel.isVisible = replies.isNotEmpty()
         btnClose.isVisible = false
+
+        rvSuggestedReplies.post {
+            applySequenceAlphas()
+        }
     }
 
     private fun loadMessage() {
@@ -317,6 +337,9 @@ class IncomingMessageActivity : BaseActivity() {
             ivCurrentReply.isVisible = false
         }
 
+        tvFromUser.text = message.fromUser.name
+        loadProtectedImage(message.fromUser.avatarImageUrl, ivFromAvatar)
+
         if (mode == MODE_REPLY) {
             tvFromUser.text = getString(R.string.reply_from,message.toUser.name)
             tvCurrentReply.text = message.reply?.let {
@@ -334,6 +357,19 @@ class IncomingMessageActivity : BaseActivity() {
             return
         } else {
             if (message.mode == "SEQUENCE") {
+                val currentReplyId = message.reply?.reply?.id
+
+                sequenceStepIndex = if (currentReplyId == null) {
+                    0
+                } else {
+                    val currentIndex = message.suggestedReplies.indexOfFirst { it.id == currentReplyId }
+                    if (currentIndex >= 0) currentIndex + 1 else 0
+                }
+
+                if (sequenceStepIndex > message.suggestedReplies.lastIndex) {
+                    sequenceStepIndex = message.suggestedReplies.lastIndex
+                }
+
                 renderSequenceReplies(message)
             } else {
                 sequenceStepIndex = 0
@@ -343,8 +379,6 @@ class IncomingMessageActivity : BaseActivity() {
             }
         }
 
-        tvFromUser.text = message.fromUser.name
-        loadProtectedImage(message.fromUser.avatarImageUrl, ivFromAvatar)
     }
 
     private fun sendReply(card: AacCardDto) {

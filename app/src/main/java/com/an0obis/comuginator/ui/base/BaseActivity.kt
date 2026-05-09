@@ -29,6 +29,7 @@ import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import coil.ImageLoader
 import coil.request.ImageRequest
+import com.an0obis.comuginator.api.AacMessageListItemDto
 import com.an0obis.comuginator.api.ApiClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -197,6 +198,20 @@ open class BaseActivity: AppCompatActivity() {
         return true
     }
 
+    private fun shouldOpenIncoming(msg: AacMessageListItemDto): Boolean {
+        if (msg.toUserId != store.userId) return false
+        if (msg.suggestedReplies.isEmpty()) return false
+
+        if (msg.mode != "SEQUENCE") {
+            return msg.reply == null
+        }
+
+        val currentReplyId = msg.reply?.reply?.id ?: return true
+        val currentIndex = msg.suggestedReplies.indexOfFirst { it.id == currentReplyId }
+
+        return currentIndex < msg.suggestedReplies.lastIndex
+    }
+
     private fun checkPendingIncomingMessages() {
         if (!shouldCheckPendingIncomingMessages()) return
         if (pendingIncomingCheckRunning) return
@@ -230,11 +245,7 @@ open class BaseActivity: AppCompatActivity() {
                         .toMap()
 
                     val incomingToAnswer = allMessages.items
-                        .filter { msg ->
-                            msg.toUserId == store.userId &&
-                                    msg.reply == null &&
-                                    msg.suggestedReplies.isNotEmpty()
-                        }
+                        .filter { msg -> shouldOpenIncoming(msg) }
                         .maxByOrNull { it.createdAt }
 
                     val repliedToMyMessage = allMessages.items
