@@ -243,4 +243,17 @@ interface ApiService {
         @Header("Authorization") auth: String,
         @Path("nodeId") nodeId: String
     ): OkResponse
+
+    @POST("/v1/library/sets/{setId}/move-items")
+    suspend fun moveLibrarySetItems(
+        @Header("Authorization") auth: String,
+        @Path("setId") setId: String,
+        @Body body: MoveLibrarySetItemsRequest
+    )
+
+    @POST("/v1/library/sets/move")
+    suspend fun moveLibrarySets(
+        @Header("Authorization") auth: String,
+        @Body body: MoveLibrarySetsRequest
+    )
 }

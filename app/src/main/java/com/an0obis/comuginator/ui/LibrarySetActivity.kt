@@ -19,6 +19,10 @@ import com.an0obis.comuginator.api.UpdateLibrarySetRequest
 import com.an0obis.comuginator.storage.SessionStore
 import com.an0obis.comuginator.ui.library.LibraryItemsAdapter
 import kotlinx.coroutines.launch
+import androidx.recyclerview.widget.ItemTouchHelper
+import com.an0obis.comuginator.api.MoveLibrarySetItemsRequest
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class LibrarySetActivity : AppCompatActivity() {
 
@@ -99,6 +103,9 @@ class LibrarySetActivity : AppCompatActivity() {
 
         rvItems.layoutManager = LinearLayoutManager(this)
         rvItems.adapter = adapter
+        rvItems.itemAnimator = null
+
+        setupDragAndDrop()
 
         btnRenameSet.setOnClickListener {
             showRenameDialog()
@@ -109,6 +116,81 @@ class LibrarySetActivity : AppCompatActivity() {
         }
 
         loadSet()
+    }
+
+    private fun setupDragAndDrop() {
+        val touchHelper = ItemTouchHelper(
+            object : ItemTouchHelper.SimpleCallback(
+                ItemTouchHelper.UP or ItemTouchHelper.DOWN,
+                0
+            ) {
+                override fun onMove(
+                    recyclerView: RecyclerView,
+                    viewHolder: RecyclerView.ViewHolder,
+                    target: RecyclerView.ViewHolder
+                ): Boolean {
+                    val from = viewHolder.bindingAdapterPosition
+                    val to = target.bindingAdapterPosition
+
+                    if (
+                        from == RecyclerView.NO_POSITION ||
+                        to == RecyclerView.NO_POSITION ||
+                        from == to
+                    ) {
+                        return false
+                    }
+
+                    adapter.moveItem(from, to)
+                    return true
+                }
+
+                override fun onSwiped(
+                    viewHolder: RecyclerView.ViewHolder,
+                    direction: Int
+                ) {
+                    // no-op
+                }
+
+                override fun clearView(
+                    recyclerView: RecyclerView,
+                    viewHolder: RecyclerView.ViewHolder
+                ) {
+                    super.clearView(recyclerView, viewHolder)
+                    persistCurrentItemOrder()
+                }
+            }
+        )
+
+        touchHelper.attachToRecyclerView(rvItems)
+    }
+
+    private fun persistCurrentItemOrder() {
+        val itemIds = adapter.readItems().map { it.id }
+
+        lifecycleScope.launch {
+            try {
+                tvStatus.text = getString(R.string.saving)
+
+                withContext(Dispatchers.IO) {
+                    ApiClient.api.moveLibrarySetItems(
+                        auth = sessionStore.authHeaderOrThrow(),
+                        setId = setId,
+                        body = MoveLibrarySetItemsRequest(
+                            itemIds = itemIds
+                        )
+                    )
+                }
+
+                tvStatus.text = resources.getQuantityString(
+                    R.plurals.items_count,
+                    itemIds.size,
+                    itemIds.size
+                )
+            } catch (e: Exception) {
+                tvStatus.text = getString(R.string.failed_with_message, e.message)
+                loadSet()
+            }
+        }
     }
 
     private fun addExistingItemToSet(itemId: String) {

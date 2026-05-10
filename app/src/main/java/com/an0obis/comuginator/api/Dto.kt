@@ -444,3 +444,11 @@ data class ChildHomeNodeResponse(
     val ok: Boolean,
     val item: ChildHomeNodeDto
 )
+
+data class MoveLibrarySetItemsRequest(
+    val itemIds: List<String>
+)
+
+data class MoveLibrarySetsRequest(
+    val setIds: List<String>
+)

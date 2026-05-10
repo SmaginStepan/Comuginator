@@ -29,4 +29,13 @@ abstract class BaseAdapter<TItem, TViewHolder : RecyclerView.ViewHolder>: Recycl
         }
     }
 
+    fun moveItem(from: Int, to: Int) {
+        if (from !in items.indices || to !in items.indices) return
+
+        val item = items.removeAt(from)
+        items.add(to, item)
+
+        notifyItemMoved(from, to)
+    }
+
 }

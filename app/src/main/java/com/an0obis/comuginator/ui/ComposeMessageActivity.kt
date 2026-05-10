@@ -47,7 +47,6 @@ class ComposeMessageActivity : BaseActivity() {
     private lateinit var btnAddFromLibrary: Button
     private lateinit var btnAddMore: Button
     private lateinit var btnSendMessage: Button
-
     private lateinit var replyAdapter: SelectedCardAdapter
 
     private val pickLibraryItemLauncher =

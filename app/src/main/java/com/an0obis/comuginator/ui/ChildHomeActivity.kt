@@ -25,6 +25,7 @@ import com.an0obis.comuginator.ui.base.BaseActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import androidx.recyclerview.widget.ItemTouchHelper
 
 class ChildHomeActivity : BaseActivity() {
 
@@ -48,7 +49,6 @@ class ChildHomeActivity : BaseActivity() {
 
     private lateinit var sessionStore: SessionStore
     private lateinit var adapter: ChildHomeAdapter
-
     private lateinit var tvTitle: TextView
     private lateinit var tvBreadcrumbs: TextView
     private lateinit var btnBack: Button
@@ -58,7 +58,6 @@ class ChildHomeActivity : BaseActivity() {
     private lateinit var progress: ProgressBar
     private lateinit var rv: RecyclerView
     private lateinit var btnPreview: Button
-
     private var lastLoadedNodesSize: Int? = null
     private var previewMode: Boolean = false
     private var blinkingNodeId: String? = null
@@ -76,10 +75,9 @@ class ChildHomeActivity : BaseActivity() {
         }
 
     private var authToken: String = ""
-
     private var pendingEditNodeId: String? = null
     private var pendingEditNodeType: String? = null
-
+    private var childHomeTouchHelper: ItemTouchHelper? = null
     private val pickItemLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode != RESULT_OK) return@registerForActivityResult
@@ -166,6 +164,8 @@ class ChildHomeActivity : BaseActivity() {
         rv.adapter = adapter
         rv.itemAnimator = null
 
+        setupDragAndDrop()
+
         if (path.isEmpty()) {
             path.add(PathEntry(parentId = null, title = getString(R.string.home)))
         }
@@ -181,6 +181,90 @@ class ChildHomeActivity : BaseActivity() {
         loadNodes(currentParentId, false)
     }
 
+    private fun setupDragAndDrop() {
+        childHomeTouchHelper = ItemTouchHelper(
+            object : ItemTouchHelper.SimpleCallback(
+                ItemTouchHelper.UP or
+                        ItemTouchHelper.DOWN or
+                        ItemTouchHelper.LEFT or
+                        ItemTouchHelper.RIGHT,
+                0
+            ) {
+                override fun isLongPressDragEnabled(): Boolean {
+                    return isEditorMode && !previewMode
+                }
+
+                override fun onMove(
+                    recyclerView: RecyclerView,
+                    viewHolder: RecyclerView.ViewHolder,
+                    target: RecyclerView.ViewHolder
+                ): Boolean {
+                    if (!isEditorMode || previewMode) return false
+
+                    val from = viewHolder.bindingAdapterPosition
+                    val to = target.bindingAdapterPosition
+
+                    if (from == RecyclerView.NO_POSITION ||
+                        to == RecyclerView.NO_POSITION ||
+                        from == to
+                    ) {
+                        return false
+                    }
+
+                    adapter.moveItem(from, to)
+                    return true
+                }
+
+                override fun onSwiped(
+                    viewHolder: RecyclerView.ViewHolder,
+                    direction: Int
+                ) {
+                    // no-op
+                }
+
+                override fun clearView(
+                    recyclerView: RecyclerView,
+                    viewHolder: RecyclerView.ViewHolder
+                ) {
+                    super.clearView(recyclerView, viewHolder)
+
+                    if (isEditorMode && !previewMode) {
+                        persistCurrentNodeOrder()
+                    }
+                }
+            }
+        )
+
+        childHomeTouchHelper?.attachToRecyclerView(rv)
+    }
+
+    private fun persistCurrentNodeOrder() {
+        val nodes = adapter.readItems()
+
+        lifecycleScope.launch {
+            try {
+                withContext(Dispatchers.IO) {
+                    nodes.forEachIndexed { index, node ->
+                        ApiClient.api.updateChildHomeNode(
+                            auth = sessionStore.authHeaderOrThrow(),
+                            nodeId = node.id,
+                            body = UpdateChildHomeNodeRequest(
+                                sortOrder = index
+                            )
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                Toast.makeText(
+                    this@ChildHomeActivity,
+                    getString(R.string.child_home_update_failed, e.message),
+                    Toast.LENGTH_LONG
+                ).show()
+
+                loadNodes(currentParentId, false)
+            }
+        }
+    }
     private fun toggleNodeVisibility(node: ChildHomeNodeDto) {
         showLoading()
 
