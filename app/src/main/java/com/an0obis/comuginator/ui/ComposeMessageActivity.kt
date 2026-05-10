@@ -47,7 +47,7 @@ class ComposeMessageActivity : BaseActivity() {
     private lateinit var btnAddFromLibrary: Button
     private lateinit var btnAddMore: Button
     private lateinit var btnSendMessage: Button
-    private lateinit var replyAdapter: SelectedCardAdapter
+    private lateinit var replyAdapter: CardAdapter
 
     private val pickLibraryItemLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -108,7 +108,8 @@ class ComposeMessageActivity : BaseActivity() {
     }
 
     private fun setupRecycler() {
-        replyAdapter = SelectedCardAdapter(
+        replyAdapter = CardAdapter(
+            layoutResId = R.layout.item_selected_card,
             onClick = { card ->
                 vm.replyCards.remove(card)
                 render()

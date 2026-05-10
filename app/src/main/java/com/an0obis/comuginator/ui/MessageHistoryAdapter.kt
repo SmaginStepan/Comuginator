@@ -55,8 +55,8 @@ class MessageHistoryAdapter(
 
         private val btnRepeat: Button = view.findViewById(R.id.btnRepeat)
 
-        private val suggestedRepliesAdapter = SimpleCardAdapter()
-        private val selectedReplyAdapter = SimpleCardAdapter()
+        private val suggestedRepliesAdapter = CardAdapter()
+        private val selectedReplyAdapter = CardAdapter()
 
         init {
             rvSuggestedReplies.layoutManager =

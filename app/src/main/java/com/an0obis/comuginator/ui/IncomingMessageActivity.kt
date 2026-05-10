@@ -42,8 +42,8 @@ class IncomingMessageActivity : BaseActivity() {
     private lateinit var rvMessageCards: RecyclerView
     private lateinit var rvSuggestedReplies: RecyclerView
 
-    private lateinit var messageAdapter: SimpleCardAdapter
-    private lateinit var repliesAdapter: SimpleCardAdapter
+    private lateinit var messageAdapter: CardAdapter
+    private lateinit var repliesAdapter: CardAdapter
     private lateinit var tvRepliesLabel: TextView
     private lateinit var ivCurrentReply: ImageView
     private lateinit var ivFromAvatar: ImageView
@@ -51,6 +51,7 @@ class IncomingMessageActivity : BaseActivity() {
 
     private var sequenceStepIndex = 0
     private var isSequenceBlinking = false
+    private var isWaitTimerRunning = false
     private var messageId: String = ""
     private var commandId: String = ""
     private var ackSent = false
@@ -103,9 +104,9 @@ class IncomingMessageActivity : BaseActivity() {
 
     override fun onInitialized() {
 
-        messageAdapter = SimpleCardAdapter()
+        messageAdapter = CardAdapter()
 
-        repliesAdapter = SimpleCardAdapter(
+        repliesAdapter = CardAdapter(
             onClick = { card ->
                 if (!isSendingReply && !isSequenceBlinking) {
                     handleReplyClick(card)
@@ -141,20 +142,39 @@ class IncomingMessageActivity : BaseActivity() {
         loadMessage()
     }
 
+    private fun formatTimerLabel(seconds: Int): String {
+        val minutes = seconds / 60
+        val secs = seconds % 60
+
+        return if (minutes > 0) {
+            "⏱ %d:%02d".format(minutes, secs)
+        } else {
+            "⏱ ${seconds}s"
+        }
+    }
     private fun startCurrentWaitStep(message: AacMessageDetailsDto) {
+        if (isWaitTimerRunning) return
+
         val waitStep = message.suggestedReplies.getOrNull(sequenceStepIndex) ?: return
         val seconds = waitStep.seconds ?: return
 
-        isSequenceBlinking = true
+        isWaitTimerRunning = true
         rvSuggestedReplies.isEnabled = false
 
         lifecycleScope.launch {
             for (remaining in seconds downTo 1) {
                 tvCurrentReply.text = getString(R.string.wait_timer_remaining, remaining)
+
+                val holder = rvSuggestedReplies
+                    .findViewHolderForAdapterPosition(sequenceStepIndex) as? CardAdapter.CardViewHolder
+
+                holder?.tvCardLabel?.text = formatTimerLabel(remaining)
+                holder?.ivCardImage?.setImageResource(R.drawable.ic_timer_large)
+
                 delay(1000)
             }
 
-            isSequenceBlinking = false
+            isWaitTimerRunning = false
             rvSuggestedReplies.isEnabled = true
 
             val isLastStep = sequenceStepIndex >= message.suggestedReplies.lastIndex
@@ -277,7 +297,7 @@ class IncomingMessageActivity : BaseActivity() {
         isSequenceBlinking = true
 
         val message = currentMessage
-        val cards = message?.suggestedReplies ?: emptyList()
+        val cards = message?.let { currentSuggestedCards(it) } ?: emptyList()
         val selectedIndex = cards.indexOfFirst { it.id == card.id }
 
         val views = cards.mapIndexedNotNull { index, _ ->
