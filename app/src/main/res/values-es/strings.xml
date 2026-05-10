@@ -291,4 +291,5 @@
     <string name="timer_seconds_unit">seg.</string>
     <string name="timer_minutes_unit">min.</string>
     <string name="wait_timer_remaining">⏱ Esperar: %1$d s</string>
+    <string name="sequence_completed">Secuencia completada</string>
 </resources>

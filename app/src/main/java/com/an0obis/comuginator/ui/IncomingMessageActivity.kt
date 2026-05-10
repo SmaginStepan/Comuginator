@@ -160,13 +160,39 @@ class IncomingMessageActivity : BaseActivity() {
             val isLastStep = sequenceStepIndex >= message.suggestedReplies.lastIndex
 
             if (isLastStep) {
-                setResult(RESULT_OK)
-                finish()
+                sendSequenceCompletedAfterWait()
             } else {
                 sequenceStepIndex += 1
                 renderSequenceReplies(message)
             }
         }
+    }
+
+    private suspend fun sendSequenceCompletedAfterWait() {
+        val completionCard = AacCardDto(
+            id = "SEQUENCE_COMPLETED",
+            label = getString(R.string.sequence_completed),
+            imageUrl = "",
+            source = "SYSTEM",
+            sourceRef = "SEQUENCE_COMPLETED"
+        )
+
+        try {
+            withContext(Dispatchers.IO) {
+                ApiClient.replyToAacMessage(
+                    authHeader = store.authHeaderOrThrow(),
+                    messageId = messageId,
+                    requestBody = SendAacReplyRequest(reply = completionCard)
+                )
+            }
+        } catch (e: Exception) {
+            // Не блокируем закрытие экрана, но логируем.
+            e.printStackTrace()
+        }
+
+        cancelCurrentNotification()
+        setResult(RESULT_OK)
+        finish()
     }
 
     private fun handleReplyClick(card: AacCardDto) {

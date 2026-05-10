@@ -36,6 +36,12 @@ class SelectedCardAdapter(
         fun bind(item: AacCardDto) {
             tvCardLabel.text = item.label
 
+            if (item.source == "WAIT") {
+                ivCardImage.setImageResource(R.drawable.ic_timer_large)
+                itemView.setOnClickListener { onClick(item) }
+                return
+            }
+
             val sessionStore = SessionStore(itemView.context)
 
             val requestBuilder = ImageRequest.Builder(itemView.context)

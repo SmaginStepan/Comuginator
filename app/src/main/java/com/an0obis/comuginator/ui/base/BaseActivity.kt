@@ -207,7 +207,16 @@ open class BaseActivity: AppCompatActivity() {
         }
 
         val currentReplyId = msg.reply?.reply?.id ?: return true
+
+        if (currentReplyId == "SEQUENCE_COMPLETED") {
+            return false
+        }
+
         val currentIndex = msg.suggestedReplies.indexOfFirst { it.id == currentReplyId }
+
+        if (currentIndex < 0) {
+            return true
+        }
 
         return currentIndex < msg.suggestedReplies.lastIndex
     }

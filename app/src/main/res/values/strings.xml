@@ -332,4 +332,5 @@
     <string name="timer_seconds_unit">sec.</string>
     <string name="timer_minutes_unit">min.</string>
     <string name="wait_timer_remaining">⏱ Wait: %1$d s</string>
+    <string name="sequence_completed">Sequence completed</string>
 </resources>
