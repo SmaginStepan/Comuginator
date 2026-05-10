@@ -80,7 +80,9 @@ class MessageHistoryAdapter(
                 else -> context.getString(R.string.compose_mode_normal)
             }
 
-            suggestedRepliesAdapter.submitItems(item.suggestedReplies)
+            suggestedRepliesAdapter.submitItems(
+                item.suggestedReplies.map { it.toCardDto() }
+            )
 
             val selectedReply = item.reply?.reply
 

@@ -152,6 +152,7 @@ class IncomingMessageActivity : BaseActivity() {
             "⏱ ${seconds}s"
         }
     }
+
     private fun startCurrentWaitStep(message: AacMessageDetailsDto) {
         if (isWaitTimerRunning) return
 
@@ -165,11 +166,23 @@ class IncomingMessageActivity : BaseActivity() {
             for (remaining in seconds downTo 1) {
                 tvCurrentReply.text = getString(R.string.wait_timer_remaining, remaining)
 
-                val holder = rvSuggestedReplies
-                    .findViewHolderForAdapterPosition(sequenceStepIndex) as? CardAdapter.CardViewHolder
+                rvSuggestedReplies.post {
+                    val holder = rvSuggestedReplies
+                        .findViewHolderForAdapterPosition(sequenceStepIndex)
+                            as? CardAdapter.CardViewHolder
 
-                holder?.tvCardLabel?.text = formatTimerLabel(remaining)
-                holder?.ivCardImage?.setImageResource(R.drawable.ic_timer_large)
+                    val drawable = TimerDrawable().apply {
+                        progress = remaining.toFloat() / seconds.toFloat()
+                        text = if (remaining >= 60) {
+                            "${remaining / 60}:${(remaining % 60).toString().padStart(2, '0')}"
+                        } else {
+                            remaining.toString()
+                        }
+                    }
+
+                    holder?.ivCardImage?.setImageDrawable(drawable)
+                    holder?.tvCardLabel?.text = formatTimerLabel(remaining)
+                }
 
                 delay(1000)
             }

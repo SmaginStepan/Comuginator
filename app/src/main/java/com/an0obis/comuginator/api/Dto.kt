@@ -163,25 +163,33 @@ data class AacSuggestedReplyDto(
     fun isWait(): Boolean = type == "WAIT"
 
     fun toCardDto(): AacCardDto {
-        val waitSeconds = seconds ?: 60
+        if (type == "WAIT") {
+            val waitSeconds = seconds ?: 60
 
-        return if (isWait()) {
-            AacCardDto(
+            val label = if (waitSeconds < 60) {
+                "⏱ ${waitSeconds}s"
+            } else {
+                val minutes = waitSeconds / 60
+                val restSeconds = waitSeconds % 60
+                "⏱ %d:%02d".format(minutes, restSeconds)
+            }
+
+            return AacCardDto(
                 id = "WAIT_$waitSeconds",
-                label = "⏱ ${waitSeconds / 60} min",
+                label = label,
                 imageUrl = "",
                 source = "WAIT",
                 sourceRef = waitSeconds.toString()
             )
-        } else {
-            AacCardDto(
-                id = id.orEmpty(),
-                label = label.orEmpty(),
-                imageUrl = imageUrl.orEmpty(),
-                source = source.orEmpty(),
-                sourceRef = sourceRef
-            )
         }
+
+        return AacCardDto(
+            id = id.orEmpty(),
+            label = label.orEmpty(),
+            imageUrl = imageUrl.orEmpty(),
+            source = source.orEmpty(),
+            sourceRef = sourceRef
+        )
     }
 }
 
@@ -240,7 +248,7 @@ data class AacMessageListItemDto(
     val fromUser: AacUserDto?,
     val toUser: AacUserDto?,
     val message: List<AacCardDto>,
-    val suggestedReplies: List<AacCardDto>,
+    val suggestedReplies: List<AacSuggestedReplyDto>,
     val reply: AacReplyShortDto?,
     val createdAt: String,
     val mode: String = "NORMAL",
