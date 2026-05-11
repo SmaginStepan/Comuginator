@@ -31,15 +31,12 @@
     <string name="child_home_send_failed">No se pudo enviar la petición: %1$s</string>
     <string name="sent">Enviado</string>
     <string name="message">Mensaje</string>
-    <string name="replies">Respuestas</string>
     <string name="incoming_message">Mensaje entrante</string>
     <string name="from">De:</string>
-    <string name="from_name">De: %1$s</string>
     <string name="suggested_replies">Respuestas sugeridas</string>
     <string name="current_reply">Respuesta actual</string>
     <string name="no_reply_yet">Todavía no hay respuesta</string>
     <string name="repeat">Repetir</string>
-    <string name="send_to_placeholder">Enviar a…</string>
     <string name="send_to_name">Enviar a %1$s</string>
     <string name="add_full_library_set">Añadir todo el conjunto</string>
     <string name="choose_set">Elegir conjunto</string>
@@ -51,10 +48,6 @@
         <item quantity="other">Elementos añadidos: %d</item>
     </plurals>
     <string name="load_sets_failed">No se pudieron cargar los conjuntos: %1$s</string>
-    <string name="upload_failed">No se pudo subir: %1$s</string>
-    <string name="photo_label">Etiqueta de la foto</string>
-    <string name="label">Etiqueta</string>
-    <string name="upload">Subir</string>
     <string name="family_title_placeholder">Familia —</string>
     <string name="invite_placeholder">Invitación: —</string>
     <string name="status_placeholder">Estado: —</string>
@@ -67,7 +60,6 @@
     <string name="charging">cargando</string>
     <string name="not_charging">sin cargar</string>
     <string name="charging_unknown">¿cargando?</string>
-    <string name="never">nunca</string>
     <string name="device_meta">Batería: %1$s · %2$s · Volumen: %3$s · Última conexión: %4$s</string>
     <string name="create_set">Crear conjunto</string>
     <string name="set_name">Nombre del conjunto</string>
@@ -86,11 +78,9 @@
     <string name="take_photo">Hacer foto</string>
     <string name="choose_photo_from_device">Elegir foto del dispositivo</string>
     <string name="search_arasaac">Buscar en ARASAAC</string>
-    <string name="search_cards">Buscar tarjetas</string>
     <string name="choose_from_library">Elegir de la biblioteca</string>
     <string name="save_and_use">Guardar y usar</string>
     <string name="search_by_label">Buscar por etiqueta</string>
-    <string name="filter_by_set">Filtrar por conjunto</string>
     <string name="title">Título</string>
     <string name="next">Siguiente</string>
     <string name="already_have_family">¿Ya tienes un grupo familiar?</string>
@@ -174,11 +164,9 @@
     <string name="update_avatar_failed">No se pudo actualizar el avatar: %1$s</string>
     <string name="volume_value">Volumen: %1$d%%</string>
     <string name="set_volume">Ajustar volumen:</string>
-    <string name="check_incoming_failed">No se pudo comprobar el mensaje entrante: %1$s</string>
     <string name="created_at">Creado: %1$s</string>
     <string name="reply_prefix">Respuesta: %1$s</string>
     <string name="reply_empty">Respuesta: —</string>
-    <string name="reply_value">Respuesta: %1$s</string>
     <string name="reply_not_available">La respuesta todavía no está disponible</string>
     <string name="reply_from">Respuesta de %1$s</string>
     <string name="reply_sent">Respuesta enviada</string>
@@ -192,7 +180,6 @@
     <string name="choose_user_avatar">Elegir avatar de usuario</string>
     <string name="choose_set_cover">Elegir portada del conjunto</string>
     <string name="add_item_to_set">Añadir elemento al conjunto</string>
-    <string name="add_item_to_message">Añadir elemento al mensaje</string>
     <string name="photo_number">Foto %1$s</string>
     <string name="user_name_required">El nombre de usuario es obligatorio</string>
     <string name="device_name_required">El nombre del dispositivo es obligatorio</string>
@@ -265,10 +252,6 @@
 
     <string name="compose_sequence_needs_two_steps">
         La secuencia requiere al menos 2 pasos
-    </string>
-
-    <string name="add_set">
-        Añadir conjunto
     </string>
 
     <string name="send_message">Enviar</string>

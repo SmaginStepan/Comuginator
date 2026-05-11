@@ -31,15 +31,12 @@
     <string name="child_home_send_failed">Не удалось отправить запрос: %1$s</string>
     <string name="sent">Отправлено</string>
     <string name="message">Сообщение</string>
-    <string name="replies">Ответы</string>
     <string name="incoming_message">Входящее сообщение</string>
     <string name="from">От:</string>
-    <string name="from_name">От: %1$s</string>
     <string name="suggested_replies">Предложенные ответы</string>
     <string name="current_reply">Текущий ответ</string>
     <string name="no_reply_yet">Ответа пока нет</string>
     <string name="repeat">Повторить</string>
-    <string name="send_to_placeholder">Отправить кому…</string>
     <string name="send_to_name">Отправить: %1$s</string>
     <string name="add_full_library_set">Добавить весь набор</string>
     <string name="choose_set">Выберите набор</string>
@@ -52,10 +49,6 @@
         <item quantity="other">Добавлено %d элемента</item>
     </plurals>
     <string name="load_sets_failed">Не удалось загрузить наборы: %1$s</string>
-    <string name="upload_failed">Не удалось загрузить: %1$s</string>
-    <string name="photo_label">Подпись к фото</string>
-    <string name="label">Подпись</string>
-    <string name="upload">Загрузить</string>
     <string name="family_title_placeholder">Семья —</string>
     <string name="invite_placeholder">Приглашение: —</string>
     <string name="status_placeholder">Статус: —</string>
@@ -68,7 +61,6 @@
     <string name="charging">заряжается</string>
     <string name="not_charging">не заряжается</string>
     <string name="charging_unknown">зарядка?</string>
-    <string name="never">никогда</string>
     <string name="device_meta">Батарея: %1$s · %2$s · Громкость: %3$s · Был в сети: %4$s</string>
     <string name="create_set">Создать набор</string>
     <string name="set_name">Название набора</string>
@@ -88,11 +80,9 @@
     <string name="take_photo">Сделать фото</string>
     <string name="choose_photo_from_device">Выбрать фото с устройства</string>
     <string name="search_arasaac">Поиск ARASAAC</string>
-    <string name="search_cards">Искать карточки</string>
     <string name="choose_from_library">Выбрать из библиотеки</string>
     <string name="save_and_use">Сохранить и использовать</string>
     <string name="search_by_label">Поиск по подписи</string>
-    <string name="filter_by_set">Фильтр по набору</string>
     <string name="title">Название</string>
     <string name="next">Далее</string>
     <string name="already_have_family">У вас уже есть семейная группа?</string>
@@ -176,11 +166,9 @@
     <string name="update_avatar_failed">Не удалось обновить аватар: %1$s</string>
     <string name="volume_value">Громкость: %1$d%%</string>
     <string name="set_volume">Установить громкость:</string>
-    <string name="check_incoming_failed">Не удалось проверить входящее сообщение: %1$s</string>
     <string name="created_at">Создано: %1$s</string>
     <string name="reply_prefix">Ответ: %1$s</string>
     <string name="reply_empty">Ответ: —</string>
-    <string name="reply_value">Ответ: %1$s</string>
     <string name="reply_not_available">Ответ пока недоступен</string>
     <string name="reply_from">Ответ от %1$s</string>
     <string name="reply_sent">Ответ отправлен</string>
@@ -195,7 +183,6 @@
     <string name="choose_user_avatar">Выбрать аватар пользователя</string>
     <string name="choose_set_cover">Выбрать обложку набора</string>
     <string name="add_item_to_set">Добавить элемент в набор</string>
-    <string name="add_item_to_message">Добавить элемент в сообщение</string>
     <string name="photo_number">Фото %1$s</string>
     <string name="user_name_required">Нужно имя пользователя</string>
     <string name="device_name_required">Нужно имя устройства</string>
@@ -272,8 +259,6 @@
     <string name="compose_sequence_needs_two_steps">
         Для последовательности нужно минимум 2 шага
     </string>
-
-    <string name="add_set">Добавить набор</string>
 
     <string name="send_message">Отправить</string>
 

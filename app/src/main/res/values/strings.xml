@@ -32,14 +32,12 @@
     <string name="sent">Sent</string>
 
     <string name="message">Message</string>
-    <string name="replies">Replies</string>
     <string name="incoming_message">Incoming message</string>
     <string name="from">From:</string>
     <string name="suggested_replies">Suggested replies</string>
     <string name="current_reply">Current reply</string>
     <string name="no_reply_yet">No reply yet</string>
     <string name="repeat">Repeat</string>
-    <string name="send_to_placeholder">Send to &#8230;</string>
     <string name="send_to_name">Send to %1$s</string>
 
     <string name="add_full_library_set">Add full Library set</string>
@@ -51,10 +49,6 @@
         <item quantity="other">Added %d items</item>
     </plurals>
     <string name="load_sets_failed">Load sets failed: %1$s</string>
-    <string name="upload_failed">Upload failed: %1$s</string>
-    <string name="photo_label">Photo label</string>
-    <string name="label">Label</string>
-    <string name="upload">Upload</string>
 
     <string name="family_title_placeholder">Family -</string>
     <string name="invite_placeholder">Invite: -</string>
@@ -68,7 +62,6 @@
     <string name="charging">charging</string>
     <string name="not_charging">not charging</string>
     <string name="charging_unknown">charging?</string>
-    <string name="never">never</string>
     <string name="device_meta">Battery: %1$s · %2$s · Volume: %3$s · Last seen: %4$s</string>
 
     <string name="create_set">Create set</string>
@@ -88,12 +81,10 @@
     <string name="take_photo">Take photo</string>
     <string name="choose_photo_from_device">Choose photo from device</string>
     <string name="search_arasaac">Search ARASAAC</string>
-    <string name="search_cards">Search cards</string>
     <string name="choose_from_library">Choose from library</string>
     <string name="save_and_use">Save and use</string>
     <string name="search_by_label">Search by label</string>
 
-    <string name="filter_by_set">Filter by set</string>
     <string name="title">Title</string>
 
     <string name="next">Next</string>
@@ -195,9 +186,6 @@
     <string name="volume_value">Volume: %1$d%%</string>
     <string name="set_volume">Set volume:</string>
 
-
-    <string name="check_incoming_failed">Check incoming message failed: %1$s</string>
-
     <!-- IncomingMessageActivity -->
     <string name="created_at">Created: %1$s</string>
     <string name="reply_prefix">Reply: %1$s</string>
@@ -217,7 +205,6 @@
     <string name="choose_user_avatar">Choose user avatar</string>
     <string name="choose_set_cover">Choose set cover</string>
     <string name="add_item_to_set">Add item to set</string>
-    <string name="add_item_to_message">Add item to message</string>
     <string name="photo_number">Photo %1$s</string>
 
     <!-- MainActivity -->
@@ -238,8 +225,6 @@
     <string name="join_family_failed">Join family failed: %1$s</string>
 
     <!-- MessageHistoryAdapter -->
-    <string name="from_name">From: %1$s</string>
-    <string name="reply_value">Reply: %1$s</string>
     <string name="reply_empty">Reply: —</string>
 
     <!-- UserMessageHistoryActivity -->
@@ -309,8 +294,6 @@
     <string name="compose_sequence_needs_two_steps">
         Sequence mode requires at least 2 steps
     </string>
-
-    <string name="add_set">Add set</string>
 
     <string name="send_message">Send</string>
 
