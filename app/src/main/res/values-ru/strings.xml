@@ -284,4 +284,6 @@
     <string name="seen_today_at">Сегодня в %1$s</string>
     <string name="seen_yesterday_at">Вчера в %1$s</string>
     <string name="seen_at_date">%1$s</string>
+
+    <string name="family_last_updated">Обновлено в %1$s</string>
 </resources>

@@ -44,6 +44,10 @@ import com.an0obis.comuginator.service.ACTION_INVITE_USED
 import com.an0obis.comuginator.service.EXTRA_INVITE_ID
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import android.widget.ProgressBar
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class FamilyActivity : BaseActivity() {
 
@@ -53,6 +57,7 @@ class FamilyActivity : BaseActivity() {
     private lateinit var tvInvite: TextView
     private lateinit var ivInviteQr: ImageView
     private lateinit var rvFamily: RecyclerView
+    private lateinit var progressFamily: ProgressBar
     private lateinit var familyAdapter: FamilyAdapter
     private var currentMeRole: String = ""
     private var currentMyDeviceId: String = ""
@@ -97,6 +102,7 @@ class FamilyActivity : BaseActivity() {
         ivInviteQr = findViewById(R.id.ivInviteQr)
         rvFamily = findViewById(R.id.rvFamily)
         btnLibrary = findViewById(R.id.btnLibrary)
+        rvFamily = findViewById(R.id.rvFamily)
 
         btnLibrary.setOnClickListener {
             startActivity(Intent(this, LibraryActivity::class.java))
@@ -415,7 +421,9 @@ class FamilyActivity : BaseActivity() {
         scope.launch {
             try {
                 runOnUiThread {
-                    tvStatus.text = getString(R.string.loading_family)
+                    if (::progressFamily.isInitialized) {
+                        progressFamily.visibility = View.VISIBLE
+                    }
                     setButtonsEnabled(false)
                 }
 
@@ -424,8 +432,14 @@ class FamilyActivity : BaseActivity() {
 
                 runOnUiThread {
                     renderFamily(response)
-                    tvStatus.text = getString(R.string.family_loaded)
+                    tvStatus.text = getString(
+                        R.string.family_last_updated,
+                        formatCurrentTime()
+                    )
                     setButtonsEnabled(true)
+                    if (::progressFamily.isInitialized) {
+                        progressFamily.visibility = View.GONE
+                    }
                 }
 
             } catch (e: Exception) {
@@ -433,11 +447,18 @@ class FamilyActivity : BaseActivity() {
                 runOnUiThread {
                     tvStatus.text = getString(R.string.load_family_failed, e.message)
                     setButtonsEnabled(true)
+                    if (::progressFamily.isInitialized) {
+                        progressFamily.visibility = View.GONE
+                    }
                 }
             }
         }
     }
 
+    private fun formatCurrentTime(): String {
+        return SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+            .format(Date())
+    }
     private fun createInvite(role: String) {
         scope.launch {
             try {

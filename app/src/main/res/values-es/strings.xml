@@ -280,4 +280,6 @@
     <string name="seen_today_at">Hoy a las %1$s</string>
     <string name="seen_yesterday_at">Ayer a las %1$s</string>
     <string name="seen_at_date">%1$s</string>
+
+    <string name="family_last_updated">Actualizado a las %1$s</string>
 </resources>

@@ -321,4 +321,6 @@
     <string name="seen_today_at">Today at %1$s</string>
     <string name="seen_yesterday_at">Yesterday at %1$s</string>
     <string name="seen_at_date">%1$s</string>
+
+    <string name="family_last_updated">Updated at %1$s</string>
 </resources>
