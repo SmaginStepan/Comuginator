@@ -579,8 +579,14 @@ class FamilyActivity : BaseActivity() {
             },
         )
 
+        val listState = rvFamily.layoutManager?.onSaveInstanceState()
+
         rvFamily.adapter = familyAdapter
         familyAdapter.submitItems(mapFamilyItems(response.users))
+
+        rvFamily.post {
+            rvFamily.layoutManager?.onRestoreInstanceState(listState)
+        }
     }
 
     private fun openMessageHistoryScreen(targetUserId: String, targetUserName: String) {
