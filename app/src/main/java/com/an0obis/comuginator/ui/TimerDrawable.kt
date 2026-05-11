@@ -80,5 +80,6 @@ class TimerDrawable : Drawable() {
         textPaint.colorFilter = colorFilter
     }
 
+    @Deprecated("?")
     override fun getOpacity(): Int = PixelFormat.TRANSLUCENT
 }

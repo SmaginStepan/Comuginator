@@ -240,7 +240,7 @@
     <string name="show_hidden">Mostrar ocultos</string>
 
     <string name="compose_mode">Modo</string>
-    <string name="compose_mode_normal">Normal</string>
+    <string name="compose_mode_normal">Prequnta</string>
     <string name="compose_mode_sequence">Secuencia</string>
 
     <string name="compose_no_replies">
@@ -292,4 +292,9 @@
     <string name="timer_minutes_unit">min.</string>
     <string name="wait_timer_remaining">⏱ Esperar: %1$d s</string>
     <string name="sequence_completed">Secuencia completada</string>
+
+    <string name="never_seen">Nunca visto</string>
+    <string name="seen_today_at">Hoy a las %1$s</string>
+    <string name="seen_yesterday_at">Ayer a las %1$s</string>
+    <string name="seen_at_date">%1$s</string>
 </resources>

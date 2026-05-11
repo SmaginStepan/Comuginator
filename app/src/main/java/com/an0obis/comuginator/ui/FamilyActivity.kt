@@ -42,11 +42,13 @@ import android.content.IntentFilter
 import androidx.core.content.ContextCompat
 import com.an0obis.comuginator.service.ACTION_INVITE_USED
 import com.an0obis.comuginator.service.EXTRA_INVITE_ID
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 
 class FamilyActivity : BaseActivity() {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-
+    private var familyRefreshJob: Job? = null
     private lateinit var tvFamily: TextView
     private lateinit var tvInvite: TextView
     private lateinit var ivInviteQr: ImageView
@@ -718,8 +720,35 @@ class FamilyActivity : BaseActivity() {
         return bitmap
     }
 
+    override fun onResume() {
+        super.onResume()
+        startFamilyRefreshLoop()
+    }
+
+    override fun onPause() {
+        stopFamilyRefreshLoop()
+        super.onPause()
+    }
+
+    private fun startFamilyRefreshLoop() {
+        familyRefreshJob?.cancel()
+
+        familyRefreshJob = scope.launch {
+            while (true) {
+                loadFamily()
+                delay(30_000)
+            }
+        }
+    }
+
+    private fun stopFamilyRefreshLoop() {
+        familyRefreshJob?.cancel()
+        familyRefreshJob = null
+    }
+
     override fun onDestroy() {
         super.onDestroy()
+        familyRefreshJob?.cancel()
         scope.cancel()
     }
 }

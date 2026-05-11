@@ -246,7 +246,7 @@
     <string name="show_hidden">Показать скрытые</string>
 
     <string name="compose_mode">Режим</string>
-    <string name="compose_mode_normal">Обычный</string>
+    <string name="compose_mode_normal">Вопрос</string>
     <string name="compose_mode_sequence">Последовательность</string>
 
     <string name="compose_no_replies">
@@ -294,4 +294,9 @@
     <string name="timer_minutes_unit">мин.</string>
     <string name="wait_timer_remaining">⏱ Ждать: %1$d с</string>
     <string name="sequence_completed">Последовательность завершена</string>
+
+    <string name="never_seen">Никогда не был онлайн</string>
+    <string name="seen_today_at">Сегодня в %1$s</string>
+    <string name="seen_yesterday_at">Вчера в %1$s</string>
+    <string name="seen_at_date">%1$s</string>
 </resources>

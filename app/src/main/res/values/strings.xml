@@ -285,7 +285,7 @@
     <string name="show_hidden">Show hidden</string>
 
     <string name="compose_mode">Mode</string>
-    <string name="compose_mode_normal">Normal</string>
+    <string name="compose_mode_normal">Question</string>
     <string name="compose_mode_sequence">Sequence</string>
 
     <string name="compose_no_replies">No reply options selected</string>
@@ -333,4 +333,9 @@
     <string name="timer_minutes_unit">min.</string>
     <string name="wait_timer_remaining">⏱ Wait: %1$d s</string>
     <string name="sequence_completed">Sequence completed</string>
+
+    <string name="never_seen">Never seen</string>
+    <string name="seen_today_at">Today at %1$s</string>
+    <string name="seen_yesterday_at">Yesterday at %1$s</string>
+    <string name="seen_at_date">%1$s</string>
 </resources>

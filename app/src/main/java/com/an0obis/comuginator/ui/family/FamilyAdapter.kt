@@ -1,5 +1,7 @@
 package com.an0obis.comuginator.ui.family
 
+import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,6 +14,10 @@ import coil.imageLoader
 import coil.request.ImageRequest
 import com.an0obis.comuginator.R
 import com.an0obis.comuginator.ui.base.BaseAdapter
+import java.util.Locale
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.TimeZone
 
 class FamilyAdapter(
     private val isParentViewer: Boolean,
@@ -119,6 +125,76 @@ class FamilyAdapter(
         private val btnVolume: Button = view.findViewById(R.id.btnVolume)
         private val btnDeviceMore: Button = view.findViewById(R.id.btnDeviceMore)
 
+        private fun formatLastSeen(iso: String?, context: Context): String {
+            if (iso.isNullOrBlank()) {
+                return context.getString(R.string.never_seen)
+            }
+
+            return try {
+                val parser = SimpleDateFormat(
+                    "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+                    Locale.US
+                )
+
+                parser.timeZone = TimeZone.getTimeZone("UTC")
+
+                val date = parser.parse(iso) ?: return iso
+
+                val now = Calendar.getInstance()
+                val target = Calendar.getInstance().apply {
+                    time = date
+                }
+
+                val timeFormatter = SimpleDateFormat(
+                    "HH:mm",
+                    Locale.getDefault()
+                )
+
+                val dateFormatter = SimpleDateFormat(
+                    "dd MMM HH:mm",
+                    Locale.getDefault()
+                )
+
+                when {
+                    isSameDay(now, target) -> {
+                        context.getString(
+                            R.string.seen_today_at,
+                            timeFormatter.format(date)
+                        )
+                    }
+
+                    isYesterday(now, target) -> {
+                        context.getString(
+                            R.string.seen_yesterday_at,
+                            timeFormatter.format(date)
+                        )
+                    }
+
+                    else -> {
+                        context.getString(
+                            R.string.seen_at_date,
+                            dateFormatter.format(date)
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("FamilyAdapter", "failed",e)
+                iso
+            }
+        }
+
+        private fun isSameDay(a: Calendar, b: Calendar): Boolean {
+            return a.get(Calendar.YEAR) == b.get(Calendar.YEAR) &&
+                    a.get(Calendar.DAY_OF_YEAR) == b.get(Calendar.DAY_OF_YEAR)
+        }
+
+        private fun isYesterday(now: Calendar, target: Calendar): Boolean {
+            val yesterday = now.clone() as Calendar
+            yesterday.add(Calendar.DAY_OF_YEAR, -1)
+
+            return isSameDay(yesterday, target)
+        }
+
         fun bind(item: FamilyListItem.DeviceRow) {
             tvDeviceName.text = item.deviceName
             val context = itemView.context
@@ -130,7 +206,7 @@ class FamilyAdapter(
             }
             val volume = item.volumePercent?.toString()?.plus("%") ?: "?"
 
-            val lastSeen = item.lastSeenAt ?: context.getString(R.string.never)
+            val lastSeen = formatLastSeen(item.lastSeenAt, context)
 
             tvDeviceMeta.text = context.getString(
                 R.string.device_meta,
