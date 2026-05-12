@@ -70,6 +70,9 @@ class FamilyActivity : BaseActivity() {
 
     private var shownInviteId: String? = null
 
+    private var lastFamilyResponse: FamilyMeResponse? = null
+    private val optimisticVolumeByDeviceId = mutableMapOf<String, Int>()
+
     private val avatarPickerLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             val userId = pendingAvatarUserId
@@ -543,7 +546,8 @@ class FamilyActivity : BaseActivity() {
                     batteryPercent = device.state?.batteryPercent,
                     isCharging = device.state?.isCharging,
                     lastSeenAt = device.lastSeenAt,
-                    volumePercent = device.state?.volumePercent
+                    volumePercent = optimisticVolumeByDeviceId[device.deviceId]
+                        ?: device.state?.volumePercent
                 )
             }
         }
@@ -554,6 +558,19 @@ class FamilyActivity : BaseActivity() {
     private fun renderFamily(response: FamilyMeResponse) {
         val familyName = response.family.name ?: getString(R.string.no_name)
         tvFamily.text = getString(R.string.family_prefix, familyName)
+
+        lastFamilyResponse = response
+
+        response.users
+            .flatMap { it.devices }
+            .forEach { device ->
+                val optimistic = optimisticVolumeByDeviceId[device.deviceId]
+                val actual = device.state?.volumePercent
+
+                if (optimistic != null && actual == optimistic) {
+                    optimisticVolumeByDeviceId.remove(device.deviceId)
+                }
+            }
 
         currentMeRole = response.me.role
         currentMyDeviceId = response.me.deviceId
@@ -619,6 +636,14 @@ class FamilyActivity : BaseActivity() {
     }
 
     private fun sendSetVolumeCommand(deviceId: String, volumePercent: Int) {
+        val previousOptimistic = optimisticVolumeByDeviceId[deviceId]
+
+        optimisticVolumeByDeviceId[deviceId] = volumePercent
+
+        lastFamilyResponse?.let {
+            renderFamily(it)
+        }
+
         scope.launch {
             try {
                 runOnUiThread {
@@ -636,12 +661,22 @@ class FamilyActivity : BaseActivity() {
                 )
 
                 runOnUiThread {
-                    tvStatus.text = getString(R.string.volume_command_sent,volumePercent)
+                    tvStatus.text = getString(R.string.volume_command_sent, volumePercent)
                     setButtonsEnabled(true)
                 }
             } catch (e: Exception) {
+                optimisticVolumeByDeviceId.remove(deviceId)
+
+                if (previousOptimistic != null) {
+                    optimisticVolumeByDeviceId[deviceId] = previousOptimistic
+                }
+
                 runOnUiThread {
-                    tvStatus.text = getString(R.string.failed_send_volume_command,e.message)
+                    lastFamilyResponse?.let {
+                        renderFamily(it)
+                    }
+
+                    tvStatus.text = getString(R.string.failed_send_volume_command, e.message)
                     setButtonsEnabled(true)
                 }
             }
@@ -695,7 +730,7 @@ class FamilyActivity : BaseActivity() {
         deviceName: String,
         currentVolumePercent: Int?
     ) {
-        val initialValue = (currentVolumePercent ?: 50).coerceIn(0, 100)
+        val initialValue = currentVolumePercent?.coerceIn(0, 100) ?: 50
 
         val container = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
