@@ -11,7 +11,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.an0obis.comuginator"
+        applicationId = "com.an0obis.comuginator.app"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
