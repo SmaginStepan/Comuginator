@@ -286,4 +286,15 @@
     <string name="seen_at_date">%1$s</string>
 
     <string name="family_last_updated">Обновлено в %1$s</string>
+
+    <string name="delete_family">Удалить семью</string>
+    <string name="delete_family_confirm">Удалить эту семью и все связанные данные? Это действие нельзя отменить.</string>
+    <string name="deleting_family">Удаление семьи…</string>
+    <string name="delete_family_failed">Не удалось удалить семью: %1$s</string>
+
+    <string name="delete_user">Удалить пользователя</string>
+    <string name="delete_user_confirm">Удалить пользователя %1$s из семьи?</string>
+    <string name="deleting_user">Удаление пользователя…</string>
+    <string name="user_deleted">Пользователь удалён</string>
+    <string name="delete_user_failed">Не удалось удалить пользователя: %1$s</string>
 </resources>

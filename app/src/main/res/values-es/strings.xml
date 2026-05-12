@@ -282,4 +282,15 @@
     <string name="seen_at_date">%1$s</string>
 
     <string name="family_last_updated">Actualizado a las %1$s</string>
+
+    <string name="delete_family">Eliminar familia</string>
+    <string name="delete_family_confirm">¿Eliminar esta familia y todos sus datos? Esta acción no se puede deshacer.</string>
+    <string name="deleting_family">Eliminando familia…</string>
+    <string name="delete_family_failed">No se pudo eliminar la familia: %1$s</string>
+
+    <string name="delete_user">Eliminar usuario</string>
+    <string name="delete_user_confirm">¿Eliminar al usuario %1$s de esta familia?</string>
+    <string name="deleting_user">Eliminando usuario…</string>
+    <string name="user_deleted">Usuario eliminado</string>
+    <string name="delete_user_failed">No se pudo eliminar el usuario: %1$s</string>
 </resources>

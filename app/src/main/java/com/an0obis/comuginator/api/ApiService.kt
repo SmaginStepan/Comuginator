@@ -256,4 +256,15 @@ interface ApiService {
         @Header("Authorization") auth: String,
         @Body body: MoveLibrarySetsRequest
     )
+
+    @DELETE("/v1/users/{userId}")
+    suspend fun deleteUser(
+        @Header("Authorization") auth: String,
+        @Path("userId") userId: String
+    ): OkResponse
+
+    @DELETE("/v1/families/me")
+    suspend fun deleteMyFamily(
+        @Header("Authorization") auth: String
+    ): OkResponse
 }

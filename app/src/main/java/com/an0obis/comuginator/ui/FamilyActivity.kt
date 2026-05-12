@@ -150,6 +150,9 @@ class FamilyActivity : BaseActivity() {
             },
             onDeleteDeviceClick = { deviceId, deviceName ->
                 confirmDeleteDevice(deviceId, deviceName)
+            },
+            onDeleteUserClick = { userId, userName ->
+                confirmDeleteUser(userId, userName)
             }
         )
         btnFamilyAdd = findViewById(R.id.btnFamilyAdd)
@@ -184,12 +187,14 @@ class FamilyActivity : BaseActivity() {
             val refreshId = 2
             val heartBeatId = 3
             val settingsId = 4
+            val deleteFamilyId = 5
 
             val popup = PopupMenu(view.context, view)
             popup.menu.add(0, renameId, 0, getString(R.string.rename))
             popup.menu.add(0, refreshId, 1, getString(R.string.refresh))
             popup.menu.add(0, heartBeatId, 2, getString(R.string.send_heartbeat))
             popup.menu.add(0, settingsId, 3, getString(R.string.settings))
+            popup.menu.add(0, deleteFamilyId, 4, getString(R.string.delete_family))
 
             popup.setOnMenuItemClickListener { btn ->
                 when (btn.itemId) {
@@ -213,6 +218,10 @@ class FamilyActivity : BaseActivity() {
                         sendHeartbeat()
                         true
                     }
+                    deleteFamilyId -> {
+                        confirmDeleteFamily()
+                        true
+                    }
                     else -> false
                 }
             }
@@ -228,6 +237,83 @@ class FamilyActivity : BaseActivity() {
         ivInviteQr.visibility = View.GONE
 
         ensureInitialized()
+    }
+
+    private fun confirmDeleteUser(userId: String, userName: String) {
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle(R.string.delete_user)
+            .setMessage(getString(R.string.delete_user_confirm, userName))
+            .setNegativeButton(R.string.cancel, null)
+            .setPositiveButton(R.string.delete) { _, _ ->
+                deleteUser(userId)
+            }
+            .show()
+    }
+
+    private fun deleteUser(userId: String) {
+        scope.launch {
+            try {
+                runOnUiThread {
+                    tvStatus.text = getString(R.string.deleting_user)
+                    setButtonsEnabled(false)
+                }
+
+                ApiClient.api.deleteUser(
+                    auth = authHeaderOrThrow(),
+                    userId = userId
+                )
+
+                runOnUiThread {
+                    tvStatus.text = getString(R.string.user_deleted)
+                }
+
+                loadFamily()
+            } catch (e: Exception) {
+                if (handleUnauthorized(e)) return@launch
+                runOnUiThread {
+                    tvStatus.text = getString(R.string.delete_user_failed, e.message)
+                    setButtonsEnabled(true)
+                }
+            }
+        }
+    }
+
+    private fun confirmDeleteFamily() {
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle(R.string.delete_family)
+            .setMessage(R.string.delete_family_confirm)
+            .setNegativeButton(R.string.cancel, null)
+            .setPositiveButton(R.string.delete) { _, _ ->
+                deleteFamily()
+            }
+            .show()
+    }
+
+    private fun deleteFamily() {
+        scope.launch {
+            try {
+                runOnUiThread {
+                    tvStatus.text = getString(R.string.deleting_family)
+                    setButtonsEnabled(false)
+                }
+
+                ApiClient.api.deleteMyFamily(
+                    auth = authHeaderOrThrow()
+                )
+
+                runOnUiThread {
+                    store.clear()
+                    startActivity(Intent(this@FamilyActivity, MainActivity::class.java))
+                    finish()
+                }
+            } catch (e: Exception) {
+                if (handleUnauthorized(e)) return@launch
+                runOnUiThread {
+                    tvStatus.text = getString(R.string.delete_family_failed, e.message)
+                    setButtonsEnabled(true)
+                }
+            }
+        }
     }
 
     override fun onStart() {
@@ -615,6 +701,9 @@ class FamilyActivity : BaseActivity() {
             onDeleteDeviceClick = { deviceId, deviceName ->
                 confirmDeleteDevice(deviceId, deviceName)
             },
+            onDeleteUserClick = { userId, userName ->
+                confirmDeleteUser(userId, userName)
+            }
         )
 
         val listState = rvFamily.layoutManager?.onSaveInstanceState()
