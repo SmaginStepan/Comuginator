@@ -28,6 +28,7 @@ import com.google.gson.reflect.TypeToken
 import androidx.recyclerview.widget.ItemTouchHelper
 import com.an0obis.comuginator.api.SuggestedReplyItem
 import com.an0obis.comuginator.api.WaitStepDto
+import com.an0obis.comuginator.ui.composemessage.ComposeMessageViewModel
 
 class ComposeMessageActivity : BaseActivity() {
 

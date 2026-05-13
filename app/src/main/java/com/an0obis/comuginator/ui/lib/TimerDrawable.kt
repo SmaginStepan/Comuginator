@@ -1,9 +1,14 @@
-package com.an0obis.comuginator.ui
+package com.an0obis.comuginator.ui.lib
 
-import android.graphics.*
+import android.graphics.Canvas
+import android.graphics.ColorFilter
+import android.graphics.Paint
+import android.graphics.PixelFormat
+import android.graphics.RectF
+import android.graphics.Typeface
 import android.graphics.drawable.Drawable
-import kotlin.math.min
 import androidx.core.graphics.toColorInt
+import kotlin.math.min
 
 class TimerDrawable : Drawable() {
 
