@@ -1,4 +1,4 @@
-package com.an0obis.comuginator.ui
+package com.an0obis.comuginator.ui.family
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
@@ -13,7 +13,6 @@ import com.an0obis.comuginator.api.UpdateNameRequest
 import com.an0obis.comuginator.api.UserDto
 import com.an0obis.comuginator.service.CommandSyncScheduler
 import com.an0obis.comuginator.storage.SessionStore
-import com.an0obis.comuginator.ui.family.FamilyListItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay

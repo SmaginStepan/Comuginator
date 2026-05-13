@@ -25,6 +25,8 @@ import com.an0obis.comuginator.service.ACTION_INVITE_USED
 import com.an0obis.comuginator.service.EXTRA_INVITE_ID
 import com.an0obis.comuginator.ui.base.BaseActivity
 import com.an0obis.comuginator.ui.family.FamilyAdapter
+import com.an0obis.comuginator.ui.family.FamilyEvent
+import com.an0obis.comuginator.ui.family.FamilyViewModel
 import com.an0obis.comuginator.ui.family.createQrBitmap
 import kotlinx.coroutines.launch
 

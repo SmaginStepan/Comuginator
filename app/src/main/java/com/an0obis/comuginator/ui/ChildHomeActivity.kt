@@ -21,6 +21,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.an0obis.comuginator.R
 import com.an0obis.comuginator.api.ChildHomeNodeDto
 import com.an0obis.comuginator.ui.base.BaseActivity
+import com.an0obis.comuginator.ui.childhome.ChildHomeViewModel
+import com.an0obis.comuginator.ui.childhome.PathEntry
+import com.an0obis.comuginator.ui.childhome.displayLabel
 import kotlinx.coroutines.launch
 
 class ChildHomeActivity : BaseActivity() {

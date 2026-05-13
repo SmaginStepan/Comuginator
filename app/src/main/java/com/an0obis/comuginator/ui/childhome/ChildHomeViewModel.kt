@@ -1,4 +1,4 @@
-package com.an0obis.comuginator.ui
+package com.an0obis.comuginator.ui.childhome
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
