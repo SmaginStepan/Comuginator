@@ -1,4 +1,4 @@
-package com.an0obis.comuginator.ui
+package com.an0obis.comuginator.ui.family
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -7,6 +7,7 @@ import android.content.IntentFilter
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.PopupMenu
@@ -14,6 +15,7 @@ import android.widget.SeekBar
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -21,13 +23,17 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.an0obis.comuginator.R
+import com.an0obis.comuginator.api.UserDto
 import com.an0obis.comuginator.service.ACTION_INVITE_USED
 import com.an0obis.comuginator.service.EXTRA_INVITE_ID
+import com.an0obis.comuginator.ui.messaging.ComposeMessageActivity
+import com.an0obis.comuginator.ui.MainActivity
+import com.an0obis.comuginator.ui.SettingsActivity
+import com.an0obis.comuginator.ui.messaging.UserMessageHistoryActivity
 import com.an0obis.comuginator.ui.base.BaseActivity
-import com.an0obis.comuginator.ui.family.FamilyAdapter
-import com.an0obis.comuginator.ui.family.FamilyEvent
-import com.an0obis.comuginator.ui.family.FamilyViewModel
-import com.an0obis.comuginator.ui.family.createQrBitmap
+import com.an0obis.comuginator.ui.childhome.ChildHomeActivity
+import com.an0obis.comuginator.ui.library.LibraryActivity
+import com.an0obis.comuginator.ui.library.LibraryItemPickerActivity
 import kotlinx.coroutines.launch
 
 class FamilyActivity : BaseActivity() {
@@ -246,7 +252,7 @@ class FamilyActivity : BaseActivity() {
         familyName: String?,
         meRole: String,
         meDeviceId: String,
-        users: List<com.an0obis.comuginator.api.UserDto>,
+        users: List<UserDto>,
         optimisticVolumes: Map<String, Int>
     ) {
         tvFamily.text = getString(R.string.family_prefix, familyName ?: getString(R.string.no_name))
@@ -292,11 +298,11 @@ class FamilyActivity : BaseActivity() {
     // ── Dialogs ───────────────────────────────────────────────────────────────
 
     private fun showRenameDialog(title: String, initialValue: String, onApply: (String) -> Unit) {
-        val editText = android.widget.EditText(this).apply {
+        val editText = EditText(this).apply {
             setText(initialValue)
             setSelection(text.length)
         }
-        androidx.appcompat.app.AlertDialog.Builder(this)
+        AlertDialog.Builder(this)
             .setTitle(title)
             .setView(editText)
             .setNegativeButton(getString(R.string.cancel), null)
@@ -330,7 +336,7 @@ class FamilyActivity : BaseActivity() {
         }
         container.addView(valueText)
         container.addView(seekBar)
-        androidx.appcompat.app.AlertDialog.Builder(this)
+        AlertDialog.Builder(this)
             .setTitle(getString(R.string.set_volume) + deviceName)
             .setView(container)
             .setNegativeButton(getString(R.string.cancel), null)
@@ -353,7 +359,7 @@ class FamilyActivity : BaseActivity() {
     // ── Confirm-delete dialogs ────────────────────────────────────────────────
 
     private fun confirmDeleteUser(userId: String, userName: String) {
-        androidx.appcompat.app.AlertDialog.Builder(this)
+        AlertDialog.Builder(this)
             .setTitle(R.string.delete_user)
             .setMessage(getString(R.string.delete_user_confirm, userName))
             .setNegativeButton(R.string.cancel, null)
@@ -362,7 +368,7 @@ class FamilyActivity : BaseActivity() {
     }
 
     private fun confirmDeleteDevice(deviceId: String, deviceName: String) {
-        androidx.appcompat.app.AlertDialog.Builder(this)
+        AlertDialog.Builder(this)
             .setTitle(R.string.delete_device)
             .setMessage(getString(R.string.delete_device_confirm, deviceName))
             .setNegativeButton(R.string.cancel, null)
@@ -371,7 +377,7 @@ class FamilyActivity : BaseActivity() {
     }
 
     private fun confirmDeleteFamily() {
-        androidx.appcompat.app.AlertDialog.Builder(this)
+        AlertDialog.Builder(this)
             .setTitle(R.string.delete_family)
             .setMessage(R.string.delete_family_confirm)
             .setNegativeButton(R.string.cancel, null)

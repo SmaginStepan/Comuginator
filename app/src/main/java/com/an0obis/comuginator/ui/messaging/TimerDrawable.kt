@@ -1,4 +1,4 @@
-package com.an0obis.comuginator.ui.lib
+package com.an0obis.comuginator.ui.messaging
 
 import android.graphics.Canvas
 import android.graphics.ColorFilter

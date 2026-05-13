@@ -1,11 +1,13 @@
-package com.an0obis.comuginator.ui
+package com.an0obis.comuginator.ui.childhome
 
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.PopupMenu
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import coil.Coil
 import coil.request.ImageRequest
@@ -47,8 +49,8 @@ class ChildHomeAdapter(
     }
 
     class VH(root: ViewGroup) : RecyclerView.ViewHolder(root) {
-        val ivNode: android.widget.ImageView = root.findViewById(R.id.ivNode)
-        val tvNodeLabel: android.widget.TextView = root.findViewById(R.id.tvNodeLabel)
+        val ivNode: ImageView = root.findViewById(R.id.ivNode)
+        val tvNodeLabel: TextView = root.findViewById(R.id.tvNodeLabel)
         val rootNode: View = root.findViewById(R.id.rootNode)
         val btnChildMore: Button = root.findViewById(R.id.btnChildMore)
         val btnToggleVisibility: Button = itemView.findViewById(R.id.btnToggleVisibility)

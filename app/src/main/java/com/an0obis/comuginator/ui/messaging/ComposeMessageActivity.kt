@@ -1,4 +1,4 @@
-package com.an0obis.comuginator.ui
+package com.an0obis.comuginator.ui.messaging
 
 import android.app.AlertDialog
 import android.os.Bundle
@@ -10,25 +10,26 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.an0obis.comuginator.R
 import com.an0obis.comuginator.api.AacCardDto
 import com.an0obis.comuginator.api.ApiClient
 import com.an0obis.comuginator.api.SendAacMessageRequest
+import com.an0obis.comuginator.api.SuggestedReplyItem
+import com.an0obis.comuginator.api.WaitStepDto
 import com.an0obis.comuginator.storage.SessionStore
+import com.an0obis.comuginator.ui.CardAdapter
 import com.an0obis.comuginator.ui.base.BaseActivity
+import com.an0obis.comuginator.ui.library.LibraryItemPickerActivity
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
-import androidx.recyclerview.widget.ItemTouchHelper
-import com.an0obis.comuginator.api.SuggestedReplyItem
-import com.an0obis.comuginator.api.WaitStepDto
-import com.an0obis.comuginator.ui.composemessage.ComposeMessageViewModel
 
 class ComposeMessageActivity : BaseActivity() {
 

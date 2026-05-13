@@ -1,8 +1,9 @@
-package com.an0obis.comuginator.ui
+package com.an0obis.comuginator.ui.messaging
 
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
@@ -13,12 +14,11 @@ import com.an0obis.comuginator.R
 import com.an0obis.comuginator.api.AacMessageListItemDto
 import com.an0obis.comuginator.api.ApiClient
 import com.an0obis.comuginator.storage.SessionStore
+import com.an0obis.comuginator.ui.base.BaseActivity
+import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import com.google.gson.Gson
-import android.widget.ImageView
-import com.an0obis.comuginator.ui.base.BaseActivity
 
 class UserMessageHistoryActivity : BaseActivity() {
 
@@ -117,7 +117,8 @@ class UserMessageHistoryActivity : BaseActivity() {
                 }
 
                 historyAdapter.submitItems(filtered)
-                tvStatus.text = if (filtered.isEmpty()) getString(R.string.no_messages_yet) else resources.getQuantityString(R.plurals.loaded_messages, filtered.size, filtered.size)
+                tvStatus.text = if (filtered.isEmpty()) getString(R.string.no_messages_yet) else resources.getQuantityString(
+                    R.plurals.loaded_messages, filtered.size, filtered.size)
             } catch (e: Exception) {
                 tvStatus.text = getString(R.string.failed_load_history)
                 Toast.makeText(

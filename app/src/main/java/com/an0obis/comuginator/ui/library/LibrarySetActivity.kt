@@ -1,4 +1,4 @@
-package com.an0obis.comuginator.ui
+package com.an0obis.comuginator.ui.library
 
 import android.os.Bundle
 import android.widget.Button
@@ -17,7 +17,6 @@ import com.an0obis.comuginator.api.AddItemsToSetRequest
 import com.an0obis.comuginator.api.ApiClient
 import com.an0obis.comuginator.api.UpdateLibrarySetRequest
 import com.an0obis.comuginator.storage.SessionStore
-import com.an0obis.comuginator.ui.library.LibraryItemsAdapter
 import kotlinx.coroutines.launch
 import androidx.recyclerview.widget.ItemTouchHelper
 import com.an0obis.comuginator.api.MoveLibrarySetItemsRequest

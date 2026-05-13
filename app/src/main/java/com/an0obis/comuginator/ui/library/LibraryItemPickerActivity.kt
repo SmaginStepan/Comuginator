@@ -1,4 +1,4 @@
-package com.an0obis.comuginator.ui
+package com.an0obis.comuginator.ui.library
 
 import android.content.ClipboardManager
 import android.content.Context
@@ -6,6 +6,8 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
@@ -29,7 +31,6 @@ import com.an0obis.comuginator.api.ApiClient
 import com.an0obis.comuginator.api.CreateArasaacLibraryItemRequest
 import com.an0obis.comuginator.api.LibrarySetDto
 import com.an0obis.comuginator.storage.SessionStore
-import com.an0obis.comuginator.ui.library.LibraryPickerItemsAdapter
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -44,6 +45,7 @@ import com.an0obis.comuginator.ui.base.BaseActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import androidx.appcompat.widget.PopupMenu
+import kotlin.collections.get
 
 class LibraryItemPickerActivity : BaseActivity() {
 
@@ -327,10 +329,10 @@ class LibraryItemPickerActivity : BaseActivity() {
 
         if (!libraryFilterWatcherAttached) {
             etSearch.addTextChangedListener(
-                object : android.text.TextWatcher {
+                object : TextWatcher {
                     override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
                     override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
-                    override fun afterTextChanged(s: android.text.Editable?) {
+                    override fun afterTextChanged(s: Editable?) {
                         applyLibraryFilter()
                     }
                 }

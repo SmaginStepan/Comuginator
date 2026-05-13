@@ -1,4 +1,4 @@
-package com.an0obis.comuginator.ui.composemessage
+package com.an0obis.comuginator.ui.messaging
 
 import androidx.lifecycle.ViewModel
 import com.an0obis.comuginator.api.AacCardDto

@@ -12,7 +12,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.an0obis.comuginator.R
 import com.an0obis.comuginator.storage.SettingsStore
-import com.an0obis.comuginator.ui.IncomingMessageActivity
+import com.an0obis.comuginator.ui.messaging.IncomingMessageActivity
 
 object NotificationHelper {
 

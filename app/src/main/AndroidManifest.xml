@@ -17,15 +17,15 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Comuginator">
 
-        <activity android:name=".ui.ComposeMessageActivity" />
-        <activity android:name=".ui.FamilyActivity" />
-        <activity android:name=".ui.IncomingMessageActivity" />
-        <activity android:name=".ui.UserMessageHistoryActivity" />
-        <activity android:name=".ui.LibraryActivity" />
-        <activity android:name=".ui.LibrarySetActivity" />
-        <activity android:name=".ui.LibraryItemPickerActivity" />
+        <activity android:name=".ui.messaging.ComposeMessageActivity" />
+        <activity android:name=".ui.family.FamilyActivity" />
+        <activity android:name=".ui.messaging.IncomingMessageActivity" />
+        <activity android:name=".ui.messaging.UserMessageHistoryActivity" />
+        <activity android:name=".ui.library.LibraryActivity" />
+        <activity android:name=".ui.library.LibrarySetActivity" />
+        <activity android:name=".ui.library.LibraryItemPickerActivity" />
         <activity android:name=".ui.SettingsActivity" />
-        <activity android:name=".ui.ChildHomeActivity" />
+        <activity android:name=".ui.childhome.ChildHomeActivity" />
 
         <activity
             android:name=".ui.MainActivity"

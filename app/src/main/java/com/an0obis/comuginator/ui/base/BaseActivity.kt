@@ -20,8 +20,8 @@ import com.an0obis.comuginator.service.PowerConnectionReceiver
 import com.an0obis.comuginator.service.TelemetryScheduler
 import com.an0obis.comuginator.storage.FcmTokenStore
 import com.an0obis.comuginator.storage.SessionStore
-import com.an0obis.comuginator.ui.ChildHomeActivity
-import com.an0obis.comuginator.ui.IncomingMessageActivity
+import com.an0obis.comuginator.ui.childhome.ChildHomeActivity
+import com.an0obis.comuginator.ui.messaging.IncomingMessageActivity
 import com.an0obis.comuginator.ui.MainActivity
 import com.google.firebase.messaging.FirebaseMessaging
 import retrofit2.HttpException

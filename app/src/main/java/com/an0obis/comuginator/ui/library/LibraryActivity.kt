@@ -1,4 +1,4 @@
-package com.an0obis.comuginator.ui
+package com.an0obis.comuginator.ui.library
 
 import android.content.Intent
 import android.os.Bundle
@@ -11,9 +11,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.an0obis.comuginator.R
 import com.an0obis.comuginator.api.ApiClient
 import com.an0obis.comuginator.storage.SessionStore
-import com.an0obis.comuginator.ui.library.LibrarySetsAdapter
 import kotlinx.coroutines.launch
 import androidx.recyclerview.widget.ItemTouchHelper
+import com.an0obis.comuginator.api.CreateLibrarySetRequest
 import com.an0obis.comuginator.api.MoveLibrarySetsRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -157,7 +157,7 @@ class LibraryActivity : AppCompatActivity() {
 
                 ApiClient.api.createLibrarySet(
                     sessionStore.authHeaderOrThrow(),
-                    com.an0obis.comuginator.api.CreateLibrarySetRequest(
+                    CreateLibrarySetRequest(
                         name = getString(R.string.new_set)
                     )
                 )

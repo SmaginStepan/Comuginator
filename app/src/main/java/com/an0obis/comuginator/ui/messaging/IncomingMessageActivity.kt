@@ -1,4 +1,4 @@
-package com.an0obis.comuginator.ui
+package com.an0obis.comuginator.ui.messaging
 
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -24,7 +24,7 @@ import kotlinx.coroutines.withContext
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.core.app.NotificationManagerCompat
 import com.an0obis.comuginator.service.NotificationHelper
-import com.an0obis.comuginator.ui.lib.TimerDrawable
+import com.an0obis.comuginator.ui.CardAdapter
 import kotlinx.coroutines.delay
 
 class IncomingMessageActivity : BaseActivity() {
@@ -122,7 +122,7 @@ class IncomingMessageActivity : BaseActivity() {
                     val index =
                         message.suggestedReplies.indexOfFirst { it.id == card.id }
                     val isPassed = index < sequenceStepIndex
-                    Log.d("IncomingMessageActivity","alpha $index $sequenceStepIndex $isPassed")
+                    Log.d("IncomingMessageActivity", "alpha $index $sequenceStepIndex $isPassed")
                     if (isPassed) {
                         0.35f
                     } else {

@@ -1,4 +1,4 @@
-package com.an0obis.comuginator.ui
+package com.an0obis.comuginator.ui.messaging
 
 import android.view.LayoutInflater
 import android.view.View
@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.an0obis.comuginator.R
 import com.an0obis.comuginator.api.AacMessageListItemDto
+import com.an0obis.comuginator.ui.CardAdapter
 
 class MessageHistoryAdapter(
     private val onRepeatClick: (AacMessageListItemDto) -> Unit
