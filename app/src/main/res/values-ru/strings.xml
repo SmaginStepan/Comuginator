@@ -134,7 +134,7 @@
     <string name="failed_to_load_message">Не удалось загрузить сообщение: %1$s</string>
     <string name="rename_user">Переименовать пользователя</string>
     <string name="rename_device">Переименовать устройство</string>
-    <string name="role_parent">Родитель</string>
+    <string name="role_parent">Взрослый</string>
     <string name="role_child">Ребёнок</string>
     <string name="send_heartbeat">Отправить heartbeat</string>
     <string name="rename_family">Переименовать семью</string>

@@ -132,7 +132,7 @@
     <string name="failed_to_load_message">No se pudo cargar el mensaje: %1$s</string>
     <string name="rename_user">Renombrar usuario</string>
     <string name="rename_device">Renombrar dispositivo</string>
-    <string name="role_parent">Padre/Madre</string>
+    <string name="role_parent">Adulto</string>
     <string name="role_child">Niño</string>
     <string name="send_heartbeat">Enviar heartbeat</string>
     <string name="rename_family">Renombrar familia</string>
