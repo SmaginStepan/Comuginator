@@ -297,4 +297,7 @@
     <string name="deleting_user">Удаление пользователя…</string>
     <string name="user_deleted">Пользователь удалён</string>
     <string name="delete_user_failed">Не удалось удалить пользователя: %1$s</string>
+
+    <string name="camera_permission_denied">Нет доступа к камере</string>
+
 </resources>

@@ -293,4 +293,6 @@
     <string name="deleting_user">Eliminando usuario…</string>
     <string name="user_deleted">Usuario eliminado</string>
     <string name="delete_user_failed">No se pudo eliminar el usuario: %1$s</string>
+
+    <string name="camera_permission_denied">No hay acceso a la cámara</string>
 </resources>

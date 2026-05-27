@@ -46,6 +46,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import androidx.appcompat.widget.PopupMenu
 import kotlin.collections.get
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
 
 class LibraryItemPickerActivity : BaseActivity() {
 
@@ -111,6 +114,15 @@ class LibraryItemPickerActivity : BaseActivity() {
 
     private var libraryFilterWatcherAttached = false
 
+    private val cameraPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (granted) {
+                launchCamera()
+            } else {
+                tvStatus.text = getString(R.string.camera_permission_denied)
+            }
+        }
+
     private val pickFromDeviceLauncher =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
             if (uri != null) {
@@ -127,6 +139,19 @@ class LibraryItemPickerActivity : BaseActivity() {
                 }
             }
         }
+
+    private fun requestCameraAndLaunch() {
+        if (
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            launchCamera()
+        } else {
+            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -188,7 +213,7 @@ class LibraryItemPickerActivity : BaseActivity() {
         btnChooseFromLibrary.isVisible = true
 
         btnTakePhoto.setOnClickListener {
-            launchCamera()
+            requestCameraAndLaunch()
         }
 
         btnChooseFromDevice.setOnClickListener {
