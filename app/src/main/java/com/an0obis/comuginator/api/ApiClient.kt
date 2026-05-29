@@ -14,7 +14,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import com.google.gson.Gson
 
 object ApiClient {
-    const val BASE_URL = "http://217.154.185.59/"
+    const val BASE_URL = "https://comuginator.com/"
     private val gson = Gson()
     private val logging = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
