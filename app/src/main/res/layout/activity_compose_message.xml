@@ -55,6 +55,39 @@
 
     </RadioGroup>
 
+    <CheckBox
+        android:id="@+id/cbMultipleReplies"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/multiple_replies"/>
+
+    <RadioGroup
+        android:id="@+id/rgReplyCount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <RadioButton
+            android:id="@+id/rbReply2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="2" />
+
+        <RadioButton
+            android:id="@+id/rbReply3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="3" />
+
+        <RadioButton
+            android:id="@+id/rbReply4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="4" />
+    </RadioGroup>
+
     <TextView
         style="@style/ComuginatorText.Title"
         android:layout_width="match_parent"

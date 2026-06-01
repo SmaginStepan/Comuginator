@@ -89,13 +89,11 @@
         style="@style/ComuginatorText.Section"
         android:text="@string/current_reply"
         android:textStyle="bold" />
-    <ImageView
-        android:id="@+id/ivCurrentReply"
-        android:layout_width="84dp"
-        android:layout_height="84dp"
-        android:layout_marginEnd="12dp"
-        android:scaleType="centerCrop"
-        android:contentDescription="@null"/>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvCurrentReply"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_marginTop="8dp" />
     <TextView
         android:id="@+id/tvCurrentReply"
         android:layout_width="match_parent"

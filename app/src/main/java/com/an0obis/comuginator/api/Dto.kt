@@ -140,7 +140,8 @@ data class SendAacMessageRequest(
     val targetUserId: String,
     val mode: String = "NORMAL",
     val cards: List<AacCardDto>,
-    val suggestedReplies: List<SuggestedReplyItem>
+    val suggestedReplies: List<SuggestedReplyItem>,
+    val requiredReplyCount: Int = 1
 )
 
 data class SendAacMessageResponse(
@@ -215,7 +216,7 @@ data class AacUserDto(
 )
 data class AacReplyShortDto(
     val id: String,
-    val reply: AacCardDto,
+    val reply: List<AacCardDto>,
     val createdAt: String
 )
 
@@ -227,12 +228,13 @@ data class AacMessageDetailsDto(
     val suggestedReplies: List<AacSuggestedReplyDto>,
     val mode: String = "NORMAL",
     val reply: AacReplyShortDto?,
+    val requiredReplyCount: Int = 1,
     val createdAt: String,
     val answeredAt: String?
 )
 
 data class SendAacReplyRequest(
-    val reply: AacCardDto
+    val reply: List<AacCardDto>
 )
 
 data class SendAacReplyResponse(
@@ -252,6 +254,7 @@ data class AacMessageListItemDto(
     val reply: AacReplyShortDto?,
     val createdAt: String,
     val mode: String = "NORMAL",
+    val requiredReplyCount: Int = 1,
     val answeredAt: String?
 )
 

@@ -295,4 +295,6 @@
     <string name="delete_user_failed">No se pudo eliminar el usuario: %1$s</string>
 
     <string name="camera_permission_denied">No hay acceso a la cámara</string>
+    <string name="multiple_replies">Varias respuestas</string>
+    <string name="multiple_replies_selected_status">Seleccionado %1$d de %2$d</string>
 </resources>

@@ -30,6 +30,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import android.widget.CheckBox
+import androidx.core.view.isVisible
 
 class ComposeMessageActivity : BaseActivity() {
 
@@ -49,6 +51,8 @@ class ComposeMessageActivity : BaseActivity() {
     private lateinit var btnAddFromLibrary: Button
     private lateinit var btnAddMore: Button
     private lateinit var btnSendMessage: Button
+    private lateinit var cbMultipleReplies: CheckBox
+    private lateinit var rgReplyCount: RadioGroup
     private lateinit var replyAdapter: CardAdapter
 
     private val pickLibraryItemLauncher =
@@ -107,6 +111,8 @@ class ComposeMessageActivity : BaseActivity() {
         btnAddFromLibrary = findViewById(R.id.btnAddFromLibrary)
         btnAddMore = findViewById(R.id.btnAddMore)
         btnSendMessage = findViewById(R.id.btnSendMessage)
+        cbMultipleReplies = findViewById(R.id.cbMultipleReplies)
+        rgReplyCount = findViewById(R.id.rgReplyCount)
     }
 
     private fun setupRecycler() {
@@ -188,6 +194,26 @@ class ComposeMessageActivity : BaseActivity() {
             }
             render()
         }
+
+        cbMultipleReplies.setOnCheckedChangeListener { _, isChecked ->
+            vm.requiredReplyCount = if (isChecked) 2 else 1
+
+            if (isChecked && rgReplyCount.checkedRadioButtonId == -1) {
+                rgReplyCount.check(R.id.rbReply2)
+            }
+
+            render()
+        }
+
+        rgReplyCount.setOnCheckedChangeListener { _, checkedId ->
+            vm.requiredReplyCount = when (checkedId) {
+                R.id.rbReply3 -> 3
+                R.id.rbReply4 -> 4
+                else -> 2
+            }
+
+            render()
+        }
     }
 
     private fun setupButtons() {
@@ -246,6 +272,13 @@ class ComposeMessageActivity : BaseActivity() {
 
             else ->
                 getString(R.string.compose_normal_question_status, vm.replyCards.size)
+        }
+        cbMultipleReplies.isVisible = vm.mode == "NORMAL"
+        rgReplyCount.isVisible = vm.mode == "NORMAL" && cbMultipleReplies.isChecked
+
+        if (vm.mode == "SEQUENCE") {
+            cbMultipleReplies.isChecked = false
+            vm.requiredReplyCount = 1
         }
     }
 
@@ -459,7 +492,8 @@ class ComposeMessageActivity : BaseActivity() {
                         targetUserId = vm.targetUserId,
                         mode = vm.mode,
                         cards = buildMessageCards(),
-                        suggestedReplies = suggestedRepliesForApi
+                        suggestedReplies = suggestedRepliesForApi,
+                        requiredReplyCount = vm.requiredReplyCount
                     )
                 )
 

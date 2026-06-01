@@ -90,7 +90,7 @@ class MessageHistoryAdapter(
             if (selectedReply != null) {
                 tvSelectedReplyLabel.text = context.getString(R.string.selected_reply)
                 rvSelectedReply.visibility = View.VISIBLE
-                selectedReplyAdapter.submitItems(listOf(selectedReply))
+                selectedReplyAdapter.submitItems(selectedReply)
             } else {
                 tvSelectedReplyLabel.text = context.getString(R.string.reply_empty)
                 rvSelectedReply.visibility = View.GONE

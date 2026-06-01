@@ -299,5 +299,7 @@
     <string name="delete_user_failed">Не удалось удалить пользователя: %1$s</string>
 
     <string name="camera_permission_denied">Нет доступа к камере</string>
+    <string name="multiple_replies">Несколько ответов</string>
+    <string name="multiple_replies_selected_status">Выбрано %1$d из %2$d</string>
 
 </resources>

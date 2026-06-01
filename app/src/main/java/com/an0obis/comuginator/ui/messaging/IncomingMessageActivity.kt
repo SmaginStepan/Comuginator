@@ -46,7 +46,8 @@ class IncomingMessageActivity : BaseActivity() {
     private lateinit var messageAdapter: CardAdapter
     private lateinit var repliesAdapter: CardAdapter
     private lateinit var tvRepliesLabel: TextView
-    private lateinit var ivCurrentReply: ImageView
+    private lateinit var rvCurrentReply: RecyclerView
+    private lateinit var currentReplyAdapter: CardAdapter
     private lateinit var ivFromAvatar: ImageView
     private lateinit var btnClose: Button
 
@@ -57,6 +58,7 @@ class IncomingMessageActivity : BaseActivity() {
     private var commandId: String = ""
     private var ackSent = false
     private var currentMessage: AacMessageDetailsDto? = null
+    private val selectedNormalReplies = mutableListOf<AacCardDto>()
     private var isSendingReply = false
     private var mode: String = MODE_MESSAGE
 
@@ -71,7 +73,7 @@ class IncomingMessageActivity : BaseActivity() {
         rvMessageCards = findViewById(R.id.rvMessageCards)
         rvSuggestedReplies = findViewById(R.id.rvSuggestedReplies)
         tvRepliesLabel = findViewById(R.id.tvRepliesLabel)
-        ivCurrentReply = findViewById(R.id.ivCurrentReply)
+        rvCurrentReply = findViewById(R.id.rvCurrentReply)
 
         ivFromAvatar = findViewById(R.id.ivFromAvatar)
         tvFromUser = findViewById(R.id.tvFromUser)
@@ -107,9 +109,14 @@ class IncomingMessageActivity : BaseActivity() {
 
         messageAdapter = CardAdapter()
 
+        currentReplyAdapter = CardAdapter()
+        rvCurrentReply.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        rvCurrentReply.adapter = currentReplyAdapter
+        rvCurrentReply.itemAnimator = null
         repliesAdapter = CardAdapter(
             onClick = { card ->
-                if (!isSendingReply && !isSequenceBlinking) {
+                if (!isSendingReply && !(currentMessage?.mode == "SEQUENCE" && isSequenceBlinking)) {
                     handleReplyClick(card)
                 }
             },
@@ -216,7 +223,7 @@ class IncomingMessageActivity : BaseActivity() {
                 ApiClient.replyToAacMessage(
                     authHeader = store.authHeaderOrThrow(),
                     messageId = messageId,
-                    requestBody = SendAacReplyRequest(reply = completionCard)
+                    requestBody = SendAacReplyRequest(reply = listOf(completionCard))
                 )
             }
         } catch (e: Exception) {
@@ -249,7 +256,43 @@ class IncomingMessageActivity : BaseActivity() {
 
             sendSequenceStepReply(currentCard)
         } else {
-            sendReply(card)
+            handleNormalReplyClick(card)
+        }
+    }
+
+    private fun handleNormalReplyClick(card: AacCardDto) {
+        val message = currentMessage ?: return
+        val required = message.requiredReplyCount.coerceAtLeast(1)
+
+        if (required <= 1) {
+            sendReply(listOf(card))
+            return
+        }
+
+        val existingIndex = selectedNormalReplies.indexOfFirst { it.id == card.id }
+
+        if (existingIndex >= 0) {
+            selectedNormalReplies.removeAt(existingIndex)
+        } else {
+            if (selectedNormalReplies.size >= required) return
+            selectedNormalReplies.add(card)
+            lifecycleScope.launch {
+                blinkSelectedReplyCard(card)
+            }
+        }
+
+        tvCurrentReply.text = getString(
+            R.string.multiple_replies_selected_status,
+            selectedNormalReplies.size,
+            required
+        )
+        currentReplyAdapter.submitItems(selectedNormalReplies.toList())
+        rvCurrentReply.isVisible = selectedNormalReplies.isNotEmpty()
+
+        repliesAdapter.submitItems(currentSuggestedCards(message))
+
+        if (selectedNormalReplies.size == required) {
+            sendReply(selectedNormalReplies.toList())
         }
     }
 
@@ -265,13 +308,13 @@ class IncomingMessageActivity : BaseActivity() {
                     ApiClient.replyToAacMessage(
                         authHeader = store.authHeaderOrThrow(),
                         messageId = messageId,
-                        requestBody = SendAacReplyRequest(reply = card)
+                        requestBody = SendAacReplyRequest(reply = listOf(card))
                     )
                 }
 
                 tvCurrentReply.text = getString(R.string.reply_prefix, card.label)
-                loadProtectedImage(card.imageUrl, ivCurrentReply)
-                ivCurrentReply.isVisible = true
+                currentReplyAdapter.submitItems(listOf(card))
+                rvCurrentReply.isVisible = true
 
                 progressBar.visibility = View.GONE
 
@@ -434,29 +477,36 @@ class IncomingMessageActivity : BaseActivity() {
         repliesAdapter.submitItems(currentSuggestedCards(message))
         val hasSuggestedReplies = message.suggestedReplies.isNotEmpty()
 
-        if (message.reply != null) {
-            tvCurrentReply.text = getString(R.string.reply_prefix, message.reply.reply.label)
+        val replyCards = message.reply?.reply.orEmpty()
+        val firstReply = replyCards.firstOrNull()
+        val replyLabel = replyCards.joinToString(", ") { it.label }
+
+        if (firstReply != null) {
+            tvCurrentReply.text = getString(R.string.reply_prefix, replyLabel)
             rvSuggestedReplies.isEnabled = false
-            loadProtectedImage(message.reply.reply.imageUrl, ivCurrentReply)
-            ivCurrentReply.isVisible = true
+            currentReplyAdapter.submitItems(replyCards)
+            rvCurrentReply.isVisible = replyCards.isNotEmpty()
         } else {
             tvCurrentReply.text = getString(R.string.no_reply_yet)
             rvSuggestedReplies.isEnabled = true
-            ivCurrentReply.isVisible = false
+            currentReplyAdapter.submitItems(emptyList())
+            rvCurrentReply.isVisible = false
         }
 
         tvFromUser.text = message.fromUser.name
         loadProtectedImage(message.fromUser.avatarImageUrl, ivFromAvatar)
 
         if (mode == MODE_REPLY) {
-            tvFromUser.text = getString(R.string.reply_from,message.toUser.name)
-            tvCurrentReply.text = message.reply?.let {
-                getString(R.string.reply_prefix, message.reply.reply.label)
-            } ?: getString(R.string.reply_not_available)
+            val modeReplyCards = message.reply?.reply.orEmpty()
 
-            repliesAdapter.submitItems(
-                message.reply?.let { listOf(it.reply) } ?: emptyList()
-            )
+            tvCurrentReply.text =
+                if (modeReplyCards.isNotEmpty()) {
+                    getString(R.string.reply_prefix, modeReplyCards.joinToString(", ") { it.label })
+                } else {
+                    getString(R.string.reply_not_available)
+                }
+
+            repliesAdapter.submitItems(modeReplyCards)
             rvSuggestedReplies.isVisible = true
 
             tvRepliesLabel.isVisible = false
@@ -465,7 +515,7 @@ class IncomingMessageActivity : BaseActivity() {
             return
         } else {
             if (message.mode == "SEQUENCE") {
-                val currentReplyId = message.reply?.reply?.id
+                val currentReplyId = message.reply?.reply?.lastOrNull()?.id
 
                 sequenceStepIndex = if (currentReplyId == null) {
                     0
@@ -489,7 +539,7 @@ class IncomingMessageActivity : BaseActivity() {
 
     }
 
-    private fun sendReply(card: AacCardDto) {
+    private fun sendReply(cards: List<AacCardDto>) {
         isSendingReply = true
         progressBar.visibility = View.VISIBLE
 
@@ -499,17 +549,20 @@ class IncomingMessageActivity : BaseActivity() {
                     ApiClient.replyToAacMessage(
                         authHeader = store.authHeaderOrThrow(),
                         messageId = messageId,
-                        requestBody = SendAacReplyRequest(reply = card)
+                        requestBody = SendAacReplyRequest(reply = cards)
                     )
                 }
 
-                tvCurrentReply.text = getString(R.string.reply_prefix, card.label)
-                loadProtectedImage(card.imageUrl, ivCurrentReply)
-                ivCurrentReply.isVisible = true
+                val label = cards.joinToString(", ") { it.label }
+                tvCurrentReply.text = getString(R.string.reply_prefix, label)
+
+                val firstCard = cards.firstOrNull()
+                currentReplyAdapter.submitItems(cards)
+                rvCurrentReply.isVisible = cards.isNotEmpty()
 
                 progressBar.visibility = View.GONE
 
-                blinkSelectedReplyCard(card)
+                firstCard?.let { blinkSelectedReplyCard(it) }
 
                 cancelCurrentNotification()
 
