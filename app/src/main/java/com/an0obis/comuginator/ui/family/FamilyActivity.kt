@@ -35,6 +35,9 @@ import com.an0obis.comuginator.ui.childhome.ChildHomeActivity
 import com.an0obis.comuginator.ui.library.LibraryActivity
 import com.an0obis.comuginator.ui.library.LibraryItemPickerActivity
 import kotlinx.coroutines.launch
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 class FamilyActivity : BaseActivity() {
 
@@ -190,6 +193,16 @@ class FamilyActivity : BaseActivity() {
 
     // ── State binding ─────────────────────────────────────────────────────────
 
+    private fun formatDateTime(value: String): String {
+        return try {
+            Instant.parse(value)
+                .atZone(ZoneId.systemDefault())
+                .format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"))
+        } catch (_: Exception) {
+            value
+        }
+    }
+
     private fun bindState() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -221,10 +234,15 @@ class FamilyActivity : BaseActivity() {
                         } else {
                             tvInvite.text = buildString {
                                 append(getString(R.string.invite_code_result, invite.code))
-                                append("  ")
+                                append("\n")
                                 append(getString(R.string.role_result, invite.role))
-                                append("  ")
-                                append(getString(R.string.expires_result, invite.expiresAt))
+                                append("\n")
+                                append(
+                                    getString(
+                                        R.string.expires_result,
+                                        formatDateTime(invite.expiresAt)
+                                    )
+                                )
                             }
                             tvInvite.visibility = View.VISIBLE
                             ivInviteQr.setImageBitmap(
