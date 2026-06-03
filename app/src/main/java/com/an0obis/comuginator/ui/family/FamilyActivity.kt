@@ -221,7 +221,9 @@ class FamilyActivity : BaseActivity() {
                         } else {
                             tvInvite.text = buildString {
                                 append(getString(R.string.invite_code_result, invite.code))
+                                append("  ")
                                 append(getString(R.string.role_result, invite.role))
+                                append("  ")
                                 append(getString(R.string.expires_result, invite.expiresAt))
                             }
                             tvInvite.visibility = View.VISIBLE
@@ -314,7 +316,7 @@ class FamilyActivity : BaseActivity() {
     }
 
     private fun showSetVolumeDialog(deviceId: String, deviceName: String, currentVolumePercent: Int?) {
-        val initial = currentVolumePercent?.coerceIn(0, 100) ?: 50
+        val initial = (currentVolumePercent ?: 50).coerceIn(0, 100)
         val container = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(48, 32, 48, 0)
