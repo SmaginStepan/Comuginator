@@ -105,6 +105,12 @@ class IncomingMessageActivity : BaseActivity() {
         )
     }
 
+    private fun visibleNormalSuggestedCards(message: AacMessageDetailsDto): List<AacCardDto> {
+        val selectedIds = selectedNormalReplies.map { it.id }.toSet()
+        return currentSuggestedCards(message).filter { it.id !in selectedIds }
+    }
+
+
     override fun onInitialized() {
 
         messageAdapter = CardAdapter()
@@ -386,7 +392,13 @@ class IncomingMessageActivity : BaseActivity() {
             applySequenceAlphas()
         }
 
-        currentMessage?.let { repliesAdapter.submitItems(currentSuggestedCards(it)) }
+        currentMessage?.let { message ->
+            if (message.mode == "NORMAL") {
+                repliesAdapter.submitItems(visibleNormalSuggestedCards(message))
+            } else {
+                repliesAdapter.submitItems(currentSuggestedCards(message))
+            }
+        }
     }
 
     private fun currentSuggestedCards(message: AacMessageDetailsDto): List<AacCardDto> {
