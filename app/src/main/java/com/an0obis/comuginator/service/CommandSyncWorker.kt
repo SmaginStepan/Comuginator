@@ -11,6 +11,8 @@ import com.an0obis.comuginator.storage.SessionStore
 
 
 const val ACTION_INVITE_USED = "com.an0obis.comuginator.INVITE_USED"
+const val ACTION_CHILD_HOME_SCHEDULE_APPLIED =
+    "com.an0obis.comuginator.CHILD_HOME_SCHEDULE_APPLIED"
 const val EXTRA_INVITE_ID = "inviteId"
 class CommandSyncWorker(
     appContext: Context,
@@ -38,6 +40,12 @@ class CommandSyncWorker(
                     }
                     "aac_reply_available" -> {
                         handleNewReplyCommand(command)
+                    }
+                    "child_home_schedule_applied" -> {
+                        applicationContext.sendBroadcast(
+                            Intent(ACTION_CHILD_HOME_SCHEDULE_APPLIED)
+                                .setPackage(applicationContext.packageName)
+                        )
                     }
                     "invite_used" -> {
                         val inviteId = command.payload["inviteId"] as? String

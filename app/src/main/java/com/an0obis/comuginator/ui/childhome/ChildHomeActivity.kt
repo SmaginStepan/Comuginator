@@ -23,6 +23,12 @@ import com.an0obis.comuginator.api.ChildHomeNodeDto
 import com.an0obis.comuginator.ui.base.BaseActivity
 import com.an0obis.comuginator.ui.library.LibraryItemPickerActivity
 import kotlinx.coroutines.launch
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import androidx.core.content.ContextCompat
+import com.an0obis.comuginator.service.ACTION_CHILD_HOME_SCHEDULE_APPLIED
 
 class ChildHomeActivity : BaseActivity() {
 
@@ -36,6 +42,11 @@ class ChildHomeActivity : BaseActivity() {
 
     private val viewModel: ChildHomeViewModel by viewModels()
 
+    private val scheduleAppliedReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            viewModel.loadNodes()
+        }
+    }
     private lateinit var adapter: ChildHomeAdapter
     private lateinit var tvTitle: TextView
     private lateinit var tvBreadcrumbs: TextView
@@ -70,6 +81,22 @@ class ChildHomeActivity : BaseActivity() {
                 )
             }
         }
+
+    override fun onStart() {
+        super.onStart()
+
+        ContextCompat.registerReceiver(
+            this,
+            scheduleAppliedReceiver,
+            IntentFilter(ACTION_CHILD_HOME_SCHEDULE_APPLIED),
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        )
+    }
+
+    override fun onStop() {
+        unregisterReceiver(scheduleAppliedReceiver)
+        super.onStop()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
