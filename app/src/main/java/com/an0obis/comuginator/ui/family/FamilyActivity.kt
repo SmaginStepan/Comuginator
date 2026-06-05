@@ -17,6 +17,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -35,10 +36,10 @@ import com.an0obis.comuginator.ui.childhome.ChildHomeActivity
 import com.an0obis.comuginator.ui.library.LibraryActivity
 import com.an0obis.comuginator.ui.library.LibraryItemPickerActivity
 import kotlinx.coroutines.launch
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-
+import com.an0obis.comuginator.ui.schedule.ScheduleActivity
+import java.text.SimpleDateFormat
+import java.util.Locale
+import java.util.TimeZone
 class FamilyActivity : BaseActivity() {
 
     private val viewModel: FamilyViewModel by viewModels()
@@ -50,6 +51,8 @@ class FamilyActivity : BaseActivity() {
     private lateinit var tvStatus: TextView
     private lateinit var btnFamilyAdd: Button
     private lateinit var btnFamilyMore: Button
+
+    private lateinit var btnSchedule: Button
 
     private var familyAdapter: FamilyAdapter? = null
     private var adapterMeRole: String = ""
@@ -86,6 +89,7 @@ class FamilyActivity : BaseActivity() {
         tvStatus = findViewById(R.id.tvStatus)
         btnFamilyAdd = findViewById(R.id.btnFamilyAdd)
         btnFamilyMore = findViewById(R.id.btnFamilyMore)
+        btnSchedule = findViewById(R.id.btnSchedule)
 
         tvInvite.visibility = View.GONE
         ivInviteQr.visibility = View.GONE
@@ -99,6 +103,10 @@ class FamilyActivity : BaseActivity() {
                     putExtra(ChildHomeActivity.EXTRA_EDITOR_MODE, true)
                 }
             )
+        }
+
+        findViewById<Button>(R.id.btnSchedule).setOnClickListener {
+            startActivity(Intent(this, ScheduleActivity::class.java))
         }
 
         btnFamilyAdd.setOnClickListener { view ->
@@ -195,9 +203,14 @@ class FamilyActivity : BaseActivity() {
 
     private fun formatDateTime(value: String): String {
         return try {
-            Instant.parse(value)
-                .atZone(ZoneId.systemDefault())
-                .format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"))
+            val parser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US).apply {
+                timeZone = TimeZone.getTimeZone("UTC")
+            }
+
+            val formatter = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault())
+
+            val date = parser.parse(value)
+            if (date != null) formatter.format(date) else value
         } catch (_: Exception) {
             value
         }
@@ -276,6 +289,8 @@ class FamilyActivity : BaseActivity() {
         optimisticVolumes: Map<String, Int>
     ) {
         tvFamily.text = getString(R.string.family_prefix, familyName ?: getString(R.string.no_name))
+
+        btnSchedule.isVisible = meRole == "PARENT"
 
         if (familyAdapter == null || adapterMeRole != meRole || adapterMyDeviceId != meDeviceId) {
             adapterMeRole = meRole

@@ -57,6 +57,14 @@
             style="@style/ComuginatorButton.Secondary"
             android:text="@string/child_home" />
 
+        <Button
+            android:id="@+id/btnSchedule"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            style="@style/ComuginatorButton.Secondary"
+            android:text="@string/schedule" />
+
     </LinearLayout>
 
     <TextView

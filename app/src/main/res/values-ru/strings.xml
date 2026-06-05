@@ -301,5 +301,6 @@
     <string name="camera_permission_denied">Нет доступа к камере</string>
     <string name="multiple_replies">Несколько ответов</string>
     <string name="multiple_replies_selected_status">Выбрано %1$d из %2$d</string>
+    <string name="schedule">Расписание</string>
 
 </resources>

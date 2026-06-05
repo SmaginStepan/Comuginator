@@ -26,6 +26,9 @@
         <activity android:name=".ui.library.LibraryItemPickerActivity" />
         <activity android:name=".ui.SettingsActivity" />
         <activity android:name=".ui.childhome.ChildHomeActivity" />
+        <activity
+            android:name=".ui.schedule.ScheduleActivity"
+            android:exported="false" />
 
         <activity
             android:name=".ui.MainActivity"

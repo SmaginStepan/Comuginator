@@ -21,7 +21,7 @@
     <string name="home">Inicio</string>
     <string name="status">Estado</string>
     <string name="refresh">Actualizar</string>
-    <string name="child_home">Pantalla infantil</string>
+    <string name="child_home">Infantil</string>
     <string name="child_home_delete_node_title">¿Eliminar elemento?</string>
     <string name="child_home_node_type_title">Tipo de elemento</string>
     <string name="child_home_create_failed">No se pudo crear: %1$s</string>
@@ -297,4 +297,6 @@
     <string name="camera_permission_denied">No hay acceso a la cámara</string>
     <string name="multiple_replies">Varias respuestas</string>
     <string name="multiple_replies_selected_status">Seleccionado %1$d de %2$d</string>
+
+    <string name="schedule">Horario</string>
 </resources>
