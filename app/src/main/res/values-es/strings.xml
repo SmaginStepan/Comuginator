@@ -21,7 +21,7 @@
     <string name="home">Inicio</string>
     <string name="status">Estado</string>
     <string name="refresh">Actualizar</string>
-    <string name="child_home">Infantil</string>
+    <string name="child_home">Pantalla Infantil</string>
     <string name="child_home_delete_node_title">¿Eliminar elemento?</string>
     <string name="child_home_node_type_title">Tipo de elemento</string>
     <string name="child_home_create_failed">No se pudo crear: %1$s</string>
