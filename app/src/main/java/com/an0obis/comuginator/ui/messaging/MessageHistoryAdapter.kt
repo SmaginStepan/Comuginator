@@ -51,6 +51,9 @@ class MessageHistoryAdapter(
         private val tvMode: TextView = view.findViewById(R.id.tvMode)
         private val tvSelectedReplyLabel: TextView = view.findViewById(R.id.tvSelectedReplyLabel)
 
+        private val tvSuggestedRepliesLabel: TextView =
+            view.findViewById(R.id.tvSuggestedRepliesLabel)
+
         private val rvSuggestedReplies: RecyclerView = view.findViewById(R.id.rvSuggestedReplies)
         private val rvSelectedReply: RecyclerView = view.findViewById(R.id.rvSelectedReply)
 
@@ -58,6 +61,14 @@ class MessageHistoryAdapter(
 
         private val suggestedRepliesAdapter = CardAdapter()
         private val selectedReplyAdapter = CardAdapter()
+
+        private val rvMessage: RecyclerView =
+            view.findViewById(R.id.rvMessage)
+
+        private val tvMessageLabel: TextView =
+            view.findViewById(R.id.tvMessageLabel)
+
+        private val messageAdapter = CardAdapter()
 
         init {
             rvSuggestedReplies.layoutManager =
@@ -69,33 +80,66 @@ class MessageHistoryAdapter(
                 LinearLayoutManager(view.context, LinearLayoutManager.HORIZONTAL, false)
             rvSelectedReply.adapter = selectedReplyAdapter
             rvSelectedReply.setHasFixedSize(true)
+            rvMessage.layoutManager =
+                LinearLayoutManager(view.context, LinearLayoutManager.HORIZONTAL, false)
+
+            rvMessage.adapter = messageAdapter
         }
 
         fun bind(item: AacMessageListItemDto) {
             val context = itemView.context
+            val hasSuggestedReplies = item.suggestedReplies.isNotEmpty()
+            val isRequestOnly = !hasSuggestedReplies
 
             tvCreatedAt.text = item.createdAt
 
-            tvMode.text = when (item.mode) {
-                "SEQUENCE" -> context.getString(R.string.compose_mode_sequence)
-                else -> context.getString(R.string.compose_mode_normal)
+            if (isRequestOnly) {
+                tvMode.visibility = View.GONE
+            } else {
+                tvMode.visibility = View.VISIBLE
+                tvMode.text = when (item.mode) {
+                    "SEQUENCE" -> context.getString(R.string.compose_mode_sequence)
+                    else -> context.getString(R.string.compose_mode_normal)
+                }
+            }
+
+            messageAdapter.submitItems(item.message)
+
+            rvMessage.visibility =
+                if (isRequestOnly && item.message.isNotEmpty()) View.VISIBLE else View.GONE
+
+            if (isRequestOnly && item.message.isNotEmpty()) {
+                tvMessageLabel.text = context.getString(R.string.request)
+                tvMessageLabel.visibility = View.VISIBLE
+            } else {
+                tvMessageLabel.visibility = View.GONE
             }
 
             suggestedRepliesAdapter.submitItems(
                 item.suggestedReplies.map { it.toCardDto() }
             )
 
+            tvSuggestedRepliesLabel.visibility =
+                if (hasSuggestedReplies) View.VISIBLE else View.GONE
+
+            rvSuggestedReplies.visibility =
+                if (hasSuggestedReplies) View.VISIBLE else View.GONE
+
             val selectedReply = item.reply?.reply
 
-            if (selectedReply != null) {
+            if (hasSuggestedReplies && selectedReply != null) {
                 tvSelectedReplyLabel.text = context.getString(R.string.selected_reply)
+                tvSelectedReplyLabel.visibility = View.VISIBLE
                 rvSelectedReply.visibility = View.VISIBLE
                 selectedReplyAdapter.submitItems(selectedReply)
             } else {
-                tvSelectedReplyLabel.text = context.getString(R.string.reply_empty)
+                tvSelectedReplyLabel.visibility = View.GONE
                 rvSelectedReply.visibility = View.GONE
                 selectedReplyAdapter.submitItems(emptyList())
             }
+
+            btnRepeat.visibility =
+                if (hasSuggestedReplies) View.VISIBLE else View.GONE
 
             btnRepeat.setOnClickListener {
                 onRepeatClick(item)

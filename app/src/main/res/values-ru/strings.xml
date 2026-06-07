@@ -302,5 +302,6 @@
     <string name="multiple_replies">Несколько ответов</string>
     <string name="multiple_replies_selected_status">Выбрано %1$d из %2$d</string>
     <string name="schedule">Расписание</string>
+    <string name="request">Просьба</string>
 
 </resources>

@@ -26,6 +26,7 @@ import androidx.core.app.NotificationManagerCompat
 import com.an0obis.comuginator.service.NotificationHelper
 import com.an0obis.comuginator.ui.CardAdapter
 import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 class IncomingMessageActivity : BaseActivity() {
 
@@ -49,6 +50,8 @@ class IncomingMessageActivity : BaseActivity() {
     private lateinit var rvCurrentReply: RecyclerView
     private lateinit var currentReplyAdapter: CardAdapter
     private lateinit var ivFromAvatar: ImageView
+    private lateinit var tvMessageLabel: TextView
+    private lateinit var tvCurrentReplyLabel: TextView
     private lateinit var btnClose: Button
 
     private var sequenceStepIndex = 0
@@ -74,6 +77,8 @@ class IncomingMessageActivity : BaseActivity() {
         rvSuggestedReplies = findViewById(R.id.rvSuggestedReplies)
         tvRepliesLabel = findViewById(R.id.tvRepliesLabel)
         rvCurrentReply = findViewById(R.id.rvCurrentReply)
+        tvMessageLabel = findViewById(R.id.tvMessageLabel)
+        tvCurrentReplyLabel = findViewById(R.id.tvCurrentReplyLabel)
 
         ivFromAvatar = findViewById(R.id.ivFromAvatar)
         tvFromUser = findViewById(R.id.tvFromUser)
@@ -198,7 +203,7 @@ class IncomingMessageActivity : BaseActivity() {
                     holder?.tvCardLabel?.text = formatTimerLabel(remaining)
                 }
 
-                delay(1000)
+                delay(1000.milliseconds)
             }
 
             isWaitTimerRunning = false
@@ -381,7 +386,7 @@ class IncomingMessageActivity : BaseActivity() {
                 rvSuggestedReplies.findViewHolderForAdapterPosition(selectedIndex)?.itemView
 
             selectedView?.alpha = if (it % 2 == 0) 0.15f else 1f
-            delay(500)
+            delay(500.milliseconds)
         }
 
         views.forEach { view ->
@@ -487,22 +492,48 @@ class IncomingMessageActivity : BaseActivity() {
 
         messageAdapter.submitItems(message.message)
         repliesAdapter.submitItems(currentSuggestedCards(message))
+
         val hasSuggestedReplies = message.suggestedReplies.isNotEmpty()
+        val showQuestion = !hasSuggestedReplies && message.message.isNotEmpty()
+        val isRequestOnly = !hasSuggestedReplies
 
         val replyCards = message.reply?.reply.orEmpty()
+        tvCurrentReplyLabel.isVisible = !isRequestOnly
+        tvCurrentReply.isVisible = !isRequestOnly
+        rvCurrentReply.isVisible = !isRequestOnly && replyCards.isNotEmpty()
+
+        messageAdapter.submitItems(message.message)
+        rvMessageCards.isVisible = showQuestion
+        tvMessageLabel.isVisible = showQuestion
+
+        repliesAdapter.submitItems(currentSuggestedCards(message))
+        rvSuggestedReplies.isVisible = hasSuggestedReplies
+        tvRepliesLabel.isVisible = hasSuggestedReplies
+
+        rvMessageCards.isVisible =
+            showQuestion && message.message.isNotEmpty()
+
+        tvMessageLabel.isVisible =
+            showQuestion && message.message.isNotEmpty()
+
         val firstReply = replyCards.firstOrNull()
         val replyLabel = replyCards.joinToString(", ") { it.label }
 
-        if (firstReply != null) {
-            tvCurrentReply.text = getString(R.string.reply_prefix, replyLabel)
-            rvSuggestedReplies.isEnabled = false
-            currentReplyAdapter.submitItems(replyCards)
-            rvCurrentReply.isVisible = replyCards.isNotEmpty()
-        } else {
-            tvCurrentReply.text = getString(R.string.no_reply_yet)
-            rvSuggestedReplies.isEnabled = true
-            currentReplyAdapter.submitItems(emptyList())
-            rvCurrentReply.isVisible = false
+        if (!isRequestOnly) {
+            if (firstReply != null) {
+                tvCurrentReply.text =
+                    getString(R.string.reply_prefix, replyLabel)
+
+                rvSuggestedReplies.isEnabled = false
+                currentReplyAdapter.submitItems(replyCards)
+                rvCurrentReply.isVisible = replyCards.isNotEmpty()
+            } else {
+                tvCurrentReply.text = getString(R.string.no_reply_yet)
+
+                rvSuggestedReplies.isEnabled = true
+                currentReplyAdapter.submitItems(emptyList())
+                rvCurrentReply.isVisible = false
+            }
         }
 
         tvFromUser.text = message.fromUser.name

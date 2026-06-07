@@ -340,4 +340,5 @@
     <string name="multiple_replies_selected_status">Selected %1$d of %2$d</string>
 
     <string name="schedule">Schedule</string>
+    <string name="request">Request</string>
 </resources>

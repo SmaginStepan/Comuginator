@@ -18,8 +18,23 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
         android:textStyle="bold" />
+    <TextView
+        android:id="@+id/tvMessageLabel"
+        style="@style/ComuginatorText.Body"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/message"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvMessage"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:layout_marginTop="6dp"
+        android:nestedScrollingEnabled="false"  />
 
     <TextView
+        android:id="@+id/tvSuggestedRepliesLabel"
         style="@style/ComuginatorText.Body"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
