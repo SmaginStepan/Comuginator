@@ -37,6 +37,7 @@ class ComposeMessageActivity : BaseActivity() {
 
     companion object {
         const val EXTRA_INITIAL_REPLY_CARDS = "initial_reply_cards"
+        const val EXTRA_INITIAL_REQUIRED_REPLY_COUNT = "initial_required_reply_count"
     }
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -91,6 +92,10 @@ class ComposeMessageActivity : BaseActivity() {
                 vm.replyCards.addAll(initialReplies)
             }
 
+            val initialRequiredReplyCount =
+                intent.getIntExtra(EXTRA_INITIAL_REQUIRED_REPLY_COUNT, 1)
+            vm.requiredReplyCount = initialRequiredReplyCount
+
             vm.initialized = true
         }
 
@@ -98,6 +103,7 @@ class ComposeMessageActivity : BaseActivity() {
         setupRecycler()
         setupMode()
         setupButtons()
+        applyRequiredReplyCountToUi()
         render()
     }
 
@@ -252,6 +258,20 @@ class ComposeMessageActivity : BaseActivity() {
 
         btnSendMessage.setOnClickListener {
             sendMessage()
+        }
+    }
+
+    private fun applyRequiredReplyCountToUi() {
+        val count = vm.requiredReplyCount
+        if (count > 1) {
+            cbMultipleReplies.isChecked = true
+            when (count) {
+                3 -> rgReplyCount.check(R.id.rbReply3)
+                4 -> rgReplyCount.check(R.id.rbReply4)
+                else -> rgReplyCount.check(R.id.rbReply2)
+            }
+        } else {
+            cbMultipleReplies.isChecked = false
         }
     }
 

@@ -75,6 +75,7 @@ class UserMessageHistoryActivity : BaseActivity() {
                 ComposeMessageActivity.EXTRA_INITIAL_REPLY_CARDS,
                 Gson().toJson(item.suggestedReplies.map { it.toCardDto() })
             )
+            putExtra(ComposeMessageActivity.EXTRA_INITIAL_REQUIRED_REPLY_COUNT, item.requiredReplyCount)
         }
         startActivity(intent)
     }
