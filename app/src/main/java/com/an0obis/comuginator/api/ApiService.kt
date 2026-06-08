@@ -267,4 +267,21 @@ interface ApiService {
     suspend fun deleteMyFamily(
         @Header("Authorization") auth: String
     ): OkResponse
+
+    @GET("/v1/schedule/items")
+    suspend fun getScheduleItems(
+        @Header("Authorization") auth: String
+    ): ScheduleItemsResponse
+
+    @DELETE("/v1/schedule/items/{id}")
+    suspend fun deleteScheduleItem(
+        @Header("Authorization") auth: String,
+        @Path("id") id: String
+    ): OkResponse
+
+    @POST("/v1/schedule/items")
+    suspend fun createScheduleItem(
+        @Header("Authorization") auth: String,
+        @Body body: CreateScheduleItemRequest
+    ): ScheduleItemResponse
 }

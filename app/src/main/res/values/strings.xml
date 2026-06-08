@@ -340,5 +340,7 @@
     <string name="multiple_replies_selected_status">Selected %1$d of %2$d</string>
 
     <string name="schedule">Schedule</string>
+    <string name="exact_date">Exact date</string>
+    <string name="day_of_week">Day of week</string>
     <string name="request">Request</string>
 </resources>

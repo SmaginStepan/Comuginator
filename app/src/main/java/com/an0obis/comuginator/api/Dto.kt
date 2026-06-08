@@ -463,3 +463,43 @@ data class MoveLibrarySetItemsRequest(
 data class MoveLibrarySetsRequest(
     val setIds: List<String>
 )
+
+data class ScheduleItemDto(
+    val id: String,
+    val familyId: String,
+
+    val mode: String, // WEEKDAY | DATE
+
+    val weekdays: List<Int>,
+    val date: String?,
+    val time: String,
+
+    val sortOrder: Int,
+
+    val cards: List<AacCardDto>,
+
+    val forceShowChildHomeNodeIds: List<String>,
+    val forceHideChildHomeNodeIds: List<String>
+)
+
+data class ScheduleItemsResponse(
+    val ok: Boolean,
+    val items: List<ScheduleItemDto>
+)
+
+data class ScheduleItemResponse(
+    val ok: Boolean,
+    val item: ScheduleItemDto
+)
+
+data class CreateScheduleItemRequest(
+    val mode: String,
+    val weekdays: List<Int> = emptyList(),
+    val date: String? = null,
+    val time: String,
+    val cards: List<AacCardDto>,
+    val sortOrder: Int? = null,
+    val isEnabled: Boolean = true,
+    val forceShowChildHomeNodeIds: List<String> = emptyList(),
+    val forceHideChildHomeNodeIds: List<String> = emptyList()
+)
