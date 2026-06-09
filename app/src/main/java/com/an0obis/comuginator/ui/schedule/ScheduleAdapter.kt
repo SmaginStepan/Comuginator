@@ -36,7 +36,7 @@ class ScheduleAdapter(
         val item = items[position]
         val card = item.cards.firstOrNull()
 
-        holder.tvTitle.text = card?.label ?: item.id
+        holder.tvTitle.text = item.name?.takeIf { it.isNotEmpty() } ?: card?.label ?: item.id
         holder.tvSchedule.text = formatSchedule(holder.itemView.context, item)
 
         val imageUrl = card?.imageUrl

@@ -15,6 +15,7 @@ import coil.load
 import com.an0obis.comuginator.R
 import com.an0obis.comuginator.api.AddItemsToSetRequest
 import com.an0obis.comuginator.api.ApiClient
+import com.an0obis.comuginator.api.RenameLibraryItemRequest
 import com.an0obis.comuginator.api.UpdateLibrarySetRequest
 import com.an0obis.comuginator.storage.SessionStore
 import kotlinx.coroutines.launch
@@ -97,6 +98,9 @@ class LibrarySetActivity : AppCompatActivity() {
             auth,
             onDeleteItemClick = { item ->
                 deleteLibraryItem(item.id)
+            },
+            onRenameItemClick = { item ->
+                showRenameItemDialog(item.id, item.label)
             }
         )
 
@@ -328,6 +332,42 @@ class LibrarySetActivity : AppCompatActivity() {
                 )
 
                 finish()
+            } catch (e: Exception) {
+                tvStatus.text = getString(R.string.failed_with_message, e.message)
+            }
+        }
+    }
+
+    private fun showRenameItemDialog(itemId: String, currentLabel: String) {
+        val input = EditText(this)
+        input.setText(currentLabel)
+        input.setSelection(input.text.length)
+
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.rename))
+            .setView(input)
+            .setNegativeButton(getString(R.string.cancel), null)
+            .setPositiveButton(getString(R.string.save)) { _, _ ->
+                val newLabel = input.text?.toString()?.trim().orEmpty()
+                if (newLabel.isNotEmpty()) {
+                    renameLibraryItem(itemId, newLabel)
+                }
+            }
+            .show()
+    }
+
+    private fun renameLibraryItem(itemId: String, newLabel: String) {
+        lifecycleScope.launch {
+            try {
+                tvStatus.text = getString(R.string.renaming)
+                withContext(Dispatchers.IO) {
+                    ApiClient.api.renameLibraryItem(
+                        auth = sessionStore.authHeaderOrThrow(),
+                        itemId = itemId,
+                        body = RenameLibraryItemRequest(label = newLabel)
+                    )
+                }
+                loadSet()
             } catch (e: Exception) {
                 tvStatus.text = getString(R.string.failed_with_message, e.message)
             }

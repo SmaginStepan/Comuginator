@@ -17,12 +17,14 @@ class LibraryItemsVH(v: View) : RecyclerView.ViewHolder(v) {
     val ivImage: ImageView = v.findViewById(R.id.ivImage)
     val tvLabel: TextView = v.findViewById(R.id.tvLabel)
     val tvSource: TextView = v.findViewById(R.id.tvSource)
+    val btnRenameItem: Button = v.findViewById(R.id.btnRenameItem)
     val btnDeleteItem: Button = v.findViewById(R.id.btnDeleteItem)
 }
 
 class LibraryItemsAdapter(
     private val authToken: String,
-    private val onDeleteItemClick: (AacCardDto) -> Unit
+    private val onDeleteItemClick: (AacCardDto) -> Unit,
+    private val onRenameItemClick: (AacCardDto) -> Unit = {}
 ) : BaseAdapter<AacCardDto, LibraryItemsVH>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LibraryItemsVH {
@@ -48,6 +50,10 @@ class LibraryItemsAdapter(
             holder.ivImage.context.imageLoader.enqueue(request)
         } else {
             holder.ivImage.setImageResource(android.R.drawable.ic_menu_gallery)
+        }
+
+        holder.btnRenameItem.setOnClickListener {
+            onRenameItemClick(item)
         }
 
         holder.btnDeleteItem.setOnClickListener {

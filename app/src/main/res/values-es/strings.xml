@@ -304,6 +304,12 @@
     <string name="multiple_replies_selected_status">Seleccionado %1$d de %2$d</string>
 
     <string name="schedule">Horario</string>
+    <string name="name">Nombre</string>
+    <string name="new_schedule_item">Nuevo elemento de horario</string>
+    <string name="edit_schedule_item">Editar elemento de horario</string>
+    <string name="force_show_nodes">Mostrar nodos</string>
+    <string name="force_hide_nodes">Ocultar nodos</string>
+    <string name="time">Hora</string>
     <string name="weekday_mon">Lun</string>
     <string name="weekday_tue">Mar</string>
     <string name="weekday_wed">Mié</string>
@@ -313,6 +319,7 @@
     <string name="weekday_sun">Dom</string>
     <string name="breadcrumb_library">Comuginator > Biblioteca</string>
     <string name="breadcrumb_schedule">Comuginator > Horario</string>
+    <string name="breadcrumb_schedule_item">Comuginator > Horario > %1$s</string>
     <string name="breadcrumb_child_home">Comuginator > Inicio > %1$s</string>
     <string name="breadcrumb_child_home_root">Comuginator > Inicio</string>
     <string name="exact_date">Fecha exacta</string>

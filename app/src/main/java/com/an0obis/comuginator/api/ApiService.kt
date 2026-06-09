@@ -164,6 +164,13 @@ interface ApiService {
         @Path("itemId") itemId: String
     ): OkResponse
 
+    @PATCH("/v1/library/items/{itemId}")
+    suspend fun renameLibraryItem(
+        @Header("Authorization") auth: String,
+        @Path("itemId") itemId: String,
+        @Body body: RenameLibraryItemRequest
+    ): LibraryItemResponse
+
     @POST("/v1/library/sets/{setId}/items")
     suspend fun addItemsToSet(
         @Header("Authorization") auth: String,
@@ -283,5 +290,12 @@ interface ApiService {
     suspend fun createScheduleItem(
         @Header("Authorization") auth: String,
         @Body body: CreateScheduleItemRequest
+    ): ScheduleItemResponse
+
+    @PATCH("/v1/schedule/items/{id}")
+    suspend fun updateScheduleItem(
+        @Header("Authorization") auth: String,
+        @Path("id") id: String,
+        @Body body: UpdateScheduleItemRequest
     ): ScheduleItemResponse
 }

@@ -39,10 +39,18 @@
     </LinearLayout>
 
     <Button
-        android:id="@+id/btnDeleteItem"
+        android:id="@+id/btnRenameItem"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
+        style="@style/ComuginatorButton.Secondary"
+        android:text="@string/rename" />
+
+    <Button
+        android:id="@+id/btnDeleteItem"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
         style="@style/ComuginatorButton"
         android:text="@string/delete" />
 

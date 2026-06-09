@@ -308,6 +308,12 @@
     <string name="multiple_replies">Несколько ответов</string>
     <string name="multiple_replies_selected_status">Выбрано %1$d из %2$d</string>
     <string name="schedule">Расписание</string>
+    <string name="name">Имя</string>
+    <string name="new_schedule_item">Новый элемент расписания</string>
+    <string name="edit_schedule_item">Редактировать элемент расписания</string>
+    <string name="force_show_nodes">Показать узлы</string>
+    <string name="force_hide_nodes">Скрыть узлы</string>
+    <string name="time">Время</string>
     <string name="weekday_mon">Пн</string>
     <string name="weekday_tue">Вт</string>
     <string name="weekday_wed">Ср</string>
@@ -317,6 +323,7 @@
     <string name="weekday_sun">Вс</string>
     <string name="breadcrumb_library">Comuginator > Библиотека</string>
     <string name="breadcrumb_schedule">Comuginator > Расписание</string>
+    <string name="breadcrumb_schedule_item">Comuginator > Расписание > %1$s</string>
     <string name="breadcrumb_child_home">Comuginator > Главный экран > %1$s</string>
     <string name="breadcrumb_child_home_root">Comuginator > Главный экран</string>
     <string name="exact_date">Конкретная дата</string>

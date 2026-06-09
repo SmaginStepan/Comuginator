@@ -344,6 +344,12 @@
     <string name="multiple_replies_selected_status">Selected %1$d of %2$d</string>
 
     <string name="schedule">Schedule</string>
+    <string name="name">Name</string>
+    <string name="new_schedule_item">New schedule item</string>
+    <string name="edit_schedule_item">Edit schedule item</string>
+    <string name="force_show_nodes">Show nodes</string>
+    <string name="force_hide_nodes">Hide nodes</string>
+    <string name="time">Time</string>
     <string name="weekday_mon">Mon</string>
     <string name="weekday_tue">Tue</string>
     <string name="weekday_wed">Wed</string>
@@ -353,6 +359,7 @@
     <string name="weekday_sun">Sun</string>
     <string name="breadcrumb_library">Comuginator > Library</string>
     <string name="breadcrumb_schedule">Comuginator > Schedule</string>
+    <string name="breadcrumb_schedule_item">Comuginator > Schedule > %1$s</string>
     <string name="breadcrumb_child_home">Comuginator > Child Home > %1$s</string>
     <string name="breadcrumb_child_home_root">Comuginator > Child Home</string>
     <string name="exact_date">Exact date</string>

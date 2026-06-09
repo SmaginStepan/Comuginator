@@ -29,6 +29,9 @@
         <activity
             android:name=".ui.schedule.ScheduleActivity"
             android:exported="false" />
+        <activity
+            android:name=".ui.schedule.ScheduleItemActivity"
+            android:exported="false" />
 
         <activity
             android:name=".ui.MainActivity"

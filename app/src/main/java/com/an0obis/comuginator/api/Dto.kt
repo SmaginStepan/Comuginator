@@ -352,6 +352,10 @@ data class MoveItemsToSetRequest(
     val targetSetId: String
 )
 
+data class RenameLibraryItemRequest(
+    val label: String
+)
+
 data class CreateArasaacLibraryItemRequest(
     val label: String,
     val sourceRef: String
@@ -468,6 +472,8 @@ data class ScheduleItemDto(
     val id: String,
     val familyId: String,
 
+    val name: String?,
+
     val mode: String, // WEEKDAY | DATE
 
     val weekdays: List<Int>,
@@ -492,8 +498,21 @@ data class ScheduleItemResponse(
     val item: ScheduleItemDto
 )
 
+data class UpdateScheduleItemRequest(
+    val mode: String? = null,
+    val name: String? = null,
+    val weekdays: List<Int>? = null,
+    val date: String? = null,
+    val time: String? = null,
+    val cards: List<AacCardDto>? = null,
+    val isEnabled: Boolean? = null,
+    val forceShowChildHomeNodeIds: List<String>? = null,
+    val forceHideChildHomeNodeIds: List<String>? = null
+)
+
 data class CreateScheduleItemRequest(
     val mode: String,
+    val name: String? = null,
     val weekdays: List<Int> = emptyList(),
     val date: String? = null,
     val time: String,
