@@ -304,6 +304,13 @@
     <string name="multiple_replies_selected_status">Seleccionado %1$d de %2$d</string>
 
     <string name="schedule">Horario</string>
+    <string name="weekday_mon">Lun</string>
+    <string name="weekday_tue">Mar</string>
+    <string name="weekday_wed">Mié</string>
+    <string name="weekday_thu">Jue</string>
+    <string name="weekday_fri">Vie</string>
+    <string name="weekday_sat">Sáb</string>
+    <string name="weekday_sun">Dom</string>
     <string name="breadcrumb_library">Comuginator > Biblioteca</string>
     <string name="breadcrumb_schedule">Comuginator > Horario</string>
     <string name="breadcrumb_child_home">Comuginator > Inicio > %1$s</string>

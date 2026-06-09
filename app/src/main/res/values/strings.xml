@@ -344,6 +344,13 @@
     <string name="multiple_replies_selected_status">Selected %1$d of %2$d</string>
 
     <string name="schedule">Schedule</string>
+    <string name="weekday_mon">Mon</string>
+    <string name="weekday_tue">Tue</string>
+    <string name="weekday_wed">Wed</string>
+    <string name="weekday_thu">Thu</string>
+    <string name="weekday_fri">Fri</string>
+    <string name="weekday_sat">Sat</string>
+    <string name="weekday_sun">Sun</string>
     <string name="breadcrumb_library">Comuginator > Library</string>
     <string name="breadcrumb_schedule">Comuginator > Schedule</string>
     <string name="breadcrumb_child_home">Comuginator > Child Home > %1$s</string>

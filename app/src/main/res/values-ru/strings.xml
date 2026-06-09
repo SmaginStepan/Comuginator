@@ -308,6 +308,13 @@
     <string name="multiple_replies">Несколько ответов</string>
     <string name="multiple_replies_selected_status">Выбрано %1$d из %2$d</string>
     <string name="schedule">Расписание</string>
+    <string name="weekday_mon">Пн</string>
+    <string name="weekday_tue">Вт</string>
+    <string name="weekday_wed">Ср</string>
+    <string name="weekday_thu">Чт</string>
+    <string name="weekday_fri">Пт</string>
+    <string name="weekday_sat">Сб</string>
+    <string name="weekday_sun">Вс</string>
     <string name="breadcrumb_library">Comuginator > Библиотека</string>
     <string name="breadcrumb_schedule">Comuginator > Расписание</string>
     <string name="breadcrumb_child_home">Comuginator > Главный экран > %1$s</string>

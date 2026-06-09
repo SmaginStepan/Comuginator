@@ -7,7 +7,6 @@ import com.an0obis.comuginator.ui.base.BaseActivity
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.an0obis.comuginator.api.AacCardDto
 import com.an0obis.comuginator.api.ApiClient
 import com.an0obis.comuginator.api.ScheduleItemDto
@@ -85,6 +84,7 @@ class ScheduleActivity : BaseActivity() {
         tvCounter = findViewById(R.id.tvCounter)
 
         adapter = ScheduleAdapter(
+            authToken = store.authHeaderOrThrow().removePrefix("Bearer "),
             onDelete = { item ->
                 deleteItem(item)
             },
@@ -97,7 +97,9 @@ class ScheduleActivity : BaseActivity() {
             }
         )
 
-        rvSchedule.layoutManager = LinearLayoutManager(this)
+        rvSchedule.layoutManager = androidx.recyclerview.widget.GridLayoutManager(
+            this, resources.getInteger(R.integer.schedule_span_count)
+        )
         rvSchedule.adapter = adapter
 
         findViewById<View>(R.id.btnAdd).setOnClickListener {
