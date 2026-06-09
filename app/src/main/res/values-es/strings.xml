@@ -171,6 +171,11 @@
     <string name="reply_from">Respuesta de %1$s</string>
     <string name="reply_sent">Respuesta enviada</string>
     <string name="failed_send_reply">No se pudo enviar la respuesta: %1$s</string>
+    <plurals name="schedule_items_count">
+        <item quantity="one">%d elemento</item>
+        <item quantity="many">%d elementos</item>
+        <item quantity="other">%d elementos</item>
+    </plurals>
     <plurals name="sets_count">
         <item quantity="one">%d conjunto</item>
         <item quantity="many">%d conjuntos</item>
@@ -299,6 +304,10 @@
     <string name="multiple_replies_selected_status">Seleccionado %1$d de %2$d</string>
 
     <string name="schedule">Horario</string>
+    <string name="breadcrumb_library">Comuginator > Biblioteca</string>
+    <string name="breadcrumb_schedule">Comuginator > Horario</string>
+    <string name="breadcrumb_child_home">Comuginator > Inicio > %1$s</string>
+    <string name="breadcrumb_child_home_root">Comuginator > Inicio</string>
     <string name="exact_date">Fecha exacta</string>
     <string name="day_of_week">Día de la semana</string>
     <string name="request">Petición</string>

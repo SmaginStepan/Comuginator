@@ -29,6 +29,7 @@ class ScheduleActivity : BaseActivity() {
 
     private lateinit var rvSchedule: RecyclerView
     private lateinit var adapter: ScheduleAdapter
+    private lateinit var tvCounter: android.widget.TextView
 
     private var selectedScheduleCard: AacCardDto? = null
 
@@ -81,6 +82,7 @@ class ScheduleActivity : BaseActivity() {
 
     override fun onInitialized() {
         rvSchedule = findViewById(R.id.rvSchedule)
+        tvCounter = findViewById(R.id.tvCounter)
 
         adapter = ScheduleAdapter(
             onDelete = { item ->
@@ -258,7 +260,11 @@ class ScheduleActivity : BaseActivity() {
                     )
                 }
 
-                adapter.submitItems(response.items.sortedBy { nextSortKey(it) })
+                val sorted = response.items.sortedBy { nextSortKey(it) }
+                adapter.submitItems(sorted)
+                tvCounter.text = resources.getQuantityString(
+                    R.plurals.schedule_items_count, sorted.size, sorted.size
+                )
             } catch (e: Exception) {
                 Toast.makeText(
                     this@ScheduleActivity,

@@ -173,6 +173,12 @@
     <string name="reply_from">Ответ от %1$s</string>
     <string name="reply_sent">Ответ отправлен</string>
     <string name="failed_send_reply">Не удалось отправить ответ: %1$s</string>
+    <plurals name="schedule_items_count">
+        <item quantity="one">%d элемент</item>
+        <item quantity="few">%d элемента</item>
+        <item quantity="many">%d элементов</item>
+        <item quantity="other">%d элемента</item>
+    </plurals>
     <plurals name="sets_count">
         <item quantity="one">%d набор</item>
         <item quantity="few">%d набора</item>
@@ -302,6 +308,10 @@
     <string name="multiple_replies">Несколько ответов</string>
     <string name="multiple_replies_selected_status">Выбрано %1$d из %2$d</string>
     <string name="schedule">Расписание</string>
+    <string name="breadcrumb_library">Comuginator > Библиотека</string>
+    <string name="breadcrumb_schedule">Comuginator > Расписание</string>
+    <string name="breadcrumb_child_home">Comuginator > Главный экран > %1$s</string>
+    <string name="breadcrumb_child_home_root">Comuginator > Главный экран</string>
     <string name="exact_date">Конкретная дата</string>
     <string name="day_of_week">День недели</string>
     <string name="request">Просьба</string>

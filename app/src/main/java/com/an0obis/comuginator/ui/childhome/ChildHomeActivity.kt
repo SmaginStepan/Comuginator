@@ -50,6 +50,7 @@ class ChildHomeActivity : BaseActivity() {
     private lateinit var adapter: ChildHomeAdapter
     private lateinit var tvTitle: TextView
     private lateinit var tvBreadcrumbs: TextView
+    private lateinit var tvCounter: TextView
     private lateinit var btnBack: Button
     private lateinit var btnAdd: Button
     private lateinit var btnHideInvisible: Button
@@ -119,6 +120,7 @@ class ChildHomeActivity : BaseActivity() {
         tvBreadcrumbs = findViewById(R.id.tvChildHomeBreadcrumbs)
         btnBack = findViewById(R.id.btnChildHomeBack)
         btnAdd = findViewById(R.id.btnChildHomeAdd)
+        tvCounter = findViewById(R.id.tvChildHomeCounter)
         btnHideInvisible = findViewById(R.id.btnHideInvisible)
         btnShowHidden = findViewById(R.id.btnShowHidden)
         btnPreview = findViewById(R.id.btnChildHomePreview)
@@ -178,6 +180,9 @@ class ChildHomeActivity : BaseActivity() {
                 launch {
                     viewModel.nodes.collect { nodes ->
                         adapter.submitItems(nodes)
+                        tvCounter.text = resources.getQuantityString(
+                            R.plurals.items_count, nodes.size, nodes.size
+                        )
                         updateUi()
                     }
                 }
@@ -199,8 +204,10 @@ class ChildHomeActivity : BaseActivity() {
                                 Toast.makeText(this@ChildHomeActivity, event.message, Toast.LENGTH_LONG).show()
                             is ChildHomeViewModel.Event.BlinkNode ->
                                 blinkNode(event.nodeId, event.seconds)
-                            is ChildHomeViewModel.Event.NodeVisibilityUpdated ->
+                            is ChildHomeViewModel.Event.NodeVisibilityUpdated -> {
                                 adapter.updateNodeVisibility(event.nodeId, event.isVisible)
+                                updateUi()
+                            }
                         }
                     }
                 }
@@ -220,6 +227,7 @@ class ChildHomeActivity : BaseActivity() {
             btnAdd.visibility = View.VISIBLE
             if (hasHidden) {
                 btnHideInvisible.visibility = if (hasInvisibleInList) View.VISIBLE else View.GONE
+                btnHideInvisible.isEnabled = true
                 btnShowHidden.visibility    = if (hasInvisibleInList) View.GONE   else View.VISIBLE
             } else {
                 btnShowHidden.visibility = View.GONE
@@ -241,7 +249,11 @@ class ChildHomeActivity : BaseActivity() {
 
         tvTitle.visibility = View.VISIBLE
         tvBreadcrumbs.visibility = if (previewMode) View.GONE else View.VISIBLE
-        tvBreadcrumbs.text = viewModel.path.value.joinToString(" > ") { it.title }
+        val pathSegments = viewModel.path.value.joinToString(" > ") { it.title }
+        tvBreadcrumbs.text = if (pathSegments.isNotEmpty())
+            getString(R.string.breadcrumb_child_home, pathSegments)
+        else
+            getString(R.string.breadcrumb_child_home_root)
 
         adapter.setEditorMode(effectiveEditorMode)
     }
