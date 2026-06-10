@@ -357,6 +357,7 @@
     <string name="force_show_nodes">Show nodes</string>
     <string name="force_hide_nodes">Hide nodes</string>
     <string name="time">Time</string>
+    <string name="time_with_value">Time: %1$s</string>
     <string name="weekday_mon">Mon</string>
     <string name="weekday_tue">Tue</string>
     <string name="weekday_wed">Wed</string>

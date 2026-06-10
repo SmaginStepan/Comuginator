@@ -321,6 +321,7 @@
     <string name="force_show_nodes">Показать узлы</string>
     <string name="force_hide_nodes">Скрыть узлы</string>
     <string name="time">Время</string>
+    <string name="time_with_value">Время: %1$s</string>
     <string name="weekday_mon">Пн</string>
     <string name="weekday_tue">Вт</string>
     <string name="weekday_wed">Ср</string>

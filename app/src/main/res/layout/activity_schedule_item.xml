@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingTop="16dp">
+
+    <!-- HEADER -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:paddingBottom="4dp"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/tvBreadcrumbs"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            style="@style/ComuginatorText.Small"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+        <Button
+            android:id="@+id/btnBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/ComuginatorButton.Secondary"
+            android:text="@string/back" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="@style/ComuginatorText.Title"
+        android:textSize="24sp"
+        android:paddingHorizontal="16dp"
+        android:paddingBottom="8dp" />
+
+    <!-- CONTENT -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Card preview -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingBottom="16dp">
+
+                <ImageView
+                    android:id="@+id/ivCardPreview"
+                    android:layout_width="72dp"
+                    android:layout_height="72dp"
+                    android:scaleType="centerCrop"
+                    android:contentDescription="@null" />
+
+                <TextView
+                    android:id="@+id/tvCardLabel"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="12dp"
+                    style="@style/ComuginatorText.Section"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <!-- Name override -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:hint="@string/name">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text"
+                    android:maxLines="1" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Mode selector -->
+            <RadioGroup
+                android:id="@+id/rgMode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingBottom="8dp">
+
+                <RadioButton
+                    android:id="@+id/rbExactDate"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/exact_date" />
+
+                <RadioButton
+                    android:id="@+id/rbWeekday"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/day_of_week"
+                    android:checked="true" />
+
+            </RadioGroup>
+
+            <!-- Exact date picker -->
+            <Button
+                android:id="@+id/btnPickDate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/ComuginatorButton.Secondary"
+                android:visibility="gone" />
+
+            <!-- Weekday checkboxes -->
+            <LinearLayout
+                android:id="@+id/llWeekdays"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <CheckBox android:id="@+id/cbMon" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/weekday_mon" />
+                <CheckBox android:id="@+id/cbTue" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/weekday_tue" />
+                <CheckBox android:id="@+id/cbWed" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/weekday_wed" />
+                <CheckBox android:id="@+id/cbThu" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/weekday_thu" />
+                <CheckBox android:id="@+id/cbFri" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/weekday_fri" />
+                <CheckBox android:id="@+id/cbSat" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/weekday_sat" />
+                <CheckBox android:id="@+id/cbSun" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/weekday_sun" />
+
+            </LinearLayout>
+
+            <!-- Time -->
+            <Button
+                android:id="@+id/btnPickTime"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                style="@style/ComuginatorButton.Secondary" />
+
+            <!-- Force show nodes -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:paddingBottom="4dp"
+                style="@style/ComuginatorText.Section"
+                android:text="@string/force_show_nodes" />
+
+            <LinearLayout
+                android:id="@+id/llForceShow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+            <!-- Force hide nodes -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:paddingBottom="4dp"
+                style="@style/ComuginatorText.Section"
+                android:text="@string/force_hide_nodes" />
+
+            <LinearLayout
+                android:id="@+id/llForceHide"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- FOOTER -->
+    <Button
+        android:id="@+id/btnSave"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="8dp"
+        style="@style/ComuginatorButton"
+        android:text="@string/save" />
+
+    <TextView
+        android:id="@+id/tvStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="16dp"
+        style="@style/ComuginatorText.Small"
+        android:gravity="center" />
+
+</LinearLayout>

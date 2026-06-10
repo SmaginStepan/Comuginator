@@ -317,6 +317,7 @@
     <string name="force_show_nodes">Mostrar nodos</string>
     <string name="force_hide_nodes">Ocultar nodos</string>
     <string name="time">Hora</string>
+    <string name="time_with_value">Hora: %1$s</string>
     <string name="weekday_mon">Lun</string>
     <string name="weekday_tue">Mar</string>
     <string name="weekday_wed">Mié</string>
