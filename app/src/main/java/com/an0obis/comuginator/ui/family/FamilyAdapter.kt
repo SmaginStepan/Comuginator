@@ -14,10 +14,9 @@ import coil.imageLoader
 import coil.request.ImageRequest
 import com.an0obis.comuginator.R
 import com.an0obis.comuginator.ui.base.BaseAdapter
-import java.util.Locale
-import java.text.SimpleDateFormat
+import com.an0obis.comuginator.util.TimeFormat
+import java.text.DateFormat
 import java.util.Calendar
-import java.util.TimeZone
 
 class FamilyAdapter(
     private val isParentViewer: Boolean,
@@ -145,29 +144,16 @@ class FamilyAdapter(
             }
 
             return try {
-                val parser = SimpleDateFormat(
-                    "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
-                    Locale.US
-                )
-
-                parser.timeZone = TimeZone.getTimeZone("UTC")
-
-                val date = parser.parse(iso) ?: return iso
+                val date = TimeFormat.parseUtc(iso) ?: return iso
 
                 val now = Calendar.getInstance()
                 val target = Calendar.getInstance().apply {
                     time = date
                 }
 
-                val timeFormatter = SimpleDateFormat(
-                    "HH:mm",
-                    Locale.getDefault()
-                )
-
-                val dateFormatter = SimpleDateFormat(
-                    "dd MMM HH:mm",
-                    Locale.getDefault()
-                )
+                val timeFormatter = DateFormat.getTimeInstance(DateFormat.SHORT)
+                val dateFormatter =
+                    DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)
 
                 when {
                     isSameDay(now, target) -> {

@@ -11,6 +11,7 @@ import com.an0obis.comuginator.api.JoinFamilyRequest
 import com.an0obis.comuginator.storage.FamilyEntry
 import com.an0obis.comuginator.api.FamilyMeResponse
 import com.an0obis.comuginator.api.UpdateMyAvatarRequest
+import com.an0obis.comuginator.api.UpdateFamilyRequest
 import com.an0obis.comuginator.api.UpdateNameRequest
 import com.an0obis.comuginator.api.UserDto
 import com.an0obis.comuginator.service.CommandSyncScheduler
@@ -31,6 +32,7 @@ import retrofit2.HttpException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 import kotlin.time.Duration.Companion.seconds
 
 data class InviteDisplay(
@@ -107,6 +109,7 @@ class FamilyViewModel(application: Application) : AndroidViewModel(application) 
                 }
                 store.role = response.me.role
                 syncFamilyList(response)
+                syncFamilyTimezone(response.family.id, response.me.role)
                 _uiState.update { current ->
                     val newVolumes = current.optimisticVolumes.toMutableMap()
                     response.users.flatMap { it.devices }.forEach { device ->
@@ -236,7 +239,7 @@ class FamilyViewModel(application: Application) : AndroidViewModel(application) 
                 withContext(Dispatchers.IO) {
                     ApiClient.api.updateMyFamily(
                         auth = store.authHeaderOrThrow(),
-                        body = UpdateNameRequest(name = name)
+                        body = UpdateFamilyRequest(name = name)
                     )
                 }
                 _statusText.value = str(R.string.family_name_updated)
@@ -315,6 +318,31 @@ class FamilyViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
+    /**
+     * Keep the family's timezone matching this device so the server's schedule
+     * worker fires items at the family's wall-clock time. Sent only when the
+     * device timezone differs from what this device last reported.
+     */
+    private fun syncFamilyTimezone(familyId: String, role: String) {
+        if (role != "PARENT") return
+        val deviceTz = TimeZone.getDefault().id
+        if (store.timezoneSynced(familyId) == deviceTz) return
+
+        viewModelScope.launch {
+            try {
+                withContext(Dispatchers.IO) {
+                    ApiClient.api.updateMyFamily(
+                        auth = store.authHeaderOrThrow(),
+                        body = UpdateFamilyRequest(timezone = deviceTz)
+                    )
+                }
+                store.setTimezoneSynced(familyId, deviceTz)
+            } catch (_: Exception) {
+                // retried on the next loadFamily
+            }
+        }
+    }
+
     // ── Multi-family ──────────────────────────────────────────────────────────
 
     fun getFamilies(): List<FamilyEntry> = store.getFamilies()
@@ -369,7 +397,8 @@ class FamilyViewModel(application: Application) : AndroidViewModel(application) 
                             code = code.trim().uppercase(),
                             userName = userName,
                             deviceName = deviceName,
-                            deviceId = deviceId
+                            deviceId = deviceId,
+                            timezone = TimeZone.getDefault().id
                         )
                     )
                 }

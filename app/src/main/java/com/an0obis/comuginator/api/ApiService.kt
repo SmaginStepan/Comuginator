@@ -105,7 +105,7 @@ interface ApiService {
     @PATCH("/v1/families/me")
     suspend fun updateMyFamily(
         @Header("Authorization") auth: String,
-        @Body body: UpdateNameRequest
+        @Body body: UpdateFamilyRequest
     ): UpdateFamilyResponse
 
     @PATCH("/v1/users/{userId}")

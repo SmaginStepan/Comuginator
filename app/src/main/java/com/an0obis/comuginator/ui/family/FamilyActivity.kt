@@ -37,12 +37,10 @@ import com.an0obis.comuginator.ui.childhome.ChildHomeActivity
 import com.an0obis.comuginator.ui.library.LibraryActivity
 import com.an0obis.comuginator.ui.library.LibraryItemPickerActivity
 import com.an0obis.comuginator.ui.schedule.ScheduleActivity
+import com.an0obis.comuginator.util.TimeFormat
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Locale
-import java.util.TimeZone
 class FamilyActivity : BaseActivity() {
 
     private val viewModel: FamilyViewModel by viewModels()
@@ -222,20 +220,7 @@ class FamilyActivity : BaseActivity() {
 
     // ── State binding ─────────────────────────────────────────────────────────
 
-    private fun formatDateTime(value: String): String {
-        return try {
-            val parser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US).apply {
-                timeZone = TimeZone.getTimeZone("UTC")
-            }
-
-            val formatter = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault())
-
-            val date = parser.parse(value)
-            if (date != null) formatter.format(date) else value
-        } catch (_: Exception) {
-            value
-        }
-    }
+    private fun formatDateTime(value: String): String = TimeFormat.dateTime(value)
 
     private fun bindState() {
         lifecycleScope.launch {

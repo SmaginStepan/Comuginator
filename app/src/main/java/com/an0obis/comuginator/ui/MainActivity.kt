@@ -18,6 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import java.util.TimeZone
 import java.util.UUID
 import androidx.appcompat.app.AlertDialog
 import com.google.android.material.textfield.TextInputEditText
@@ -250,7 +251,8 @@ class MainActivity : BaseActivity() {
                         userName = userName,
                         deviceName = deviceName,
                         deviceId = stableDeviceId,
-                        familyName = familyName
+                        familyName = familyName,
+                        timezone = TimeZone.getDefault().id
                     )
                 )
 
@@ -315,7 +317,8 @@ class MainActivity : BaseActivity() {
                         code = code,
                         userName = userName,
                         deviceName = deviceName,
-                        deviceId = stableDeviceId
+                        deviceId = stableDeviceId,
+                        timezone = TimeZone.getDefault().id
                     )
                 )
 

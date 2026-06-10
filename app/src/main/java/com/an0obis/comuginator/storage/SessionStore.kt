@@ -98,6 +98,14 @@ class SessionStore(context: Context) {
         saveFamilies(entries)
     }
 
+    /** The timezone this device last reported to the server for the family. */
+    fun timezoneSynced(familyId: String): String? =
+        prefs.getString("tz_synced_$familyId", null)
+
+    fun setTimezoneSynced(familyId: String, timezone: String) {
+        prefs.edit { putString("tz_synced_$familyId", timezone) }
+    }
+
     fun removeFamily(familyId: String) {
         val list = getFamilies().toMutableList()
         list.removeAll { it.familyId == familyId }

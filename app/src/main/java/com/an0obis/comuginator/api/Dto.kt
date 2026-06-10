@@ -4,7 +4,8 @@ data class CreateFamilyRequest(
     val userName: String,
     val deviceName: String,
     val deviceId: String,
-    val familyName: String? = null
+    val familyName: String? = null,
+    val timezone: String? = null
 )
 
 data class CreateFamilyResponse(
@@ -19,7 +20,8 @@ data class JoinFamilyRequest(
     val code: String,
     val userName: String,
     val deviceName: String,
-    val deviceId: String
+    val deviceId: String,
+    val timezone: String? = null
 )
 
 data class JoinFamilyResponse(
@@ -288,6 +290,11 @@ data class FamilyPhotoListResponse(
 
 data class UpdateNameRequest(
     val name: String
+)
+
+data class UpdateFamilyRequest(
+    val name: String? = null,
+    val timezone: String? = null
 )
 
 data class UpdateFamilyResponse(

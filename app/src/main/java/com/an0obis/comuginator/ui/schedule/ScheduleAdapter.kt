@@ -12,6 +12,7 @@ import coil.request.ImageRequest
 import com.an0obis.comuginator.R
 import com.an0obis.comuginator.api.ScheduleItemDto
 import com.an0obis.comuginator.ui.base.BaseAdapter
+import com.an0obis.comuginator.util.TimeFormat
 
 class ScheduleAdapter(
     private val authToken: String,
@@ -82,7 +83,7 @@ class ScheduleAdapter(
     private fun formatSchedule(context: android.content.Context, item: ScheduleItemDto): String {
         return when (item.mode) {
             "WEEKDAY" -> "${item.weekdays.joinToString(", ") { weekdayName(context, it) }} ${item.time}"
-            "DATE" -> "${item.date ?: "-"} ${item.time}"
+            "DATE" -> "${TimeFormat.date(item.date).ifEmpty { "-" }} ${item.time}"
             else -> item.time
         }
     }

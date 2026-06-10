@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.an0obis.comuginator.R
 import com.an0obis.comuginator.api.AacMessageListItemDto
 import com.an0obis.comuginator.ui.CardAdapter
+import com.an0obis.comuginator.util.TimeFormat
 
 class MessageHistoryAdapter(
     private val onRepeatClick: (AacMessageListItemDto) -> Unit
@@ -91,7 +92,7 @@ class MessageHistoryAdapter(
             val hasSuggestedReplies = item.suggestedReplies.isNotEmpty()
             val isRequestOnly = !hasSuggestedReplies
 
-            tvCreatedAt.text = item.createdAt
+            tvCreatedAt.text = TimeFormat.dateTime(item.createdAt)
 
             if (isRequestOnly) {
                 tvMode.visibility = View.GONE

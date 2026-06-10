@@ -24,6 +24,7 @@ import kotlinx.coroutines.withContext
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.core.app.NotificationManagerCompat
 import com.an0obis.comuginator.service.NotificationHelper
+import com.an0obis.comuginator.util.TimeFormat
 import com.an0obis.comuginator.widget.ComuginatorWidgetProvider
 import com.an0obis.comuginator.ui.CardAdapter
 import kotlinx.coroutines.delay
@@ -537,7 +538,7 @@ class IncomingMessageActivity : BaseActivity() {
     }
 
     private fun renderMessage(message: AacMessageDetailsDto) {
-        tvCreatedAt.text = getString(R.string.created_at, message.createdAt)
+        tvCreatedAt.text = getString(R.string.created_at, TimeFormat.dateTime(message.createdAt))
 
         messageAdapter.submitItems(message.message)
         repliesAdapter.submitItems(currentSuggestedCards(message))
