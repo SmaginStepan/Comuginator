@@ -42,6 +42,19 @@ data class CreateInviteResponse(
     val expiresAt: String
 )
 
+data class MyFamiliesResponse(
+    val ok: Boolean,
+    val families: List<MyFamilyDto>
+)
+
+data class MyFamilyDto(
+    val familyId: String,
+    val familyName: String?,
+    val userId: String,
+    val userName: String?,
+    val role: String
+)
+
 data class FamilyMeResponse(
     val family: FamilyDto,
     val me: MeDto,

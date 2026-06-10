@@ -93,6 +93,11 @@ class SessionStore(context: Context) {
         prefs.edit { putString("families_v2", Gson().toJson(list)) }
     }
 
+    /** Replace the local family list with the server's truth (GET /v1/me/families). */
+    fun syncFamilies(entries: List<FamilyEntry>) {
+        saveFamilies(entries)
+    }
+
     fun removeFamily(familyId: String) {
         val list = getFamilies().toMutableList()
         list.removeAll { it.familyId == familyId }

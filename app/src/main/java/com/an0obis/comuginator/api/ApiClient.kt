@@ -25,13 +25,18 @@ object ApiClient {
     var familyIdProvider: (() -> String?)? = null
 
     private val familyHeaderInterceptor = Interceptor { chain ->
-        val familyId = familyIdProvider?.invoke()
-        val request = if (!familyId.isNullOrBlank()) {
-            chain.request().newBuilder()
-                .header("X-Family-Id", familyId)
-                .build()
+        val original = chain.request()
+        // An explicitly set X-Family-Id (e.g. cross-family probing) wins over
+        // the active-family default.
+        val request = if (original.header("X-Family-Id") == null) {
+            val familyId = familyIdProvider?.invoke()
+            if (!familyId.isNullOrBlank()) {
+                original.newBuilder().header("X-Family-Id", familyId).build()
+            } else {
+                original
+            }
         } else {
-            chain.request()
+            original
         }
         chain.proceed(request)
     }
@@ -71,10 +76,15 @@ object ApiClient {
         }
     }
 
-    fun getAacMessageWithAuthHeader(authHeader: String, messageId: String): AacMessageDetailsDto {
+    fun getAacMessageWithAuthHeader(
+        authHeader: String,
+        messageId: String,
+        familyId: String? = null
+    ): AacMessageDetailsDto {
         val request = Request.Builder()
             .url("${BASE_URL}v1/messages/aac/$messageId")
             .header("Authorization", authHeader)
+            .apply { if (!familyId.isNullOrBlank()) header("X-Family-Id", familyId) }
             .get()
             .build()
 

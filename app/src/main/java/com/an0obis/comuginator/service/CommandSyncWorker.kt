@@ -102,12 +102,31 @@ class CommandSyncWorker(
 
         try {
             if (messageId != null) {
-                val authHeader = SessionStore(applicationContext).authHeader() ?: return
+                val sessionStore = SessionStore(applicationContext)
+                val authHeader = sessionStore.authHeader() ?: return
 
-                val message = ApiClient.getAacMessageWithAuthHeader(
-                    authHeader = authHeader,
-                    messageId = messageId
-                )
+                val message = try {
+                    ApiClient.getAacMessageWithAuthHeader(
+                        authHeader = authHeader,
+                        messageId = messageId
+                    )
+                } catch (e: Exception) {
+                    // The message may belong to another family this device is in —
+                    // probe them for the notification details (no context switch).
+                    sessionStore.getFamilies()
+                        .filter { it.familyId != sessionStore.familyId }
+                        .firstNotNullOfOrNull { family ->
+                            try {
+                                ApiClient.getAacMessageWithAuthHeader(
+                                    authHeader = authHeader,
+                                    messageId = messageId,
+                                    familyId = family.familyId
+                                )
+                            } catch (_: Exception) {
+                                null
+                            }
+                        } ?: throw e
+                }
 
                 senderName = message.fromUser.name
                 senderAvatar = ApiClient.loadBitmap(message.fromUser.avatarImageUrl)

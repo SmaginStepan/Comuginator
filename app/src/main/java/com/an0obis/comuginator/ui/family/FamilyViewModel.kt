@@ -106,12 +106,7 @@ class FamilyViewModel(application: Application) : AndroidViewModel(application) 
                     ApiClient.api.getMyFamily(store.authHeaderOrThrow())
                 }
                 store.role = response.me.role
-                store.addOrUpdateFamily(
-                    familyId = response.family.id,
-                    userId = response.me.userId,
-                    role = response.me.role,
-                    name = response.family.name
-                )
+                syncFamilyList(response)
                 _uiState.update { current ->
                     val newVolumes = current.optimisticVolumes.toMutableMap()
                     response.users.flatMap { it.devices }.forEach { device ->
@@ -324,6 +319,34 @@ class FamilyViewModel(application: Application) : AndroidViewModel(application) 
 
     fun getFamilies(): List<FamilyEntry> = store.getFamilies()
 
+    /**
+     * Refresh the local family list from the server so the switch dialog never
+     * shows memberships the user has lost. Best-effort: falls back to updating
+     * just the active family if the endpoint fails.
+     */
+    private suspend fun syncFamilyList(response: FamilyMeResponse) {
+        try {
+            val families = withContext(Dispatchers.IO) {
+                ApiClient.api.getMyFamilies(store.authHeaderOrThrow())
+            }
+            store.syncFamilies(families.families.map {
+                FamilyEntry(
+                    familyId = it.familyId,
+                    userId = it.userId,
+                    role = it.role,
+                    name = it.familyName
+                )
+            })
+        } catch (_: Exception) {
+            store.addOrUpdateFamily(
+                familyId = response.family.id,
+                userId = response.me.userId,
+                role = response.me.role,
+                name = response.family.name
+            )
+        }
+    }
+
     fun setActiveFamily(familyId: String) {
         store.setActiveFamily(familyId)
         _uiState.value = FamilyUiState()
@@ -352,14 +375,22 @@ class FamilyViewModel(application: Application) : AndroidViewModel(application) 
                 }
                 store.token = response.token
                 store.addOrUpdateFamily(response.familyId, response.userId, response.role)
-                store.setActiveFamily(response.familyId)
-                _uiState.value = FamilyUiState()
-                _inviteDisplay.value = null
-                val successMsg = str(R.string.switch_family_success)
-                _statusText.value = successMsg
-                _events.emit(FamilyEvent.ShowToast(successMsg))
-                _events.emit(FamilyEvent.FamilySwitched)
-                loadFamily()
+                if (response.role == "CHILD") {
+                    // Don't auto-activate a CHILD membership: switching would lock
+                    // this device into child mode without warning.
+                    val msg = str(R.string.family_joined_not_switched)
+                    _statusText.value = msg
+                    _events.emit(FamilyEvent.ShowToast(msg))
+                } else {
+                    store.setActiveFamily(response.familyId)
+                    _uiState.value = FamilyUiState()
+                    _inviteDisplay.value = null
+                    val successMsg = str(R.string.switch_family_success)
+                    _statusText.value = successMsg
+                    _events.emit(FamilyEvent.ShowToast(successMsg))
+                    _events.emit(FamilyEvent.FamilySwitched)
+                    loadFamily()
+                }
             } catch (e: Exception) {
                 if (handleUnauthorized(e)) return@launch
                 val errorMsg = str(R.string.join_family_failed, e.message)

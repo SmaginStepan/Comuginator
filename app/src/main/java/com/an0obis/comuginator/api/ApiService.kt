@@ -36,6 +36,11 @@ interface ApiService {
         @Header("Authorization") auth: String
     ): FamilyMeResponse
 
+    @GET("/v1/me/families")
+    suspend fun getMyFamilies(
+        @Header("Authorization") auth: String
+    ): MyFamiliesResponse
+
     @POST("/v1/devices/heartbeat")
     suspend fun heartbeat(
         @Header("Authorization") auth: String,
@@ -78,7 +83,8 @@ interface ApiService {
         @Header("Authorization") auth: String,
         @Query("scope") scope: String = "all",
         @Query("fromUserId") fromUserId: String? = null,
-        @Query("toUserId") toUserId: String? = null
+        @Query("toUserId") toUserId: String? = null,
+        @Header("X-Family-Id") familyId: String? = null
     ): AacMessagesResponse
 
     @Multipart

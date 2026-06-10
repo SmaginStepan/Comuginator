@@ -509,11 +509,26 @@ class FamilyActivity : BaseActivity() {
             .setSingleChoiceItems(labels, currentIndex) { dialog, which ->
                 val selected = families[which]
                 if (selected.familyId != activeFamilyId) {
-                    viewModel.setActiveFamily(selected.familyId)
+                    if (selected.role == "CHILD") {
+                        confirmSwitchToChildFamily(selected.familyId)
+                    } else {
+                        viewModel.setActiveFamily(selected.familyId)
+                    }
                 }
                 dialog.dismiss()
             }
             .setNegativeButton(getString(R.string.cancel), null)
+            .show()
+    }
+
+    private fun confirmSwitchToChildFamily(familyId: String) {
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.switch_family))
+            .setMessage(getString(R.string.switch_to_child_family_warning))
+            .setNegativeButton(getString(R.string.cancel), null)
+            .setPositiveButton(getString(R.string.apply)) { _, _ ->
+                viewModel.setActiveFamily(familyId)
+            }
             .show()
     }
 

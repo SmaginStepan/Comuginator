@@ -331,7 +331,9 @@
     <string name="removed_from_family">You were removed from this family. Switching to another.</string>
     <string name="join_another_family">Join another family</string>
     <string name="switch_family">Switch family</string>
+    <string name="switch_to_child_family_warning">In this family your role is Child. After switching, this device will work in child mode and you will not be able to switch back from this screen. Continue?</string>
     <string name="switch_family_success">Switched to new family</string>
+    <string name="family_joined_not_switched">Joined as Child. Use Switch family to activate it.</string>
     <string name="switching_family">Switching family&#8230;</string>
     <string name="delete_family">Delete family</string>
     <string name="delete_family_confirm">Delete this family and all its data? This action cannot be undone.</string>

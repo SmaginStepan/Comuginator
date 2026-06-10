@@ -9,11 +9,13 @@ import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
 import androidx.core.os.LocaleListCompat
+import com.an0obis.comuginator.R
 import com.an0obis.comuginator.service.CommandSyncScheduler
 import com.an0obis.comuginator.service.FcmTokenSyncScheduler
 import com.an0obis.comuginator.service.PowerConnectionReceiver
@@ -27,7 +29,7 @@ import com.google.firebase.messaging.FirebaseMessaging
 import retrofit2.HttpException
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
-import coil.ImageLoader
+import coil.Coil
 import coil.request.ImageRequest
 import com.an0obis.comuginator.api.AacMessageListItemDto
 import com.an0obis.comuginator.api.ApiClient
@@ -47,7 +49,6 @@ open class BaseActivity: AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         store = SessionStore(this)
-        ApiClient.familyIdProvider = { store.familyId }
 
         if (store.role == "CHILD" && shouldForceChildHome()) {
             redirectedByRoleGuard = true
@@ -206,8 +207,8 @@ open class BaseActivity: AppCompatActivity() {
         return true
     }
 
-    private fun shouldOpenIncoming(msg: AacMessageListItemDto): Boolean {
-        if (msg.toUserId != store.userId) return false
+    private fun shouldOpenIncoming(msg: AacMessageListItemDto, userId: String? = store.userId): Boolean {
+        if (msg.toUserId != userId) return false
         if (msg.suggestedReplies.isEmpty()) return false
 
         if (msg.mode != "SEQUENCE") {
@@ -274,34 +275,104 @@ open class BaseActivity: AppCompatActivity() {
                         .maxByOrNull { it.createdAt }
 
                     when {
-                        incomingToAnswer != null -> Triple(
+                        incomingToAnswer != null -> PendingIncomingTarget(
                             incomingToAnswer.id,
                             pendingMessageMap[incomingToAnswer.id].orEmpty(),
                             IncomingMessageActivity.MODE_MESSAGE
                         )
 
-                        repliedToMyMessage != null -> Triple(
+                        repliedToMyMessage != null -> PendingIncomingTarget(
                             repliedToMyMessage.id,
                             pendingReplyMap[repliedToMyMessage.id].orEmpty(),
                             IncomingMessageActivity.MODE_REPLY
                         )
 
-                        else -> null
+                        else -> findTargetInOtherFamilies(auth, pendingMessageMap, pendingReplyMap)
                     }
                 }
 
                 val target = result ?: return@launch
-                val messageId = target.first
-                val commandId = target.second
-                val mode = target.third
 
-                openIncomingMessage(messageId, commandId, mode)
+                if (target.switchToFamilyId != null) {
+                    store.setActiveFamily(target.switchToFamilyId)
+                    Toast.makeText(
+                        this@BaseActivity,
+                        getString(R.string.switch_family_success),
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+
+                openIncomingMessage(target.messageId, target.commandId, target.mode)
             } catch (e: Exception) {
                 handleUnauthorized(e)
             } finally {
                 pendingIncomingCheckRunning = false
             }
         }
+    }
+
+    private data class PendingIncomingTarget(
+        val messageId: String,
+        val commandId: String,
+        val mode: String,
+        val switchToFamilyId: String? = null
+    )
+
+    /**
+     * A queued message command may belong to a family other than the active one
+     * (commands are device-scoped, messages are family-scoped). Probe the other
+     * known PARENT memberships and return a target that also switches family.
+     * CHILD memberships are skipped so a parent device is never silently locked
+     * into child mode.
+     */
+    private suspend fun findTargetInOtherFamilies(
+        auth: String,
+        pendingMessageMap: Map<String, String>,
+        pendingReplyMap: Map<String, String>
+    ): PendingIncomingTarget? {
+        if (pendingMessageMap.isEmpty() && pendingReplyMap.isEmpty()) return null
+
+        val otherFamilies = store.getFamilies()
+            .filter { it.familyId != store.familyId && it.role == "PARENT" }
+
+        for (family in otherFamilies) {
+            val messages = try {
+                ApiClient.api.getAacMessages(
+                    auth = auth, scope = "all", familyId = family.familyId
+                ).items
+            } catch (_: Exception) {
+                continue
+            }
+
+            val incoming = messages
+                .filter { pendingMessageMap.containsKey(it.id) && shouldOpenIncoming(it, family.userId) }
+                .maxByOrNull { it.createdAt }
+            if (incoming != null) {
+                return PendingIncomingTarget(
+                    messageId = incoming.id,
+                    commandId = pendingMessageMap[incoming.id].orEmpty(),
+                    mode = IncomingMessageActivity.MODE_MESSAGE,
+                    switchToFamilyId = family.familyId
+                )
+            }
+
+            val replied = messages
+                .filter {
+                    it.fromUserId == family.userId &&
+                            it.reply != null &&
+                            pendingReplyMap.containsKey(it.id)
+                }
+                .maxByOrNull { it.createdAt }
+            if (replied != null) {
+                return PendingIncomingTarget(
+                    messageId = replied.id,
+                    commandId = pendingReplyMap[replied.id].orEmpty(),
+                    mode = IncomingMessageActivity.MODE_REPLY,
+                    switchToFamilyId = family.familyId
+                )
+            }
+        }
+        return null
     }
 
     private fun openIncomingMessage(messageId: String, commandId: String, mode: String) {
@@ -323,7 +394,7 @@ open class BaseActivity: AppCompatActivity() {
             .target(imageView)
             .build()
 
-        ImageLoader(this).enqueue(request)
+        Coil.imageLoader(this).enqueue(request)
     }
 
     override fun onResume() {

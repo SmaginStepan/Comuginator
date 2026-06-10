@@ -291,7 +291,9 @@
     <string name="removed_from_family">Fuiste eliminado de esta familia. Cambiando a otra.</string>
     <string name="join_another_family">Unirse a otra familia</string>
     <string name="switch_family">Cambiar familia</string>
+    <string name="switch_to_child_family_warning">En esta familia tu rol es Niño. Después de cambiar, este dispositivo funcionará en modo infantil y no podrás volver desde esta pantalla. ¿Continuar?</string>
     <string name="switch_family_success">Cambiado a nueva familia</string>
+    <string name="family_joined_not_switched">Te uniste como Niño. Usa Cambiar familia para activarla.</string>
     <string name="switching_family">Cambiando familia&#8230;</string>
     <string name="delete_family">Eliminar familia</string>
     <string name="delete_family_confirm">¿Eliminar esta familia y todos sus datos? Esta acción no se puede deshacer.</string>

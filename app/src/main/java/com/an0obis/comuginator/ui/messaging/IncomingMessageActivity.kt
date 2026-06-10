@@ -102,6 +102,32 @@ class IncomingMessageActivity : BaseActivity() {
         ensureInitialized()
     }
 
+    /**
+     * Try to fetch the message from the device's other PARENT families. On the
+     * first hit, the active family is switched so the rest of the screen
+     * (images, reply, role) works in the right context. Returns null if the
+     * message isn't found in any of them.
+     */
+    private fun fetchFromOtherFamily(authHeader: String): AacMessageDetailsDto? {
+        val otherFamilies = store.getFamilies()
+            .filter { it.familyId != store.familyId && it.role == "PARENT" }
+
+        for (family in otherFamilies) {
+            try {
+                val message = ApiClient.getAacMessageWithAuthHeader(
+                    authHeader = authHeader,
+                    messageId = messageId,
+                    familyId = family.familyId
+                )
+                store.setActiveFamily(family.familyId)
+                return message
+            } catch (_: Exception) {
+                // not in this family, keep probing
+            }
+        }
+        return null
+    }
+
     private fun cancelCurrentNotification() {
         if (messageId.isBlank()) return
 
@@ -459,8 +485,24 @@ class IncomingMessageActivity : BaseActivity() {
         lifecycleScope.launch {
             try {
                 val authHeader = store.authHeader() ?: return@launch
+                var switchedFamily = false
                 val message = withContext(Dispatchers.IO) {
-                    ApiClient.getAacMessageWithAuthHeader(authHeader, messageId)
+                    try {
+                        ApiClient.getAacMessageWithAuthHeader(authHeader, messageId)
+                    } catch (e: Exception) {
+                        // The message may belong to another family this device is in
+                        // (commands are device-scoped, messages are family-scoped).
+                        // Probe the other PARENT memberships and switch on match.
+                        fetchFromOtherFamily(authHeader)?.also { switchedFamily = true } ?: throw e
+                    }
+                }
+
+                if (switchedFamily) {
+                    Toast.makeText(
+                        this@IncomingMessageActivity,
+                        getString(R.string.switch_family_success),
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
 
                 currentMessage = message

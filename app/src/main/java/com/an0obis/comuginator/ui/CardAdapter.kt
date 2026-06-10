@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import coil.ImageLoader
+import coil.imageLoader
 import coil.request.ImageRequest
 import com.an0obis.comuginator.R
 import com.an0obis.comuginator.api.AacCardDto
@@ -61,7 +61,7 @@ class CardAdapter(
                 requestBuilder.addHeader("Authorization", sessionStore.authHeaderOrThrow())
             }
 
-            ImageLoader(itemView.context).enqueue(requestBuilder.build())
+            itemView.context.imageLoader.enqueue(requestBuilder.build())
         }
     }
 }
