@@ -261,6 +261,7 @@ class MainActivity : BaseActivity() {
                 store.userName = userName
                 store.deviceName = deviceName
                 store.role = response.role
+                store.addOrUpdateFamily(response.familyId, response.userId, response.role)
 
                 runOnUiThread {
                     tvStatus.text = getString(
@@ -325,6 +326,7 @@ class MainActivity : BaseActivity() {
                 store.userName = userName
                 store.deviceName = deviceName
                 store.role = response.role
+                store.addOrUpdateFamily(response.familyId, response.userId, response.role)
 
                 runOnUiThread {
                     tvStatus.text = getString(

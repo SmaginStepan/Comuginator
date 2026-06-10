@@ -47,6 +47,7 @@ open class BaseActivity: AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         store = SessionStore(this)
+        ApiClient.familyIdProvider = { store.familyId }
 
         if (store.role == "CHILD" && shouldForceChildHome()) {
             redirectedByRoleGuard = true
@@ -164,12 +165,19 @@ open class BaseActivity: AppCompatActivity() {
 
     protected fun handleUnauthorized(e: Exception): Boolean {
         if (e is HttpException && e.code() == 401) {
-            val store = SessionStore(this)
+            val currentFamilyId = store.familyId
+            if (currentFamilyId != null) {
+                store.removeFamily(currentFamilyId)
+                val remaining = store.getFamilies()
+                if (remaining.isNotEmpty()) {
+                    store.setActiveFamily(remaining.first().familyId)
+                    recreate()
+                    return true
+                }
+            }
             store.clear()
-
             startActivity(Intent(this, MainActivity::class.java))
             finish()
-
             return true
         }
         return false

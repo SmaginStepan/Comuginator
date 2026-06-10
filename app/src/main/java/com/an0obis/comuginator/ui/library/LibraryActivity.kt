@@ -34,6 +34,7 @@ class LibraryActivity : AppCompatActivity() {
         tvStatus = findViewById(R.id.tvStatus)
         rvSets = findViewById(R.id.rvSets)
         val btnCreate = findViewById<Button>(R.id.btnCreateSet)
+        findViewById<Button>(R.id.btnBack).setOnClickListener { finish() }
 
 
         adapter = LibrarySetsAdapter(sessionStore.authHeaderOrThrow()) { set ->

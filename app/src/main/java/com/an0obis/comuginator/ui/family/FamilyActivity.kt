@@ -13,6 +13,7 @@ import android.widget.LinearLayout
 import android.widget.PopupMenu
 import android.widget.SeekBar
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
@@ -36,6 +37,8 @@ import com.an0obis.comuginator.ui.childhome.ChildHomeActivity
 import com.an0obis.comuginator.ui.library.LibraryActivity
 import com.an0obis.comuginator.ui.library.LibraryItemPickerActivity
 import com.an0obis.comuginator.ui.schedule.ScheduleActivity
+import com.journeyapps.barcodescanner.ScanContract
+import com.journeyapps.barcodescanner.ScanOptions
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -58,6 +61,17 @@ class FamilyActivity : BaseActivity() {
     private var adapterMeRole: String = ""
     private var adapterMyDeviceId: String = ""
     private var pendingAvatarUserId: String? = null
+
+    private val joinFamilyQrLauncher =
+        registerForActivityResult(ScanContract()) { result ->
+            val content = result.contents ?: return@registerForActivityResult
+            val code = parseInviteCode(content)
+            if (code != null) {
+                viewModel.joinAnotherFamily(code)
+            } else {
+                viewModel.setStatus(getString(R.string.invalid_qr_code))
+            }
+        }
 
     private val avatarPickerLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -128,12 +142,17 @@ class FamilyActivity : BaseActivity() {
         btnFamilyMore.setOnClickListener { view ->
             val renameId = 1; val refreshId = 2; val heartBeatId = 3
             val settingsId = 4; val deleteFamilyId = 5
+            val joinAnotherId = 6; val switchFamilyId = 7
             PopupMenu(view.context, view).apply {
                 menu.add(0, renameId,       0, getString(R.string.rename))
                 menu.add(0, refreshId,      1, getString(R.string.refresh))
                 menu.add(0, heartBeatId,    2, getString(R.string.send_heartbeat))
                 menu.add(0, settingsId,     3, getString(R.string.settings))
-                menu.add(0, deleteFamilyId, 4, getString(R.string.delete_family))
+                menu.add(0, joinAnotherId,  4, getString(R.string.join_another_family))
+                if (viewModel.getFamilies().size > 1) {
+                    menu.add(0, switchFamilyId, 5, getString(R.string.switch_family))
+                }
+                menu.add(0, deleteFamilyId, 6, getString(R.string.delete_family))
                 setOnMenuItemClickListener { btn ->
                     when (btn.itemId) {
                         renameId -> {
@@ -145,13 +164,15 @@ class FamilyActivity : BaseActivity() {
                             )
                             true
                         }
-                        refreshId      -> { viewModel.loadFamily();     true }
-                        heartBeatId    -> { viewModel.sendHeartbeat();  true }
+                        refreshId      -> { viewModel.loadFamily();          true }
+                        heartBeatId    -> { viewModel.sendHeartbeat();       true }
                         settingsId     -> {
                             startActivity(Intent(this@FamilyActivity, SettingsActivity::class.java))
                             true
                         }
-                        deleteFamilyId -> { confirmDeleteFamily();       true }
+                        joinAnotherId  -> { showJoinAnotherFamilyDialog();   true }
+                        switchFamilyId -> { showSwitchFamilyDialog();        true }
+                        deleteFamilyId -> { confirmDeleteFamily();            true }
                         else           -> false
                     }
                 }
@@ -271,6 +292,12 @@ class FamilyActivity : BaseActivity() {
                             FamilyEvent.NavigateToMain -> {
                                 startActivity(Intent(this@FamilyActivity, MainActivity::class.java))
                                 finish()
+                            }
+                            FamilyEvent.FamilySwitched -> {
+                                familyAdapter = null // force adapter rebuild for new role
+                            }
+                            is FamilyEvent.ShowToast -> {
+                                Toast.makeText(this@FamilyActivity, event.message, Toast.LENGTH_LONG).show()
                             }
                         }
                     }
@@ -417,6 +444,76 @@ class FamilyActivity : BaseActivity() {
             .setMessage(R.string.delete_family_confirm)
             .setNegativeButton(R.string.cancel, null)
             .setPositiveButton(R.string.delete) { _, _ -> viewModel.deleteFamily() }
+            .show()
+    }
+
+    // ── Multi-family dialogs ──────────────────────────────────────────────────
+
+    private fun parseInviteCode(content: String): String? {
+        val raw = content.trim()
+        if (raw.startsWith("comuginator://join?code=")) {
+            return raw.substringAfter("code=").substringBefore("&").trim().uppercase()
+                .takeIf { it.isNotBlank() }
+        }
+        return raw.uppercase().takeIf { it.matches(Regex("[A-Z0-9]{4,20}")) }
+    }
+
+    private fun showJoinAnotherFamilyDialog() {
+        val container = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(48, 24, 48, 0)
+        }
+        val etCode = EditText(this).apply {
+            hint = getString(R.string.invite_code_required).removeSuffix(" is required")
+                .ifBlank { "Invite code" }
+            inputType = android.text.InputType.TYPE_CLASS_TEXT or
+                    android.text.InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS
+        }
+        val btnScan = Button(this).apply {
+            text = getString(R.string.scan_qr_code)
+            setOnClickListener {
+                joinFamilyQrLauncher.launch(
+                    ScanOptions()
+                        .setDesiredBarcodeFormats(ScanOptions.QR_CODE)
+                        .setPrompt(getString(R.string.scan_qr_code))
+                        .setBeepEnabled(false)
+                        .setOrientationLocked(false)
+                )
+            }
+        }
+        container.addView(etCode)
+        container.addView(btnScan)
+
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.join_another_family))
+            .setView(container)
+            .setNegativeButton(getString(R.string.cancel), null)
+            .setPositiveButton(getString(R.string.join)) { _, _ ->
+                val code = etCode.text?.toString()?.trim().orEmpty()
+                if (code.isNotEmpty()) viewModel.joinAnotherFamily(code)
+            }
+            .show()
+    }
+
+    private fun showSwitchFamilyDialog() {
+        val families = viewModel.getFamilies()
+        val activeFamilyId = store.familyId
+        val labels = families.map { entry ->
+            val display = entry.name?.takeIf { it.isNotEmpty() } ?: entry.familyId
+            if (entry.familyId == activeFamilyId) "▶ $display" else display
+        }.toTypedArray()
+        val currentIndex = families.indexOfFirst { it.familyId == activeFamilyId }.coerceAtLeast(0)
+
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.switch_family))
+            .setSingleChoiceItems(labels, currentIndex) { dialog, which ->
+                val selected = families[which]
+                if (selected.familyId != activeFamilyId) {
+                    viewModel.setActiveFamily(selected.familyId)
+                }
+                dialog.dismiss()
+            }
+            .setNegativeButton(getString(R.string.cancel), null)
             .show()
     }
 

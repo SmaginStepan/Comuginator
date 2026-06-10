@@ -59,6 +59,7 @@ class ScheduleActivity : BaseActivity() {
     override fun onInitialized() {
         rvSchedule = findViewById(R.id.rvSchedule)
         tvCounter = findViewById(R.id.tvCounter)
+        findViewById<View>(R.id.btnBack).setOnClickListener { finish() }
 
         adapter = ScheduleAdapter(
             authToken = store.authHeaderOrThrow().removePrefix("Bearer "),

@@ -7,6 +7,8 @@ import com.an0obis.comuginator.R
 import com.an0obis.comuginator.api.ApiClient
 import com.an0obis.comuginator.api.CreateCommandRequest
 import com.an0obis.comuginator.api.CreateInviteRequest
+import com.an0obis.comuginator.api.JoinFamilyRequest
+import com.an0obis.comuginator.storage.FamilyEntry
 import com.an0obis.comuginator.api.FamilyMeResponse
 import com.an0obis.comuginator.api.UpdateMyAvatarRequest
 import com.an0obis.comuginator.api.UpdateNameRequest
@@ -29,6 +31,7 @@ import retrofit2.HttpException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.time.Duration.Companion.seconds
 
 data class InviteDisplay(
     val code: String,
@@ -44,6 +47,8 @@ data class FamilyUiState(
 
 sealed class FamilyEvent {
     object NavigateToMain : FamilyEvent()
+    object FamilySwitched : FamilyEvent()
+    data class ShowToast(val message: String) : FamilyEvent()
 }
 
 class FamilyViewModel(application: Application) : AndroidViewModel(application) {
@@ -81,7 +86,7 @@ class FamilyViewModel(application: Application) : AndroidViewModel(application) 
         refreshJob = viewModelScope.launch {
             while (true) {
                 loadFamily()
-                delay(30_000)
+                delay(30.seconds)
             }
         }
     }
@@ -101,6 +106,12 @@ class FamilyViewModel(application: Application) : AndroidViewModel(application) 
                     ApiClient.api.getMyFamily(store.authHeaderOrThrow())
                 }
                 store.role = response.me.role
+                store.addOrUpdateFamily(
+                    familyId = response.family.id,
+                    userId = response.me.userId,
+                    role = response.me.role,
+                    name = response.family.name
+                )
                 _uiState.update { current ->
                     val newVolumes = current.optimisticVolumes.toMutableMap()
                     response.users.flatMap { it.devices }.forEach { device ->
@@ -309,6 +320,57 @@ class FamilyViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
+    // ── Multi-family ──────────────────────────────────────────────────────────
+
+    fun getFamilies(): List<FamilyEntry> = store.getFamilies()
+
+    fun setActiveFamily(familyId: String) {
+        store.setActiveFamily(familyId)
+        _uiState.value = FamilyUiState()
+        _inviteDisplay.value = null
+        viewModelScope.launch { _events.emit(FamilyEvent.FamilySwitched) }
+        loadFamily()
+    }
+
+    fun joinAnotherFamily(code: String) {
+        val userName = store.userName ?: return
+        val deviceName = store.deviceName ?: return
+        val deviceId = store.deviceId ?: return
+        viewModelScope.launch {
+            _isLoading.value = true
+            _statusText.value = str(R.string.joining_family)
+            try {
+                val response = withContext(Dispatchers.IO) {
+                    ApiClient.api.joinFamily(
+                        JoinFamilyRequest(
+                            code = code.trim().uppercase(),
+                            userName = userName,
+                            deviceName = deviceName,
+                            deviceId = deviceId
+                        )
+                    )
+                }
+                store.token = response.token
+                store.addOrUpdateFamily(response.familyId, response.userId, response.role)
+                store.setActiveFamily(response.familyId)
+                _uiState.value = FamilyUiState()
+                _inviteDisplay.value = null
+                val successMsg = str(R.string.switch_family_success)
+                _statusText.value = successMsg
+                _events.emit(FamilyEvent.ShowToast(successMsg))
+                _events.emit(FamilyEvent.FamilySwitched)
+                loadFamily()
+            } catch (e: Exception) {
+                if (handleUnauthorized(e)) return@launch
+                val errorMsg = str(R.string.join_family_failed, e.message)
+                _statusText.value = errorMsg
+                _events.emit(FamilyEvent.ShowToast(errorMsg))
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
     // ── Delete ────────────────────────────────────────────────────────────────
 
     fun deleteUser(userId: String) {
@@ -367,6 +429,10 @@ class FamilyViewModel(application: Application) : AndroidViewModel(application) 
 
     // ── Misc ──────────────────────────────────────────────────────────────────
 
+    fun setStatus(text: String) {
+        _statusText.value = text
+    }
+
     fun sendHeartbeat() {
         CommandSyncScheduler.enqueueImmediate(getApplication(), "manual_test")
     }
@@ -375,6 +441,20 @@ class FamilyViewModel(application: Application) : AndroidViewModel(application) 
 
     private suspend fun handleUnauthorized(e: Exception): Boolean {
         if (e is HttpException && e.code() == 401) {
+            val currentFamilyId = store.familyId
+            if (currentFamilyId != null) {
+                store.removeFamily(currentFamilyId)
+                val remaining = store.getFamilies()
+                if (remaining.isNotEmpty()) {
+                    store.setActiveFamily(remaining.first().familyId)
+                    _uiState.value = FamilyUiState()
+                    _inviteDisplay.value = null
+                    _events.emit(FamilyEvent.ShowToast(str(R.string.removed_from_family)))
+                    _events.emit(FamilyEvent.FamilySwitched)
+                    loadFamily()
+                    return true
+                }
+            }
             store.clear()
             _events.emit(FamilyEvent.NavigateToMain)
             return true

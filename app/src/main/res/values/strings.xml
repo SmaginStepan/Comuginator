@@ -328,6 +328,11 @@
 
     <string name="family_last_updated">Updated at %1$s</string>
 
+    <string name="removed_from_family">You were removed from this family. Switching to another.</string>
+    <string name="join_another_family">Join another family</string>
+    <string name="switch_family">Switch family</string>
+    <string name="switch_family_success">Switched to new family</string>
+    <string name="switching_family">Switching family&#8230;</string>
     <string name="delete_family">Delete family</string>
     <string name="delete_family_confirm">Delete this family and all its data? This action cannot be undone.</string>
     <string name="deleting_family">Deleting family&#8230;</string>

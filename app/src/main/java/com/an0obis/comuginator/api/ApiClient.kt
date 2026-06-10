@@ -3,6 +3,7 @@ package com.an0obis.comuginator.api
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -20,7 +21,23 @@ object ApiClient {
         level = HttpLoggingInterceptor.Level.BODY
     }
 
+    /** Set this once in BaseActivity so every request carries the active family context. */
+    var familyIdProvider: (() -> String?)? = null
+
+    private val familyHeaderInterceptor = Interceptor { chain ->
+        val familyId = familyIdProvider?.invoke()
+        val request = if (!familyId.isNullOrBlank()) {
+            chain.request().newBuilder()
+                .header("X-Family-Id", familyId)
+                .build()
+        } else {
+            chain.request()
+        }
+        chain.proceed(request)
+    }
+
     private val client = OkHttpClient.Builder()
+        .addInterceptor(familyHeaderInterceptor)
         .addInterceptor(logging)
         .build()
 

@@ -293,6 +293,11 @@
 
     <string name="family_last_updated">Обновлено в %1$s</string>
 
+    <string name="removed_from_family">Вы были удалены из этой семьи. Переключаемся на другую.</string>
+    <string name="join_another_family">Войти в другую семью</string>
+    <string name="switch_family">Сменить семью</string>
+    <string name="switch_family_success">Семья изменена</string>
+    <string name="switching_family">Смена семьи&#8230;</string>
     <string name="delete_family">Удалить семью</string>
     <string name="delete_family_confirm">Удалить эту семью и все связанные данные? Это действие нельзя отменить.</string>
     <string name="deleting_family">Удаление семьи…</string>

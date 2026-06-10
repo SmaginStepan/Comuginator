@@ -16,7 +16,6 @@ import com.an0obis.comuginator.ui.base.BaseAdapter
 class LibraryItemsVH(v: View) : RecyclerView.ViewHolder(v) {
     val ivImage: ImageView = v.findViewById(R.id.ivImage)
     val tvLabel: TextView = v.findViewById(R.id.tvLabel)
-    val tvSource: TextView = v.findViewById(R.id.tvSource)
     val btnRenameItem: Button = v.findViewById(R.id.btnRenameItem)
     val btnDeleteItem: Button = v.findViewById(R.id.btnDeleteItem)
 }
@@ -37,7 +36,6 @@ class LibraryItemsAdapter(
         val item = items[position]
 
         holder.tvLabel.text = item.label
-        holder.tvSource.text = item.source ?: ""
         val url = item.imageUrl
 
         if (!url.isNullOrBlank()) {

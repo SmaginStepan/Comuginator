@@ -288,6 +288,11 @@
 
     <string name="family_last_updated">Actualizado a las %1$s</string>
 
+    <string name="removed_from_family">Fuiste eliminado de esta familia. Cambiando a otra.</string>
+    <string name="join_another_family">Unirse a otra familia</string>
+    <string name="switch_family">Cambiar familia</string>
+    <string name="switch_family_success">Cambiado a nueva familia</string>
+    <string name="switching_family">Cambiando familia&#8230;</string>
     <string name="delete_family">Eliminar familia</string>
     <string name="delete_family_confirm">¿Eliminar esta familia y todos sus datos? Esta acción no se puede deshacer.</string>
     <string name="deleting_family">Eliminando familia…</string>

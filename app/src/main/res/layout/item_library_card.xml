@@ -29,13 +29,6 @@
             android:text="@string/item"
             android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/tvSource"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            style="@style/ComuginatorText.Small"
-            android:text="@string/family_photo" />
-
     </LinearLayout>
 
     <Button
