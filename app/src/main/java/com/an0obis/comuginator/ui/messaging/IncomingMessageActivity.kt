@@ -24,6 +24,7 @@ import kotlinx.coroutines.withContext
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.core.app.NotificationManagerCompat
 import com.an0obis.comuginator.service.NotificationHelper
+import com.an0obis.comuginator.widget.ComuginatorWidgetProvider
 import com.an0obis.comuginator.ui.CardAdapter
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
@@ -134,6 +135,12 @@ class IncomingMessageActivity : BaseActivity() {
         NotificationManagerCompat.from(this).cancel(
             NotificationHelper.notificationIdForMessage(messageId)
         )
+    }
+
+    override fun onDestroy() {
+        // The message may have been answered — refresh the home screen widget.
+        ComuginatorWidgetProvider.requestUpdate(applicationContext)
+        super.onDestroy()
     }
 
     private fun visibleNormalSuggestedCards(message: AacMessageDetailsDto): List<AacCardDto> {

@@ -321,6 +321,12 @@
     <string name="force_show_nodes">Показать узлы</string>
     <string name="force_hide_nodes">Скрыть узлы</string>
     <string name="time">Время</string>
+    <string name="widget_description">Показывает новые сообщения и расписание на сегодня</string>
+    <string name="widget_message_from">Сообщение от %1$s</string>
+    <string name="widget_tap_to_answer">Нажми, чтобы ответить</string>
+    <string name="widget_today">Сегодня</string>
+    <string name="widget_tomorrow">Завтра</string>
+    <string name="widget_no_schedule">Сегодня занятий нет</string>
     <string name="time_with_value">Время: %1$s</string>
     <string name="weekday_mon">Пн</string>
     <string name="weekday_tue">Вт</string>

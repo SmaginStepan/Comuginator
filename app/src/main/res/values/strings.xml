@@ -357,6 +357,14 @@
     <string name="force_show_nodes">Show nodes</string>
     <string name="force_hide_nodes">Hide nodes</string>
     <string name="time">Time</string>
+    <string name="widget_description">Shows new messages and today\'s schedule</string>
+    <string name="widget_message_from">Message from %1$s</string>
+    <string name="widget_tap_to_answer">Tap to answer</string>
+    <string name="widget_today">Today</string>
+    <string name="widget_tomorrow">Tomorrow</string>
+    <string name="widget_no_schedule">No activities today</string>
+    <string name="widget_schedule_now_row" translatable="false">▶ %1$s · %2$s</string>
+    <string name="widget_schedule_row" translatable="false">%1$s · %2$s</string>
     <string name="time_with_value">Time: %1$s</string>
     <string name="weekday_mon">Mon</string>
     <string name="weekday_tue">Tue</string>

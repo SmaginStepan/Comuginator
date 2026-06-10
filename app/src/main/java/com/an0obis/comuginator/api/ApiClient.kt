@@ -10,6 +10,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.IOException
 import okhttp3.Request
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import com.google.gson.Gson
@@ -55,11 +56,27 @@ object ApiClient {
             .create(ApiService::class.java)
     }
 
-    fun loadBitmap(url: String?): Bitmap? {
+    // Protected images (FAMILY_PHOTO) need the token, but never send it to
+    // third-party hosts like ARASAAC. The server may build image URLs with a
+    // host that differs from BASE_URL, so also match the protected path.
+    private fun isProtectedImageUrl(url: String): Boolean = try {
+        val target = url.toHttpUrl()
+        target.host == BASE_URL.toHttpUrl().host ||
+                target.encodedPath.startsWith("/v1/library/")
+    } catch (_: Exception) {
+        false
+    }
+
+    fun loadBitmap(url: String?, authHeader: String? = null): Bitmap? {
         if (url.isNullOrBlank()) return null
 
         val request = Request.Builder()
             .url(url)
+            .apply {
+                if (!authHeader.isNullOrBlank() && isProtectedImageUrl(url)) {
+                    header("Authorization", authHeader)
+                }
+            }
             .get()
             .build()
 

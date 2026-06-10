@@ -8,6 +8,7 @@ import androidx.work.WorkerParameters
 import com.an0obis.comuginator.api.ApiClient
 import com.an0obis.comuginator.api.CommandDto
 import com.an0obis.comuginator.storage.SessionStore
+import com.an0obis.comuginator.widget.ComuginatorWidgetProvider
 
 
 const val ACTION_INVITE_USED = "com.an0obis.comuginator.INVITE_USED"
@@ -71,6 +72,10 @@ class CommandSyncWorker(
                 )
             }
 
+            if (items.isNotEmpty()) {
+                ComuginatorWidgetProvider.requestUpdate(applicationContext)
+            }
+
             Result.success()
         } catch (e: Exception) {
             Log.e("CommandSyncWorker", "failed", e)
@@ -129,7 +134,7 @@ class CommandSyncWorker(
                 }
 
                 senderName = message.fromUser.name
-                senderAvatar = ApiClient.loadBitmap(message.fromUser.avatarImageUrl)
+                senderAvatar = ApiClient.loadBitmap(message.fromUser.avatarImageUrl, authHeader)
             }
         } catch (e: Exception) {
             Log.w("CommandSyncWorker", "failed to load notification details", e)
