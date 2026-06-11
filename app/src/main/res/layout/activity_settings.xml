@@ -54,5 +54,59 @@
         style="@style/ComuginatorButton"
         android:text="@string/language" />
 
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/swNotifications"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:textSize="16sp"
+        android:text="@string/notifications" />
+
+    <Button
+        android:id="@+id/btnNotificationSound"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        style="@style/ComuginatorButton.Secondary"
+        android:text="@string/notification_sound" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        style="@style/ComuginatorText.Section"
+        android:text="@string/notification_schedule"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:id="@+id/llNotificationRules"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+
+    </ScrollView>
+
+    <Button
+        android:id="@+id/btnAddRule"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        style="@style/ComuginatorButton"
+        android:text="@string/add_rule" />
+
+    <TextView
+        android:id="@+id/tvRulesCounter"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="4dp"
+        android:paddingBottom="16dp"
+        style="@style/ComuginatorText.Small"
+        android:gravity="center" />
 
 </LinearLayout>

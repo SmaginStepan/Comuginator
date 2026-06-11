@@ -357,6 +357,15 @@
     <string name="force_show_nodes">Show nodes</string>
     <string name="force_hide_nodes">Hide nodes</string>
     <string name="time">Time</string>
+    <string name="notifications">Notifications</string>
+    <string name="notification_schedule">Notification schedule</string>
+    <string name="notification_sound">Notification sound</string>
+    <string name="notification_sound_with_value">Notification sound: %1$s</string>
+    <string name="sound_default">Default</string>
+    <string name="sound_silent">Silent</string>
+    <string name="add_rule">Add rule</string>
+    <string name="notifications_action_enable">Turn notifications on</string>
+    <string name="notifications_action_disable">Turn notifications off</string>
     <string name="widget_description">Shows new messages and today\'s schedule</string>
     <string name="widget_message_from">Message from %1$s</string>
     <string name="widget_tap_to_answer">Tap to answer</string>

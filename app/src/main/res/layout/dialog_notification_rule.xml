@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="24dp"
+        android:paddingTop="8dp">
+
+        <RadioGroup
+            android:id="@+id/rgRuleAction"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <RadioButton
+                android:id="@+id/rbRuleEnable"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/notifications_action_enable" />
+
+            <RadioButton
+                android:id="@+id/rbRuleDisable"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/notifications_action_disable"
+                android:checked="true" />
+
+        </RadioGroup>
+
+        <RadioGroup
+            android:id="@+id/rgRuleMode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="vertical">
+
+            <RadioButton
+                android:id="@+id/rbRuleDate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/exact_date" />
+
+            <RadioButton
+                android:id="@+id/rbRuleWeekday"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/day_of_week"
+                android:checked="true" />
+
+        </RadioGroup>
+
+        <Button
+            android:id="@+id/btnRulePickDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/ComuginatorButton.Secondary"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:id="@+id/llRuleWeekdays"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <CheckBox android:id="@+id/cbRuleMon" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/weekday_mon" />
+            <CheckBox android:id="@+id/cbRuleTue" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/weekday_tue" />
+            <CheckBox android:id="@+id/cbRuleWed" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/weekday_wed" />
+            <CheckBox android:id="@+id/cbRuleThu" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/weekday_thu" />
+            <CheckBox android:id="@+id/cbRuleFri" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/weekday_fri" />
+            <CheckBox android:id="@+id/cbRuleSat" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/weekday_sat" />
+            <CheckBox android:id="@+id/cbRuleSun" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/weekday_sun" />
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btnRulePickTime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            style="@style/ComuginatorButton.Secondary" />
+
+    </LinearLayout>
+</ScrollView>

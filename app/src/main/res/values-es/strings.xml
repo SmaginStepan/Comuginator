@@ -317,6 +317,15 @@
     <string name="force_show_nodes">Mostrar nodos</string>
     <string name="force_hide_nodes">Ocultar nodos</string>
     <string name="time">Hora</string>
+    <string name="notifications">Notificaciones</string>
+    <string name="notification_schedule">Horario de notificaciones</string>
+    <string name="notification_sound">Sonido de notificaciones</string>
+    <string name="notification_sound_with_value">Sonido de notificaciones: %1$s</string>
+    <string name="sound_default">Predeterminado</string>
+    <string name="sound_silent">Silencio</string>
+    <string name="add_rule">Añadir regla</string>
+    <string name="notifications_action_enable">Activar notificaciones</string>
+    <string name="notifications_action_disable">Desactivar notificaciones</string>
     <string name="widget_description">Muestra mensajes nuevos y el horario de hoy</string>
     <string name="widget_message_from">Mensaje de %1$s</string>
     <string name="widget_tap_to_answer">Toca para responder</string>
