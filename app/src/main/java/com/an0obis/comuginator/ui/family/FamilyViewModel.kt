@@ -9,6 +9,8 @@ import com.an0obis.comuginator.api.CreateCommandRequest
 import com.an0obis.comuginator.api.CreateInviteRequest
 import com.an0obis.comuginator.api.JoinFamilyRequest
 import com.an0obis.comuginator.storage.FamilyEntry
+import com.an0obis.comuginator.storage.OfflineCache
+import com.an0obis.comuginator.storage.SettingsStore
 import com.an0obis.comuginator.api.FamilyMeResponse
 import com.an0obis.comuginator.api.UpdateMyAvatarRequest
 import com.an0obis.comuginator.api.UpdateFamilyRequest
@@ -50,6 +52,7 @@ data class FamilyUiState(
 sealed class FamilyEvent {
     object NavigateToMain : FamilyEvent()
     object FamilySwitched : FamilyEvent()
+    object ConnectionTrouble : FamilyEvent()
     data class ShowToast(val message: String) : FamilyEvent()
 }
 
@@ -103,11 +106,24 @@ class FamilyViewModel(application: Application) : AndroidViewModel(application) 
     fun loadFamily() {
         viewModelScope.launch {
             _isLoading.value = true
+
+            val cache = OfflineCache(getApplication())
+            if (SettingsStore(getApplication<Application>()).offlineMode) {
+                val cached = cache.loadFamily(store.familyId)
+                if (cached != null) {
+                    _uiState.update { it.copy(familyResponse = cached) }
+                }
+                _statusText.value = str(R.string.offline)
+                _isLoading.value = false
+                return@launch
+            }
+
             try {
                 val response = withContext(Dispatchers.IO) {
                     ApiClient.api.getMyFamily(store.authHeaderOrThrow())
                 }
                 store.role = response.me.role
+                cache.saveFamily(response.family.id, response)
                 syncFamilyList(response)
                 syncFamilyTimezone(response.family.id, response.me.role)
                 _uiState.update { current ->
@@ -122,7 +138,14 @@ class FamilyViewModel(application: Application) : AndroidViewModel(application) 
                 _statusText.value = str(R.string.family_last_updated, formatCurrentTime())
             } catch (e: Exception) {
                 if (handleUnauthorized(e)) return@launch
-                _statusText.value = str(R.string.load_family_failed, e.message)
+                connectionTrouble(e)
+                val cached = cache.loadFamily(store.familyId)
+                if (cached != null) {
+                    _uiState.update { it.copy(familyResponse = cached) }
+                    _statusText.value = str(R.string.offline)
+                } else {
+                    _statusText.value = str(R.string.load_family_failed, e.message)
+                }
             } finally {
                 _isLoading.value = false
             }
@@ -177,6 +200,7 @@ class FamilyViewModel(application: Application) : AndroidViewModel(application) 
                 _statusText.value = str(R.string.invite_created)
             } catch (e: Exception) {
                 if (handleUnauthorized(e)) return@launch
+                connectionTrouble(e)
                 _statusText.value = str(R.string.create_invite_failed, e.message)
             } finally {
                 _isLoading.value = false
@@ -222,6 +246,7 @@ class FamilyViewModel(application: Application) : AndroidViewModel(application) 
                     if (previousOptimistic != null) newVolumes[deviceId] = previousOptimistic
                     current.copy(optimisticVolumes = newVolumes)
                 }
+                connectionTrouble(e)
                 _statusText.value = str(R.string.failed_send_volume_command, e.message)
             } finally {
                 _isLoading.value = false
@@ -246,6 +271,7 @@ class FamilyViewModel(application: Application) : AndroidViewModel(application) 
                 loadFamily()
             } catch (e: Exception) {
                 if (handleUnauthorized(e)) return@launch
+                connectionTrouble(e)
                 _statusText.value = str(R.string.update_family_failed, e.message)
                 _isLoading.value = false
             }
@@ -268,6 +294,7 @@ class FamilyViewModel(application: Application) : AndroidViewModel(application) 
                 loadFamily()
             } catch (e: Exception) {
                 if (handleUnauthorized(e)) return@launch
+                connectionTrouble(e)
                 _statusText.value = str(R.string.update_user_failed, e.message)
                 _isLoading.value = false
             }
@@ -290,6 +317,7 @@ class FamilyViewModel(application: Application) : AndroidViewModel(application) 
                 loadFamily()
             } catch (e: Exception) {
                 if (handleUnauthorized(e)) return@launch
+                connectionTrouble(e)
                 _statusText.value = str(R.string.update_device_failed, e.message)
                 _isLoading.value = false
             }
@@ -312,6 +340,7 @@ class FamilyViewModel(application: Application) : AndroidViewModel(application) 
                 loadFamily()
             } catch (e: Exception) {
                 if (handleUnauthorized(e)) return@launch
+                connectionTrouble(e)
                 _statusText.value = str(R.string.update_avatar_failed, e.message)
                 _isLoading.value = false
             }
@@ -422,6 +451,7 @@ class FamilyViewModel(application: Application) : AndroidViewModel(application) 
                 }
             } catch (e: Exception) {
                 if (handleUnauthorized(e)) return@launch
+                connectionTrouble(e)
                 val errorMsg = str(R.string.join_family_failed, e.message)
                 _statusText.value = errorMsg
                 _events.emit(FamilyEvent.ShowToast(errorMsg))
@@ -445,6 +475,7 @@ class FamilyViewModel(application: Application) : AndroidViewModel(application) 
                 loadFamily()
             } catch (e: Exception) {
                 if (handleUnauthorized(e)) return@launch
+                connectionTrouble(e)
                 _statusText.value = str(R.string.delete_user_failed, e.message)
                 _isLoading.value = false
             }
@@ -463,6 +494,7 @@ class FamilyViewModel(application: Application) : AndroidViewModel(application) 
                 loadFamily()
             } catch (e: Exception) {
                 if (handleUnauthorized(e)) return@launch
+                connectionTrouble(e)
                 _statusText.value = str(R.string.delete_device_failed, e.message)
                 _isLoading.value = false
             }
@@ -481,6 +513,7 @@ class FamilyViewModel(application: Application) : AndroidViewModel(application) 
                 _events.emit(FamilyEvent.NavigateToMain)
             } catch (e: Exception) {
                 if (handleUnauthorized(e)) return@launch
+                connectionTrouble(e)
                 _statusText.value = str(R.string.delete_family_failed, e.message)
                 _isLoading.value = false
             }
@@ -498,6 +531,18 @@ class FamilyViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     // ── Internal ──────────────────────────────────────────────────────────────
+
+    /**
+     * Surfaces persistent connectivity failures (already retried by
+     * ApiClient) so the activity can show the connection-trouble screen.
+     */
+    private suspend fun connectionTrouble(e: Exception) {
+        if (e is java.io.IOException &&
+            !SettingsStore(getApplication<Application>()).offlineMode
+        ) {
+            _events.emit(FamilyEvent.ConnectionTrouble)
+        }
+    }
 
     private suspend fun handleUnauthorized(e: Exception): Boolean {
         if (e is HttpException && e.code() == 401) {

@@ -37,6 +37,9 @@ import com.an0obis.comuginator.ui.childhome.ChildHomeActivity
 import com.an0obis.comuginator.ui.library.LibraryActivity
 import com.an0obis.comuginator.ui.library.LibraryItemPickerActivity
 import com.an0obis.comuginator.ui.schedule.ScheduleActivity
+import com.an0obis.comuginator.storage.SettingsStore
+import com.an0obis.comuginator.ui.ConnectionErrorHelper
+import com.an0obis.comuginator.ui.OfflineBanner
 import com.an0obis.comuginator.util.TimeFormat
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
@@ -55,9 +58,12 @@ class FamilyActivity : BaseActivity() {
 
     private lateinit var btnSchedule: Button
 
+    private val connectionErrorHelper = ConnectionErrorHelper(this) { viewModel.loadFamily() }
+
     private var familyAdapter: FamilyAdapter? = null
     private var adapterMeRole: String = ""
     private var adapterMyDeviceId: String = ""
+    private var adapterOffline: Boolean = false
     private var pendingAvatarUserId: String? = null
 
     private val joinFamilyQrLauncher =
@@ -180,6 +186,8 @@ class FamilyActivity : BaseActivity() {
 
         rvFamily.layoutManager = LinearLayoutManager(this)
 
+        OfflineBanner.setup(this) { viewModel.loadFamily() }
+
         bindState()
         ensureInitialized()
     }
@@ -210,6 +218,7 @@ class FamilyActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
+        OfflineBanner.refresh(this)
         viewModel.startRefreshLoop()
     }
 
@@ -239,7 +248,8 @@ class FamilyActivity : BaseActivity() {
                 }
                 launch {
                     viewModel.isLoading.collect { loading ->
-                        btnFamilyAdd.isEnabled = !loading
+                        // Creating invites needs the server.
+                        btnFamilyAdd.isEnabled = !loading && !isOfflineMode()
                         btnFamilyMore.isEnabled = !loading
                     }
                 }
@@ -284,6 +294,9 @@ class FamilyActivity : BaseActivity() {
                             is FamilyEvent.ShowToast -> {
                                 Toast.makeText(this@FamilyActivity, event.message, Toast.LENGTH_LONG).show()
                             }
+                            FamilyEvent.ConnectionTrouble -> {
+                                connectionErrorHelper.show()
+                            }
                         }
                     }
                 }
@@ -302,19 +315,38 @@ class FamilyActivity : BaseActivity() {
     ) {
         tvFamily.text = getString(R.string.family_prefix, familyName ?: getString(R.string.no_name))
 
+        OfflineBanner.refresh(this)
+
         btnSchedule.isVisible = meRole == "PARENT"
 
-        if (familyAdapter == null || adapterMeRole != meRole || adapterMyDeviceId != meDeviceId) {
+        val offline = isOfflineMode()
+        if (familyAdapter == null || adapterMeRole != meRole ||
+            adapterMyDeviceId != meDeviceId || adapterOffline != offline
+        ) {
             adapterMeRole = meRole
             adapterMyDeviceId = meDeviceId
+            adapterOffline = offline
             familyAdapter = FamilyAdapter(
                 isParentViewer = meRole == "PARENT",
                 myDeviceId = meDeviceId,
+                myUserId = store.userId.orEmpty(),
                 authToken = store.authHeaderOrThrow(),
+                offlineMode = offline,
                 onVolumeClick = { deviceId, deviceName, currentVolume ->
-                    showSetVolumeDialog(deviceId, deviceName, currentVolume)
+                    if (isOfflineMode()) {
+                        showOfflineToast()
+                    } else {
+                        showSetVolumeDialog(deviceId, deviceName, currentVolume)
+                    }
                 },
-                onSendClick = ::openComposeMessageScreen,
+                onSendClick = { userId, userName ->
+                    // Offline: only messages to self are possible.
+                    if (isOfflineMode() && userId != store.userId) {
+                        showOfflineToast()
+                    } else {
+                        openComposeMessageScreen(userId, userName)
+                    }
+                },
                 onHistoryClick = ::openMessageHistoryScreen,
                 onRenameUserClick = { userId, userName ->
                     showRenameDialog(
@@ -515,6 +547,14 @@ class FamilyActivity : BaseActivity() {
                 viewModel.setActiveFamily(familyId)
             }
             .show()
+    }
+
+    // ── Offline ───────────────────────────────────────────────────────────────
+
+    private fun isOfflineMode(): Boolean = SettingsStore(this).offlineMode
+
+    private fun showOfflineToast() {
+        Toast.makeText(this, getString(R.string.unavailable_offline), Toast.LENGTH_SHORT).show()
     }
 
     // ── Navigation ────────────────────────────────────────────────────────────

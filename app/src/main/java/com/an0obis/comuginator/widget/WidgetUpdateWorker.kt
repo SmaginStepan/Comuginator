@@ -16,7 +16,9 @@ import com.an0obis.comuginator.R
 import com.an0obis.comuginator.api.AacMessageListItemDto
 import com.an0obis.comuginator.api.ApiClient
 import com.an0obis.comuginator.api.ScheduleItemDto
+import com.an0obis.comuginator.storage.OfflineCache
 import com.an0obis.comuginator.storage.SessionStore
+import com.an0obis.comuginator.storage.SettingsStore
 import com.an0obis.comuginator.ui.childhome.ChildHomeActivity
 import com.an0obis.comuginator.ui.messaging.IncomingMessageActivity
 import java.util.Calendar
@@ -52,19 +54,29 @@ class WidgetUpdateWorker(
     private suspend fun buildViews(store: SessionStore, auth: String): RemoteViews {
         val views = RemoteViews(applicationContext.packageName, R.layout.widget_comuginator)
 
-        val unread = try {
-            ApiClient.api.getAacMessages(auth = auth, scope = "all").items
-                .filter { isAwaitingReply(it, store.userId) }
-                .maxByOrNull { it.createdAt }
-        } catch (e: Exception) {
-            Log.w("WidgetUpdateWorker", "failed to load messages", e)
-            null
+        val cache = OfflineCache(applicationContext)
+        val offlineForced = SettingsStore(applicationContext).offlineMode
+
+        val messages = if (offlineForced) {
+            cache.loadMessages(store.familyId) ?: emptyList()
+        } else {
+            try {
+                ApiClient.api.getAacMessages(auth = auth, scope = "all").items
+                    .also { cache.saveMessages(store.familyId, it) }
+            } catch (e: Exception) {
+                Log.w("WidgetUpdateWorker", "failed to load messages", e)
+                cache.loadMessages(store.familyId) ?: emptyList()
+            }
         }
+
+        val unread = messages
+            .filter { isAwaitingReply(it, store.userId) }
+            .maxByOrNull { it.createdAt }
 
         if (unread != null) {
             bindMessage(views, unread)
         } else {
-            bindSchedule(views, auth)
+            bindSchedule(views, auth, cache, store.familyId, offlineForced)
         }
         return views
     }
@@ -208,7 +220,13 @@ class WidgetUpdateWorker(
         )
     }
 
-    private suspend fun bindSchedule(views: RemoteViews, auth: String) {
+    private suspend fun bindSchedule(
+        views: RemoteViews,
+        auth: String,
+        cache: OfflineCache,
+        familyId: String?,
+        offlineForced: Boolean
+    ) {
         views.setViewVisibility(R.id.widgetMessageContainer, View.GONE)
         views.setViewVisibility(R.id.widgetScheduleContainer, View.VISIBLE)
 
@@ -217,11 +235,16 @@ class WidgetUpdateWorker(
             applicationContext.getString(R.string.widget_today)
         )
 
-        val allItems = try {
-            ApiClient.api.getScheduleItems(auth).items
-        } catch (e: Exception) {
-            Log.w("WidgetUpdateWorker", "failed to load schedule", e)
-            emptyList()
+        val allItems = if (offlineForced) {
+            cache.loadScheduleItems(familyId) ?: emptyList()
+        } else {
+            try {
+                ApiClient.api.getScheduleItems(auth).items
+                    .also { cache.saveScheduleItems(familyId, it) }
+            } catch (e: Exception) {
+                Log.w("WidgetUpdateWorker", "failed to load schedule", e)
+                cache.loadScheduleItems(familyId) ?: emptyList()
+            }
         }
         val todays = itemsForDay(allItems, Calendar.getInstance())
         val tomorrows = itemsForDay(

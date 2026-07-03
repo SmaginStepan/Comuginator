@@ -61,6 +61,8 @@
         style="@style/ComuginatorButton"
         android:text="@string/add" />
 
+    <include layout="@layout/view_offline_banner" />
+
     <TextView
         android:id="@+id/tvCounter"
         android:layout_width="match_parent"

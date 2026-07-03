@@ -61,6 +61,8 @@
         style="@style/ComuginatorButton"
         android:text="@string/create_set" />
 
+    <include layout="@layout/view_offline_banner" />
+
     <TextView
         android:id="@+id/tvStatus"
         android:layout_width="match_parent"

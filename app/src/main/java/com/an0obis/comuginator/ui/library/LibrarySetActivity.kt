@@ -17,7 +17,10 @@ import com.an0obis.comuginator.api.AddItemsToSetRequest
 import com.an0obis.comuginator.api.ApiClient
 import com.an0obis.comuginator.api.RenameLibraryItemRequest
 import com.an0obis.comuginator.api.UpdateLibrarySetRequest
+import com.an0obis.comuginator.storage.OfflineCache
 import com.an0obis.comuginator.storage.SessionStore
+import com.an0obis.comuginator.storage.SettingsStore
+import com.an0obis.comuginator.ui.ConnectionErrorHelper
 import kotlinx.coroutines.launch
 import androidx.recyclerview.widget.ItemTouchHelper
 import com.an0obis.comuginator.api.MoveLibrarySetItemsRequest
@@ -28,6 +31,8 @@ class LibrarySetActivity : AppCompatActivity() {
 
     private lateinit var sessionStore: SessionStore
     private lateinit var setId: String
+
+    private val connectionErrorHelper = ConnectionErrorHelper(this) { loadSet() }
 
     private lateinit var ivCover: ImageView
     private lateinit var tvName: TextView
@@ -262,6 +267,16 @@ class LibrarySetActivity : AppCompatActivity() {
 
     private fun loadSet() {
         lifecycleScope.launch {
+            val cache = OfflineCache(this@LibrarySetActivity)
+            val familyId = sessionStore.familyId
+
+            if (SettingsStore(this@LibrarySetActivity).offlineMode) {
+                val cached = cache.loadSetDetails(familyId, setId)
+                if (cached != null) showSet(cached, offline = true)
+                else tvStatus.text = getString(R.string.unavailable_offline)
+                return@launch
+            }
+
             try {
                 tvStatus.text = getString(R.string.loading)
 
@@ -270,17 +285,39 @@ class LibrarySetActivity : AppCompatActivity() {
                     setId = setId
                 )
 
-                val set = response.set
-                tvName.text = set.name
-                tvStatus.text =
-                    resources.getQuantityString(R.plurals.items_count, set.items.size, set.items.size)
-                ivCover.load(set.cover?.imageUrl)
-                adapter.submitItems(set.items)
-
+                cache.saveSetDetails(familyId, response.set)
+                showSet(response.set, offline = false)
             } catch (e: Exception) {
-                tvStatus.text = getString(R.string.failed_with_message, e.message)
+                if (connectionErrorHelper.handle(e)) return@launch
+                val cached = cache.loadSetDetails(familyId, setId)
+                if (cached != null) {
+                    showSet(cached, offline = true)
+                } else {
+                    tvStatus.text = getString(R.string.failed_with_message, e.message)
+                }
             }
         }
+    }
+
+    private fun showSet(set: com.an0obis.comuginator.api.LibrarySetDetailsDto, offline: Boolean) {
+        tvName.text = set.name
+        val countText =
+            resources.getQuantityString(R.plurals.items_count, set.items.size, set.items.size)
+        tvStatus.text = if (offline) {
+            getString(R.string.status_with_offline, countText, getString(R.string.offline))
+        } else {
+            countText
+        }
+        ivCover.load(set.cover?.imageUrl)
+        adapter.submitItems(set.items)
+
+        // Offline is read-only for sets: only photo uploads are queued, and
+        // they land in the library, not in a specific set.
+        btnRenameSet.isEnabled = !offline
+        btnDeleteSet.isEnabled = !offline
+        btnAddPhoto.isEnabled = !offline
+        btnAddArasaac.isEnabled = !offline
+        btnChangeCover.isEnabled = !offline
     }
 
     private fun showRenameDialog() {

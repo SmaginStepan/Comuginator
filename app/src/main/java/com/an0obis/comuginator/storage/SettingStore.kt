@@ -26,6 +26,13 @@ class SettingsStore(context: Context) {
             prefs.edit { putBoolean("open_incoming_fullscreen", value) }
         }
 
+    /** Manual "work offline" switch: the app uses local data only while set. */
+    var offlineMode: Boolean
+        get() = prefs.getBoolean("offline_mode", false)
+        set(value) {
+            prefs.edit { putBoolean("offline_mode", value) }
+        }
+
     // ── Notifications on/off ────────────────────────────────────────────────
     // The manual toggle is an event with a timestamp so scheduled rules and
     // the manual switch can compete on "last event wins".

@@ -21,7 +21,9 @@ import java.util.Calendar
 class FamilyAdapter(
     private val isParentViewer: Boolean,
     private val myDeviceId: String,
+    private val myUserId: String,
     private val authToken: String,
+    private val offlineMode: Boolean,
     private val onVolumeClick: (deviceId: String, deviceName: String, currentVolumePercent: Int?) -> Unit,
     private val onSendClick: (userId: String, userName: String) -> Unit,
     private val onHistoryClick: (userId: String, userName: String) -> Unit,
@@ -96,6 +98,10 @@ class FamilyAdapter(
             } else {
                 ivAvatar.setImageResource(android.R.drawable.ic_menu_gallery)
             }
+
+            // Offline: only messages to self; user edits need the server.
+            btnSend.isEnabled = !offlineMode || item.userId == myUserId
+            btnUserMore.isEnabled = !offlineMode
 
             btnSend.setOnClickListener { onSendClick(item.userId, item.userName) }
             btnHistory.setOnClickListener { onHistoryClick(item.userId, item.userName) }
@@ -222,6 +228,10 @@ class FamilyAdapter(
                         item.deviceId != myDeviceId
 
             btnVolume.visibility = if (canControlVolume) View.VISIBLE else View.GONE
+
+            // Volume commands and device edits need the server.
+            btnVolume.isEnabled = !offlineMode
+            btnDeviceMore.isEnabled = !offlineMode
 
             btnVolume.setOnClickListener {
                 onVolumeClick(item.deviceId, item.deviceName, item.volumePercent)

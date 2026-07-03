@@ -17,6 +17,12 @@ object TimeFormat {
         "yyyy-MM-dd'T'HH:mm:ss'Z'"
     )
 
+    /** Current moment as the server-style UTC ISO string. */
+    fun nowIsoUtc(): String =
+        SimpleDateFormat(utcPatterns[0], Locale.US).apply {
+            timeZone = TimeZone.getTimeZone("UTC")
+        }.format(Date())
+
     fun parseUtc(iso: String?): Date? {
         if (iso.isNullOrBlank()) return null
         for (pattern in utcPatterns) {

@@ -18,10 +18,12 @@ import androidx.core.os.LocaleListCompat
 import com.an0obis.comuginator.R
 import com.an0obis.comuginator.service.CommandSyncScheduler
 import com.an0obis.comuginator.service.FcmTokenSyncScheduler
+import com.an0obis.comuginator.service.OfflineSyncScheduler
 import com.an0obis.comuginator.service.PowerConnectionReceiver
 import com.an0obis.comuginator.service.TelemetryScheduler
 import com.an0obis.comuginator.storage.FcmTokenStore
 import com.an0obis.comuginator.storage.SessionStore
+import com.an0obis.comuginator.storage.SettingsStore
 import com.an0obis.comuginator.ui.childhome.ChildHomeActivity
 import com.an0obis.comuginator.ui.messaging.IncomingMessageActivity
 import com.an0obis.comuginator.ui.MainActivity
@@ -116,6 +118,7 @@ open class BaseActivity: AppCompatActivity() {
             )
 
             CommandSyncScheduler.enqueueImmediate(applicationContext, "app_start")
+            OfflineSyncScheduler.enqueue(applicationContext)
             if (store.role == "CHILD" && shouldForceChildHome()) {
                 startActivity(
                     Intent(this, ChildHomeActivity::class.java).apply {
@@ -200,6 +203,7 @@ open class BaseActivity: AppCompatActivity() {
 
     private fun shouldCheckPendingIncomingMessages(): Boolean {
         if (this is IncomingMessageActivity) return false
+        if (SettingsStore(this).offlineMode) return false
 
         val auth = store.authHeader()
         if (auth.isNullOrBlank()) return false

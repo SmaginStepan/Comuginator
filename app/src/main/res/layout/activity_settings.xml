@@ -55,6 +55,14 @@
         android:text="@string/language" />
 
     <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/swOfflineMode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:textSize="16sp"
+        android:text="@string/offline_mode" />
+
+    <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/swNotifications"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -22,6 +22,7 @@ import android.widget.TextView
 import android.widget.Toast
 import com.an0obis.comuginator.R
 import com.an0obis.comuginator.service.NotificationPolicy
+import com.an0obis.comuginator.service.OfflineSyncScheduler
 import com.an0obis.comuginator.storage.NotificationRule
 import com.an0obis.comuginator.storage.SessionStore
 import com.an0obis.comuginator.storage.SettingsStore
@@ -98,6 +99,16 @@ class SettingsActivity : BaseActivity() {
         btnNotificationSound = findViewById(R.id.btnNotificationSound)
         btnNotificationSound.setOnClickListener { openSoundPicker() }
         updateSoundButton()
+
+        val swOfflineMode = findViewById<SwitchCompat>(R.id.swOfflineMode)
+        swOfflineMode.isChecked = settingsStore.offlineMode
+        swOfflineMode.setOnCheckedChangeListener { _, isChecked ->
+            settingsStore.offlineMode = isChecked
+            if (!isChecked) {
+                // Back online: push everything created while offline.
+                OfflineSyncScheduler.enqueue(applicationContext)
+            }
+        }
 
         updateEnabledState()
         renderNotificationState()

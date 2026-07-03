@@ -25,6 +25,7 @@ import com.an0obis.comuginator.api.ChildHomeNodeDto
 import com.an0obis.comuginator.api.CreateScheduleItemRequest
 import com.an0obis.comuginator.api.ScheduleItemDto
 import com.an0obis.comuginator.api.UpdateScheduleItemRequest
+import com.an0obis.comuginator.ui.ConnectionErrorHelper
 import com.an0obis.comuginator.ui.base.BaseActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -65,6 +66,8 @@ class ScheduleItemActivity : BaseActivity() {
     private lateinit var llForceHide: LinearLayout
     private lateinit var btnSave: Button
     private lateinit var tvStatus: TextView
+
+    private val connectionErrorHelper = ConnectionErrorHelper(this) { save() }
 
     // state
     private var editItem: ScheduleItemDto? = null
@@ -327,8 +330,12 @@ class ScheduleItemActivity : BaseActivity() {
                 setResult(RESULT_OK)
                 finish()
             } catch (e: Exception) {
-                tvStatus.text = e.message
                 btnSave.isEnabled = true
+                if (connectionErrorHelper.handle(e)) {
+                    tvStatus.text = ""
+                } else {
+                    tvStatus.text = e.message
+                }
             }
         }
     }

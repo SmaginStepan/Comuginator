@@ -15,11 +15,21 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.an0obis.comuginator.R
 import com.an0obis.comuginator.api.AacCardDto
+import com.an0obis.comuginator.api.AacMessageListItemDto
+import com.an0obis.comuginator.api.AacSuggestedReplyDto
+import com.an0obis.comuginator.api.AacUserDto
 import com.an0obis.comuginator.api.ApiClient
 import com.an0obis.comuginator.api.SendAacMessageRequest
 import com.an0obis.comuginator.api.SuggestedReplyItem
 import com.an0obis.comuginator.api.WaitStepDto
+import com.an0obis.comuginator.service.NotificationHelper
+import com.an0obis.comuginator.storage.OfflineCache
+import com.an0obis.comuginator.storage.PendingSelfMessage
 import com.an0obis.comuginator.storage.SessionStore
+import com.an0obis.comuginator.storage.SettingsStore
+import com.an0obis.comuginator.util.TimeFormat
+import com.an0obis.comuginator.widget.ComuginatorWidgetProvider
+import java.util.UUID
 import com.an0obis.comuginator.ui.CardAdapter
 import com.an0obis.comuginator.ui.base.BaseActivity
 import com.an0obis.comuginator.ui.library.LibraryItemPickerActivity
@@ -494,27 +504,36 @@ class ComposeMessageActivity : BaseActivity() {
         }
 
         scope.launch {
-            try {
-                val suggestedRepliesForApi: List<SuggestedReplyItem> =
-                    vm.replyCards.map { card ->
-                        if (card.source == "WAIT") {
-                            WaitStepDto(
-                                seconds = card.sourceRef?.toIntOrNull() ?: 60
-                            )
-                        } else {
-                            card
-                        }
+            val suggestedRepliesForApi: List<SuggestedReplyItem> =
+                vm.replyCards.map { card ->
+                    if (card.source == "WAIT") {
+                        WaitStepDto(
+                            seconds = card.sourceRef?.toIntOrNull() ?: 60
+                        )
+                    } else {
+                        card
                     }
+                }
 
+            val request = SendAacMessageRequest(
+                targetUserId = vm.targetUserId,
+                mode = vm.mode,
+                cards = buildMessageCards(),
+                suggestedReplies = suggestedRepliesForApi,
+                requiredReplyCount = vm.requiredReplyCount
+            )
+
+            val isSelf = vm.targetUserId == store.userId
+
+            if (isSelf && SettingsStore(this@ComposeMessageActivity).offlineMode) {
+                deliverSelfMessageOffline(request)
+                return@launch
+            }
+
+            try {
                 ApiClient.api.sendAacMessage(
                     auth = store.authHeaderOrThrow(),
-                    body = SendAacMessageRequest(
-                        targetUserId = vm.targetUserId,
-                        mode = vm.mode,
-                        cards = buildMessageCards(),
-                        suggestedReplies = suggestedRepliesForApi,
-                        requiredReplyCount = vm.requiredReplyCount
-                    )
+                    body = request
                 )
 
                 runOnUiThread {
@@ -522,6 +541,11 @@ class ComposeMessageActivity : BaseActivity() {
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
+                if (isSelf) {
+                    // No connection: deliver locally and sync later.
+                    deliverSelfMessageOffline(request)
+                    return@launch
+                }
                 runOnUiThread {
                     Toast.makeText(
                         this@ComposeMessageActivity,
@@ -530,6 +554,76 @@ class ComposeMessageActivity : BaseActivity() {
                     ).show()
                 }
             }
+        }
+    }
+
+    /**
+     * Queues the request for upload and delivers the message locally: it lands
+     * in the cached history and a notification opens it on this device.
+     */
+    private fun deliverSelfMessageOffline(request: SendAacMessageRequest) {
+        val cache = OfflineCache(this)
+        val localId = "local_" + UUID.randomUUID().toString()
+
+        cache.addPendingSelfMessage(
+            PendingSelfMessage(
+                id = localId,
+                requestJson = Gson().toJson(request),
+                createdAt = System.currentTimeMillis()
+            )
+        )
+
+        val me = AacUserDto(
+            id = store.userId.orEmpty(),
+            name = store.userName ?: "",
+            role = store.role ?: "PARENT",
+            avatarItemId = null,
+            avatarImageUrl = null
+        )
+        val suggested = request.suggestedReplies.map { item ->
+            when (item) {
+                is AacCardDto -> AacSuggestedReplyDto(
+                    id = item.id,
+                    label = item.label,
+                    imageUrl = item.imageUrl,
+                    source = item.source,
+                    sourceRef = item.sourceRef
+                )
+                is WaitStepDto -> AacSuggestedReplyDto(type = "WAIT", seconds = item.seconds)
+            }
+        }
+        val localMessage = AacMessageListItemDto(
+            id = localId,
+            familyId = store.familyId.orEmpty(),
+            fromUserId = me.id,
+            toUserId = me.id,
+            fromUser = me,
+            toUser = me,
+            message = request.cards,
+            suggestedReplies = suggested,
+            reply = null,
+            createdAt = TimeFormat.nowIsoUtc(),
+            mode = request.mode,
+            requiredReplyCount = request.requiredReplyCount,
+            answeredAt = null
+        )
+        val familyId = store.familyId
+        cache.saveMessages(
+            familyId,
+            listOf(localMessage) + (cache.loadMessages(familyId) ?: emptyList())
+        )
+
+        NotificationHelper.showNewMessageNotification(
+            context = this,
+            messageId = localId,
+            commandId = ""
+        )
+        ComuginatorWidgetProvider.requestUpdate(applicationContext)
+
+        runOnUiThread {
+            Toast.makeText(this, getString(R.string.message_saved_offline), Toast.LENGTH_LONG)
+                .show()
+            finish()
         }
     }
 

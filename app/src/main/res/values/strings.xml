@@ -357,6 +357,16 @@
     <string name="force_show_nodes">Show nodes</string>
     <string name="force_hide_nodes">Hide nodes</string>
     <string name="time">Time</string>
+    <string name="offline_mode">Offline mode</string>
+    <string name="connection_trouble_message">It looks like you\'re having trouble connecting to the Internet.</string>
+    <string name="try_again">Try again</string>
+    <string name="enter_offline_mode">Enter offline mode</string>
+    <string name="reconnect">Reconnect</string>
+    <string name="offline">Offline</string>
+    <string name="status_with_offline" translatable="false">%1$s · %2$s</string>
+    <string name="unavailable_offline">Not available offline</string>
+    <string name="photo_saved_offline">Photo saved. It will be uploaded when back online.</string>
+    <string name="message_saved_offline">Message saved on this device. It will be synced when back online.</string>
     <string name="notifications">Notifications</string>
     <string name="notification_schedule">Notification schedule</string>
     <string name="notification_sound">Notification sound</string>

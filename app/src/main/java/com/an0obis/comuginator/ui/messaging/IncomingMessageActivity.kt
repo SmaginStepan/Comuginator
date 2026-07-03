@@ -24,6 +24,9 @@ import kotlinx.coroutines.withContext
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.core.app.NotificationManagerCompat
 import com.an0obis.comuginator.service.NotificationHelper
+import com.an0obis.comuginator.api.AacReplyShortDto
+import com.an0obis.comuginator.api.AacUserDto
+import com.an0obis.comuginator.storage.OfflineCache
 import com.an0obis.comuginator.util.TimeFormat
 import com.an0obis.comuginator.widget.ComuginatorWidgetProvider
 import com.an0obis.comuginator.ui.CardAdapter
@@ -128,6 +131,65 @@ class IncomingMessageActivity : BaseActivity() {
             }
         }
         return null
+    }
+
+    /** Self-messages composed offline live only in the local cache. */
+    private fun loadLocalMessage(): AacMessageDetailsDto? {
+        val cached = OfflineCache(this).loadMessages(store.familyId)
+            ?.firstOrNull { it.id == messageId } ?: return null
+        val fallbackUser = AacUserDto(
+            id = store.userId.orEmpty(),
+            name = store.userName ?: "",
+            role = store.role ?: "PARENT",
+            avatarItemId = null,
+            avatarImageUrl = null
+        )
+        return AacMessageDetailsDto(
+            id = cached.id,
+            fromUser = cached.fromUser ?: fallbackUser,
+            toUser = cached.toUser ?: fallbackUser,
+            message = cached.message,
+            suggestedReplies = cached.suggestedReplies,
+            mode = cached.mode,
+            reply = cached.reply,
+            requiredReplyCount = cached.requiredReplyCount,
+            createdAt = cached.createdAt,
+            answeredAt = cached.answeredAt
+        )
+    }
+
+    /** Replies to local self-messages are appended to the cached copy. */
+    private fun saveLocalReply(cards: List<AacCardDto>) {
+        val cache = OfflineCache(this)
+        val familyId = store.familyId
+        val messages = cache.loadMessages(familyId)?.toMutableList() ?: return
+        val index = messages.indexOfFirst { it.id == messageId }
+        if (index < 0) return
+
+        val existing = messages[index].reply?.reply.orEmpty()
+        val now = TimeFormat.nowIsoUtc()
+        messages[index] = messages[index].copy(
+            reply = AacReplyShortDto(
+                id = "local_reply",
+                reply = existing + cards,
+                createdAt = now
+            ),
+            answeredAt = now
+        )
+        cache.saveMessages(familyId, messages)
+    }
+
+    /** Routes a reply to the server, or to the local cache for local messages. */
+    private fun deliverReply(cards: List<AacCardDto>) {
+        if (messageId.startsWith("local_")) {
+            saveLocalReply(cards)
+        } else {
+            ApiClient.replyToAacMessage(
+                authHeader = store.authHeaderOrThrow(),
+                messageId = messageId,
+                requestBody = SendAacReplyRequest(reply = cards)
+            )
+        }
     }
 
     private fun cancelCurrentNotification() {
@@ -265,11 +327,7 @@ class IncomingMessageActivity : BaseActivity() {
 
         try {
             withContext(Dispatchers.IO) {
-                ApiClient.replyToAacMessage(
-                    authHeader = store.authHeaderOrThrow(),
-                    messageId = messageId,
-                    requestBody = SendAacReplyRequest(reply = listOf(completionCard))
-                )
+                deliverReply(listOf(completionCard))
             }
         } catch (e: Exception) {
             // Не блокируем закрытие экрана, но логируем.
@@ -350,11 +408,7 @@ class IncomingMessageActivity : BaseActivity() {
         lifecycleScope.launch {
             try {
                 withContext(Dispatchers.IO) {
-                    ApiClient.replyToAacMessage(
-                        authHeader = store.authHeaderOrThrow(),
-                        messageId = messageId,
-                        requestBody = SendAacReplyRequest(reply = listOf(card))
-                    )
+                    deliverReply(listOf(card))
                 }
 
                 tvCurrentReply.text = getString(R.string.reply_prefix, card.label)
@@ -495,7 +549,9 @@ class IncomingMessageActivity : BaseActivity() {
                 val authHeader = store.authHeader() ?: return@launch
                 var switchedFamily = false
                 val message = withContext(Dispatchers.IO) {
-                    try {
+                    if (messageId.startsWith("local_")) {
+                        loadLocalMessage() ?: throw IllegalStateException("Local message not found")
+                    } else try {
                         ApiClient.getAacMessageWithAuthHeader(authHeader, messageId)
                     } catch (e: Exception) {
                         // The message may belong to another family this device is in
@@ -639,11 +695,7 @@ class IncomingMessageActivity : BaseActivity() {
         lifecycleScope.launch {
             try {
                 withContext(Dispatchers.IO) {
-                    ApiClient.replyToAacMessage(
-                        authHeader = store.authHeaderOrThrow(),
-                        messageId = messageId,
-                        requestBody = SendAacReplyRequest(reply = cards)
-                    )
+                    deliverReply(cards)
                 }
 
                 val label = cards.joinToString(", ") { it.label }

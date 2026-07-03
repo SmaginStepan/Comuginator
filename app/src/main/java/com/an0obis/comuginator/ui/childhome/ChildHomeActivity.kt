@@ -20,6 +20,8 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.an0obis.comuginator.R
 import com.an0obis.comuginator.api.ChildHomeNodeDto
+import com.an0obis.comuginator.ui.ConnectionErrorHelper
+import com.an0obis.comuginator.ui.OfflineBanner
 import com.an0obis.comuginator.ui.base.BaseActivity
 import com.an0obis.comuginator.ui.library.LibraryItemPickerActivity
 import kotlinx.coroutines.launch
@@ -41,6 +43,8 @@ class ChildHomeActivity : BaseActivity() {
     }
 
     private val viewModel: ChildHomeViewModel by viewModels()
+
+    private val connectionErrorHelper = ConnectionErrorHelper(this) { viewModel.loadNodes() }
 
     private val scheduleAppliedReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -151,6 +155,8 @@ class ChildHomeActivity : BaseActivity() {
             if (viewModel.previewMode.value) stopPreview() else startPreview()
         }
 
+        OfflineBanner.setup(this) { viewModel.loadNodes() }
+
         viewModel.ensureRootPath(getString(R.string.home))
         bindState()
         viewModel.loadNodes()
@@ -208,6 +214,8 @@ class ChildHomeActivity : BaseActivity() {
                                 adapter.updateNodeVisibility(event.nodeId, event.isVisible)
                                 updateUi()
                             }
+                            ChildHomeViewModel.Event.ConnectionTrouble ->
+                                connectionErrorHelper.show()
                         }
                     }
                 }
@@ -218,6 +226,7 @@ class ChildHomeActivity : BaseActivity() {
     // ── UI ────────────────────────────────────────────────────────────────────
 
     private fun updateUi() {
+        OfflineBanner.refresh(this)
         val effectiveEditorMode = viewModel.isEditorMode && !viewModel.previewMode.value
         val items = adapter.readItems()
         val hasHidden = (viewModel.lastLoadedNodesSize ?: 0) > items.size

@@ -317,6 +317,15 @@
     <string name="force_show_nodes">Mostrar nodos</string>
     <string name="force_hide_nodes">Ocultar nodos</string>
     <string name="time">Hora</string>
+    <string name="offline_mode">Modo sin conexión</string>
+    <string name="connection_trouble_message">Parece que hay problemas con la conexión a Internet.</string>
+    <string name="try_again">Reintentar</string>
+    <string name="enter_offline_mode">Activar modo sin conexión</string>
+    <string name="reconnect">Reconectar</string>
+    <string name="offline">Sin conexión</string>
+    <string name="unavailable_offline">No disponible sin conexión</string>
+    <string name="photo_saved_offline">Foto guardada. Se subirá cuando haya conexión.</string>
+    <string name="message_saved_offline">Mensaje guardado en este dispositivo. Se sincronizará cuando haya conexión.</string>
     <string name="notifications">Notificaciones</string>
     <string name="notification_schedule">Horario de notificaciones</string>
     <string name="notification_sound">Sonido de notificaciones</string>

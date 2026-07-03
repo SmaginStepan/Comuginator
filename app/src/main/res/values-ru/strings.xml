@@ -321,6 +321,15 @@
     <string name="force_show_nodes">Показать узлы</string>
     <string name="force_hide_nodes">Скрыть узлы</string>
     <string name="time">Время</string>
+    <string name="offline_mode">Офлайн-режим</string>
+    <string name="connection_trouble_message">Похоже, возникли проблемы с подключением к интернету.</string>
+    <string name="try_again">Попробовать снова</string>
+    <string name="enter_offline_mode">Перейти в офлайн-режим</string>
+    <string name="reconnect">Переподключиться</string>
+    <string name="offline">Офлайн</string>
+    <string name="unavailable_offline">Недоступно офлайн</string>
+    <string name="photo_saved_offline">Фото сохранено. Оно будет загружено при появлении соединения.</string>
+    <string name="message_saved_offline">Сообщение сохранено на устройстве. Оно будет отправлено при появлении соединения.</string>
     <string name="notifications">Уведомления</string>
     <string name="notification_schedule">Расписание уведомлений</string>
     <string name="notification_sound">Звук уведомлений</string>

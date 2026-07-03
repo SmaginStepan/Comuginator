@@ -42,7 +42,26 @@ object ApiClient {
         chain.proceed(request)
     }
 
+    // Network failures are retried transparently: 3 attempts with a short
+    // backoff. HTTP error responses (4xx/5xx) are not retried — only
+    // connectivity problems (IOException).
+    private const val MAX_ATTEMPTS = 3
+
+    private val retryInterceptor = Interceptor { chain ->
+        var lastError: IOException? = null
+        for (attempt in 1..MAX_ATTEMPTS) {
+            try {
+                return@Interceptor chain.proceed(chain.request())
+            } catch (e: IOException) {
+                lastError = e
+                if (attempt < MAX_ATTEMPTS) Thread.sleep(700L * attempt)
+            }
+        }
+        throw lastError!!
+    }
+
     private val client = OkHttpClient.Builder()
+        .addInterceptor(retryInterceptor)
         .addInterceptor(familyHeaderInterceptor)
         .addInterceptor(logging)
         .build()
@@ -114,6 +133,22 @@ object ApiClient {
             return gson.fromJson(body, AacMessageDetailsDto::class.java)
         }
     }
+    /** Replays a message request that was serialized while offline. */
+    fun sendAacMessageRaw(authHeader: String, requestJson: String) {
+        val body = requestJson.toRequestBody("application/json".toMediaType())
+        val request = Request.Builder()
+            .url("${BASE_URL}v1/messages/aac")
+            .header("Authorization", authHeader)
+            .post(body)
+            .build()
+
+        client.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) {
+                throw IOException("sendAacMessageRaw failed: ${response.code}")
+            }
+        }
+    }
+
     fun replyToAacMessage(
         authHeader: String,
         messageId: String,

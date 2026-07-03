@@ -14,7 +14,12 @@ import com.an0obis.comuginator.storage.SessionStore
 import kotlinx.coroutines.launch
 import androidx.recyclerview.widget.ItemTouchHelper
 import com.an0obis.comuginator.api.CreateLibrarySetRequest
+import com.an0obis.comuginator.api.LibrarySetDto
 import com.an0obis.comuginator.api.MoveLibrarySetsRequest
+import com.an0obis.comuginator.storage.OfflineCache
+import com.an0obis.comuginator.storage.SettingsStore
+import com.an0obis.comuginator.ui.ConnectionErrorHelper
+import com.an0obis.comuginator.ui.OfflineBanner
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -24,6 +29,8 @@ class LibraryActivity : AppCompatActivity() {
     private lateinit var tvStatus: TextView
     private lateinit var rvSets: RecyclerView
     private lateinit var adapter: LibrarySetsAdapter
+
+    private val connectionErrorHelper = ConnectionErrorHelper(this) { loadSets() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,6 +59,8 @@ class LibraryActivity : AppCompatActivity() {
         btnCreate.setOnClickListener {
             createSimpleSet()
         }
+
+        OfflineBanner.setup(this) { loadSets() }
 
         loadSets()
     }
@@ -136,20 +145,45 @@ class LibraryActivity : AppCompatActivity() {
     }
 
     private fun loadSets() {
+        OfflineBanner.refresh(this)
         lifecycleScope.launch {
+            val cache = OfflineCache(this@LibraryActivity)
+            val familyId = sessionStore.familyId
+
+            if (SettingsStore(this@LibraryActivity).offlineMode) {
+                showSets(cache.loadLibrarySets(familyId) ?: emptyList(), offline = true)
+                return@launch
+            }
+
             try {
                 tvStatus.text = getString(R.string.loading)
 
                 val resp = ApiClient.api.getLibrarySets(sessionStore.authHeaderOrThrow())
 
-                adapter.submitItems(resp.sets)
-                tvStatus.text =
-                    resources.getQuantityString(R.plurals.sets_count, resp.sets.size, resp.sets.size)
-
+                cache.saveLibrarySets(familyId, resp.sets)
+                showSets(resp.sets, offline = false)
             } catch (e: Exception) {
-                tvStatus.text = e.message
+                if (connectionErrorHelper.handle(e)) return@launch
+                val cached = cache.loadLibrarySets(familyId)
+                if (cached != null) {
+                    showSets(cached, offline = true)
+                } else {
+                    tvStatus.text = e.message
+                }
             }
         }
+    }
+
+    private fun showSets(sets: List<LibrarySetDto>, offline: Boolean) {
+        adapter.submitItems(sets)
+        val countText =
+            resources.getQuantityString(R.plurals.sets_count, sets.size, sets.size)
+        tvStatus.text = if (offline) {
+            getString(R.string.status_with_offline, countText, getString(R.string.offline))
+        } else {
+            countText
+        }
+        findViewById<Button>(R.id.btnCreateSet).isEnabled = !offline
     }
 
     private fun createSimpleSet() {

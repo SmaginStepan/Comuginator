@@ -8,7 +8,9 @@ import com.an0obis.comuginator.api.ApiClient
 import com.an0obis.comuginator.api.ChildHomeNodeDto
 import com.an0obis.comuginator.api.CreateChildHomeNodeRequest
 import com.an0obis.comuginator.api.UpdateChildHomeNodeRequest
+import com.an0obis.comuginator.storage.OfflineCache
 import com.an0obis.comuginator.storage.SessionStore
+import com.an0obis.comuginator.storage.SettingsStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,6 +31,7 @@ class ChildHomeViewModel(application: Application) : AndroidViewModel(applicatio
         data class ShowToast(val message: String) : Event()
         data class BlinkNode(val nodeId: String, val seconds: Int) : Event()
         data class NodeVisibilityUpdated(val nodeId: String, val isVisible: Boolean) : Event()
+        object ConnectionTrouble : Event()
     }
 
     val store = SessionStore(application)
@@ -130,22 +133,45 @@ class ChildHomeViewModel(application: Application) : AndroidViewModel(applicatio
         val parentId = currentParentId
         _isLoading.value = true
         viewModelScope.launch {
-            try {
-                val response = withContext(Dispatchers.IO) {
-                    ApiClient.api.getChildHomeNodes(
-                        auth = store.authHeaderOrThrow(),
-                        parentId = parentId
-                    )
+            val cache = OfflineCache(getApplication())
+            val familyId = store.familyId
+
+            val items: List<ChildHomeNodeDto>? =
+                if (SettingsStore(getApplication<Application>()).offlineMode) {
+                    cache.loadChildHomeNodes(familyId, parentId) ?: emptyList()
+                } else {
+                    try {
+                        val response = withContext(Dispatchers.IO) {
+                            ApiClient.api.getChildHomeNodes(
+                                auth = store.authHeaderOrThrow(),
+                                parentId = parentId
+                            )
+                        }
+                        cache.saveChildHomeNodes(familyId, parentId, response.items)
+                        response.items
+                    } catch (e: Exception) {
+                        if (e is java.io.IOException) {
+                            _events.emit(Event.ConnectionTrouble)
+                            null
+                        } else {
+                            val cached = cache.loadChildHomeNodes(familyId, parentId)
+                            if (cached == null) {
+                                _events.emit(
+                                    Event.ShowToast(str(R.string.child_home_load_failed, e.message))
+                                )
+                            }
+                            cached
+                        }
+                    }
                 }
+
+            if (items != null) {
                 val effectiveEditorMode = isEditorMode && !hideInvisible && !_previewMode.value
-                lastLoadedNodesSize = response.items.size
-                _nodes.value = if (effectiveEditorMode) response.items
-                               else response.items.filter { it.isVisible }
-            } catch (e: Exception) {
-                _events.emit(Event.ShowToast(str(R.string.child_home_load_failed, e.message)))
-            } finally {
-                _isLoading.value = false
+                lastLoadedNodesSize = items.size
+                _nodes.value = if (effectiveEditorMode) items
+                               else items.filter { it.isVisible }
             }
+            _isLoading.value = false
         }
     }
 

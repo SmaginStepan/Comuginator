@@ -16,6 +16,7 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
@@ -30,7 +31,11 @@ import com.an0obis.comuginator.api.AacCardDto
 import com.an0obis.comuginator.api.ApiClient
 import com.an0obis.comuginator.api.CreateArasaacLibraryItemRequest
 import com.an0obis.comuginator.api.LibrarySetDto
+import com.an0obis.comuginator.storage.OfflineCache
+import com.an0obis.comuginator.storage.PendingPhoto
 import com.an0obis.comuginator.storage.SessionStore
+import com.an0obis.comuginator.storage.SettingsStore
+import java.util.UUID
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -221,8 +226,14 @@ class LibraryItemPickerActivity : BaseActivity() {
         }
 
         btnSearchArasaac.setOnClickListener {
-            showSearchArasaacDialog()
+            if (isOffline()) {
+                Toast.makeText(this, getString(R.string.unavailable_offline), Toast.LENGTH_SHORT)
+                    .show()
+            } else {
+                showSearchArasaacDialog()
+            }
         }
+        btnSearchArasaac.isEnabled = !isOffline()
 
         btnChooseFromLibrary.setOnClickListener {
             openLibraryBrowse()
@@ -527,10 +538,38 @@ class LibraryItemPickerActivity : BaseActivity() {
             try {
                 when {
                     pendingSelectedUri != null -> {
-                        val created = uploadPhotoToLibrary(pendingSelectedUri!!, label)
+                        if (isOffline()) {
+                            savePhotoOffline(pendingSelectedUri!!, label)
+                            Toast.makeText(
+                                this@LibraryItemPickerActivity,
+                                getString(R.string.photo_saved_offline),
+                                Toast.LENGTH_LONG
+                            ).show()
+                            setResult(RESULT_CANCELED)
+                            finish()
+                            return@launch
+                        }
+                        val created = try {
+                            uploadPhotoToLibrary(pendingSelectedUri!!, label)
+                        } catch (e: Exception) {
+                            // No connection: keep the photo, upload later.
+                            savePhotoOffline(pendingSelectedUri!!, label)
+                            Toast.makeText(
+                                this@LibraryItemPickerActivity,
+                                getString(R.string.photo_saved_offline),
+                                Toast.LENGTH_LONG
+                            ).show()
+                            setResult(RESULT_CANCELED)
+                            finish()
+                            return@launch
+                        }
                         finishWithItem(created.id)
                     }
                     pendingSelectedArasaac != null -> {
+                        if (isOffline()) {
+                            tvStatus.text = getString(R.string.unavailable_offline)
+                            return@launch
+                        }
                         val created = ApiClient.api.createArasaacLibraryItem(
                             auth = authHeaderOrThrow(),
                             body = CreateArasaacLibraryItemRequest(
@@ -548,6 +587,47 @@ class LibraryItemPickerActivity : BaseActivity() {
                 tvStatus.text = getString(R.string.save_failed, e.message)
             }
         }
+    }
+
+    private fun isOffline(): Boolean = SettingsStore(this).offlineMode
+
+    /**
+     * Copies the picked image into app storage and queues it for upload.
+     * The photo also appears in the cached library right away as a local item.
+     */
+    private suspend fun savePhotoOffline(uri: Uri, label: String) {
+        val cache = OfflineCache(this)
+        val id = "local_" + UUID.randomUUID().toString()
+        val destFile = File(cache.photosDir, "$id.img")
+
+        withContext(Dispatchers.IO) {
+            val inputStream = contentResolver.openInputStream(uri)
+                ?: throw IllegalStateException("Cannot open selected file")
+            inputStream.use { input ->
+                destFile.outputStream().use { output -> input.copyTo(output) }
+            }
+        }
+
+        cache.addPendingPhoto(
+            PendingPhoto(
+                id = id,
+                filePath = destFile.absolutePath,
+                label = label,
+                createdAt = System.currentTimeMillis()
+            )
+        )
+
+        val familyId = sessionStore.familyId
+        val localItem = AacCardDto(
+            id = id,
+            label = label,
+            imageUrl = Uri.fromFile(destFile).toString(),
+            source = "FAMILY_PHOTO"
+        )
+        cache.saveLibraryItems(
+            familyId,
+            listOf(localItem) + (cache.loadLibraryItems(familyId) ?: emptyList())
+        )
     }
 
     private suspend fun uploadPhotoToLibrary(uri: Uri, label: String): AacCardDto {

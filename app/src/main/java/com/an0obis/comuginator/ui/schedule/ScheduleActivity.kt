@@ -10,6 +10,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.an0obis.comuginator.R
 import com.an0obis.comuginator.api.ApiClient
 import com.an0obis.comuginator.api.ScheduleItemDto
+import com.an0obis.comuginator.storage.OfflineCache
+import com.an0obis.comuginator.storage.SettingsStore
+import com.an0obis.comuginator.ui.ConnectionErrorHelper
+import com.an0obis.comuginator.ui.OfflineBanner
 import com.an0obis.comuginator.ui.base.BaseActivity
 import com.an0obis.comuginator.ui.library.LibraryItemPickerActivity
 import kotlinx.coroutines.Dispatchers
@@ -22,6 +26,8 @@ class ScheduleActivity : BaseActivity() {
     private lateinit var rvSchedule: RecyclerView
     private lateinit var adapter: ScheduleAdapter
     private lateinit var tvCounter: android.widget.TextView
+
+    private val connectionErrorHelper = ConnectionErrorHelper(this) { loadItems() }
 
     // Launch library picker → then open ScheduleItemActivity for creation
     private val pickItemLauncher =
@@ -76,24 +82,52 @@ class ScheduleActivity : BaseActivity() {
             )
         }
 
+        OfflineBanner.setup(this) { loadItems() }
+
         loadItems()
     }
 
     private fun loadItems() {
+        OfflineBanner.refresh(this)
         lifecycleScope.launch {
+            val cache = OfflineCache(this@ScheduleActivity)
+            val familyId = store.familyId
+
+            if (SettingsStore(this@ScheduleActivity).offlineMode) {
+                showItems(cache.loadScheduleItems(familyId) ?: emptyList(), offline = true)
+                return@launch
+            }
+
             try {
                 val response = withContext(Dispatchers.IO) {
                     ApiClient.api.getScheduleItems(auth = store.authHeaderOrThrow())
                 }
-                val sorted = response.items.sortedBy { nextSortKey(it) }
-                adapter.submitItems(sorted)
-                tvCounter.text = resources.getQuantityString(
-                    R.plurals.schedule_items_count, sorted.size, sorted.size
-                )
+                cache.saveScheduleItems(familyId, response.items)
+                showItems(response.items, offline = false)
             } catch (e: Exception) {
-                Toast.makeText(this@ScheduleActivity, "Failed to load schedule: ${e.message}", Toast.LENGTH_LONG).show()
+                if (connectionErrorHelper.handle(e)) return@launch
+                val cached = cache.loadScheduleItems(familyId)
+                if (cached != null) {
+                    showItems(cached, offline = true)
+                } else {
+                    Toast.makeText(this@ScheduleActivity, "Failed to load schedule: ${e.message}", Toast.LENGTH_LONG).show()
+                }
             }
         }
+    }
+
+    private fun showItems(items: List<ScheduleItemDto>, offline: Boolean) {
+        val sorted = items.sortedBy { nextSortKey(it) }
+        adapter.submitItems(sorted)
+        val countText = resources.getQuantityString(
+            R.plurals.schedule_items_count, sorted.size, sorted.size
+        )
+        tvCounter.text = if (offline) {
+            getString(R.string.status_with_offline, countText, getString(R.string.offline))
+        } else {
+            countText
+        }
+        findViewById<View>(R.id.btnAdd).isEnabled = !offline
     }
 
     private fun deleteItem(item: ScheduleItemDto) {
