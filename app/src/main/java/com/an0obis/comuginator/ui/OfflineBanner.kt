@@ -5,6 +5,7 @@ import android.view.View
 import android.widget.Button
 import com.an0obis.comuginator.R
 import com.an0obis.comuginator.service.OfflineSyncScheduler
+import com.an0obis.comuginator.storage.SessionStore
 import com.an0obis.comuginator.storage.SettingsStore
 
 /**
@@ -31,5 +32,10 @@ object OfflineBanner {
         val banner = activity.findViewById<View>(R.id.offlineBanner) ?: return
         banner.visibility =
             if (SettingsStore(activity).offlineMode) View.VISIBLE else View.GONE
+
+        // Child devices recover automatically (OfflineAutoRecovery): the
+        // banner is informational only, no manual reconnect.
+        banner.findViewById<Button>(R.id.btnReconnect).visibility =
+            if (SessionStore(activity).role == "CHILD") View.GONE else View.VISIBLE
     }
 }

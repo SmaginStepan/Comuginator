@@ -28,6 +28,13 @@ data class PendingSelfMessage(
     val createdAt: Long
 )
 
+/** A child-home node tap made offline; the parent request is sent later. */
+data class PendingNodeAction(
+    val id: String,
+    val nodeId: String,
+    val createdAt: Long
+)
+
 /**
  * File-based JSON snapshots of server data so the app can work without a
  * connection. Snapshots are written on every successful load ("write-through")
@@ -128,4 +135,16 @@ class OfflineCache(context: Context) {
 
     fun removePendingSelfMessage(id: String) =
         save("pending_self_messages", getPendingSelfMessages().filterNot { it.id == id })
+
+    // ── Pending child-home action requests ─────────────────────────────────
+
+    fun getPendingNodeActions(): List<PendingNodeAction> =
+        load("pending_node_actions", object : TypeToken<List<PendingNodeAction>>() {}.type)
+            ?: emptyList()
+
+    fun addPendingNodeAction(action: PendingNodeAction) =
+        save("pending_node_actions", getPendingNodeActions() + action)
+
+    fun removePendingNodeAction(id: String) =
+        save("pending_node_actions", getPendingNodeActions().filterNot { it.id == id })
 }

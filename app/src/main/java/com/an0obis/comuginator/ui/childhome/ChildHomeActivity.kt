@@ -30,7 +30,10 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import androidx.core.content.ContextCompat
+import com.an0obis.comuginator.service.ACTION_BACK_ONLINE
 import com.an0obis.comuginator.service.ACTION_CHILD_HOME_SCHEDULE_APPLIED
+import com.an0obis.comuginator.service.OfflineAutoRecovery
+import com.an0obis.comuginator.storage.SettingsStore
 
 class ChildHomeActivity : BaseActivity() {
 
@@ -48,6 +51,13 @@ class ChildHomeActivity : BaseActivity() {
 
     private val scheduleAppliedReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
+            viewModel.loadNodes()
+        }
+    }
+
+    private val backOnlineReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            OfflineBanner.refresh(this@ChildHomeActivity)
             viewModel.loadNodes()
         }
     }
@@ -96,10 +106,22 @@ class ChildHomeActivity : BaseActivity() {
             IntentFilter(ACTION_CHILD_HOME_SCHEDULE_APPLIED),
             ContextCompat.RECEIVER_NOT_EXPORTED
         )
+        ContextCompat.registerReceiver(
+            this,
+            backOnlineReceiver,
+            IntentFilter(ACTION_BACK_ONLINE),
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        )
+
+        // A child device that is still offline keeps watching for recovery.
+        if (viewModel.store.role == "CHILD" && SettingsStore(this).offlineMode) {
+            OfflineAutoRecovery.startPolling(applicationContext)
+        }
     }
 
     override fun onStop() {
         unregisterReceiver(scheduleAppliedReceiver)
+        unregisterReceiver(backOnlineReceiver)
         super.onStop()
     }
 

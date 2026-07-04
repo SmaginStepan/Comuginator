@@ -4,7 +4,9 @@ import android.app.Application
 import coil.ImageLoader
 import coil.ImageLoaderFactory
 import com.an0obis.comuginator.api.ApiClient
+import com.an0obis.comuginator.service.OfflineAutoRecovery
 import com.an0obis.comuginator.storage.SessionStore
+import com.an0obis.comuginator.storage.SettingsStore
 import okhttp3.OkHttpClient
 
 class ComuginatorApp : Application(), ImageLoaderFactory {
@@ -14,6 +16,11 @@ class ComuginatorApp : Application(), ImageLoaderFactory {
         // Background workers and raw OkHttp helpers need the active family
         // context even when no activity has been created yet.
         ApiClient.familyIdProvider = { SessionStore(this).familyId }
+
+        // Child devices recover from offline mode automatically.
+        if (SessionStore(this).role == "CHILD" && SettingsStore(this).offlineMode) {
+            OfflineAutoRecovery.startPolling(this)
+        }
     }
 
     // Global Coil loader: image requests must carry X-Family-Id, otherwise the

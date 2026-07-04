@@ -367,6 +367,7 @@
     <string name="unavailable_offline">Not available offline</string>
     <string name="photo_saved_offline">Photo saved. It will be uploaded when back online.</string>
     <string name="message_saved_offline">Message saved on this device. It will be synced when back online.</string>
+    <string name="action_queued_offline">Saved. It will be sent when back online.</string>
     <string name="notifications">Notifications</string>
     <string name="notification_schedule">Notification schedule</string>
     <string name="notification_sound">Notification sound</string>

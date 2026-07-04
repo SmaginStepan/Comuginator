@@ -9,6 +9,7 @@ import com.an0obis.comuginator.api.ChildHomeNodeDto
 import com.an0obis.comuginator.api.CreateChildHomeNodeRequest
 import com.an0obis.comuginator.api.UpdateChildHomeNodeRequest
 import com.an0obis.comuginator.storage.OfflineCache
+import com.an0obis.comuginator.storage.PendingNodeAction
 import com.an0obis.comuginator.storage.SessionStore
 import com.an0obis.comuginator.storage.SettingsStore
 import kotlinx.coroutines.Dispatchers
@@ -301,6 +302,12 @@ class ChildHomeViewModel(application: Application) : AndroidViewModel(applicatio
     fun requestAction(node: ChildHomeNodeDto) {
         _isLoading.value = true
         viewModelScope.launch {
+            if (SettingsStore(getApplication<Application>()).offlineMode) {
+                queueActionOffline(node)
+                _isLoading.value = false
+                return@launch
+            }
+
             try {
                 val response = withContext(Dispatchers.IO) {
                     ApiClient.api.requestChildHomeAction(
@@ -313,11 +320,34 @@ class ChildHomeViewModel(application: Application) : AndroidViewModel(applicatio
                 }
                 _events.emit(Event.ShowToast(str(R.string.sent)))
             } catch (e: Exception) {
-                _events.emit(Event.ShowToast(str(R.string.child_home_send_failed, e.message)))
+                if (e is java.io.IOException) {
+                    // Connection dropped: keep the request, send when back online.
+                    queueActionOffline(node)
+                } else {
+                    _events.emit(Event.ShowToast(str(R.string.child_home_send_failed, e.message)))
+                }
             } finally {
                 _isLoading.value = false
             }
         }
+    }
+
+    /**
+     * Stores the tap for OfflineSyncWorker to deliver later and gives the
+     * child the usual visual feedback right away.
+     */
+    private suspend fun queueActionOffline(node: ChildHomeNodeDto) {
+        OfflineCache(getApplication()).addPendingNodeAction(
+            PendingNodeAction(
+                id = java.util.UUID.randomUUID().toString(),
+                nodeId = node.id,
+                createdAt = System.currentTimeMillis()
+            )
+        )
+        if (node.blinkEnabled) {
+            _events.emit(Event.BlinkNode(node.id, node.blinkSeconds))
+        }
+        _events.emit(Event.ShowToast(str(R.string.action_queued_offline)))
     }
 
     // ── Internal ──────────────────────────────────────────────────────────────

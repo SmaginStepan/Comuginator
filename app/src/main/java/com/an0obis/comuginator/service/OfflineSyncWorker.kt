@@ -74,6 +74,22 @@ class OfflineSyncWorker(
             }
         }
 
+        for (action in cache.getPendingNodeActions()) {
+            try {
+                ApiClient.api.requestChildHomeAction(auth = auth, nodeId = action.nodeId)
+                cache.removePendingNodeAction(action.id)
+            } catch (e: Exception) {
+                if (e is retrofit2.HttpException) {
+                    // Server rejected it (e.g. node deleted meanwhile) —
+                    // retrying won't help, drop it.
+                    cache.removePendingNodeAction(action.id)
+                } else {
+                    Log.w("OfflineSyncWorker", "node action send failed", e)
+                    allOk = false
+                }
+            }
+        }
+
         return if (allOk) Result.success() else Result.retry()
     }
 }

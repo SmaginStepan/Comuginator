@@ -3,6 +3,8 @@ package com.an0obis.comuginator.ui
 import android.content.Intent
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
+import com.an0obis.comuginator.service.OfflineAutoRecovery
+import com.an0obis.comuginator.storage.SessionStore
 import com.an0obis.comuginator.storage.SettingsStore
 import java.io.IOException
 
@@ -32,6 +34,15 @@ class ConnectionErrorHelper(
     fun show() {
         if (showing) return
         if (SettingsStore(activity).offlineMode) return
+
+        // Child devices don't get asked: they go offline automatically and a
+        // background poller brings them back online when the server responds.
+        if (SessionStore(activity).role == "CHILD") {
+            OfflineAutoRecovery.engage(activity)
+            onResolved()
+            return
+        }
+
         showing = true
         launcher.launch(Intent(activity, ConnectionTroubleActivity::class.java))
     }
