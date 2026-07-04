@@ -10,6 +10,7 @@ import android.widget.PopupMenu
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import coil.Coil
+import coil.dispose
 import coil.request.ImageRequest
 import com.an0obis.comuginator.R
 import com.an0obis.comuginator.api.ChildHomeNodeDto
@@ -121,6 +122,7 @@ class ChildHomeAdapter(
 
             Coil.imageLoader(holder.itemView.context).enqueue(request)
         } else {
+            holder.ivNode.dispose()
             holder.ivNode.setImageDrawable(null)
         }
 

@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import coil.dispose
 import coil.imageLoader
 import coil.request.ImageRequest
 import com.an0obis.comuginator.R
@@ -50,6 +51,7 @@ class LibrarySetsAdapter(
 
             holder.ivCover.context.imageLoader.enqueue(request)
         } else {
+            holder.ivCover.dispose()
             holder.ivCover.setImageResource(android.R.drawable.ic_menu_gallery)
         }
 

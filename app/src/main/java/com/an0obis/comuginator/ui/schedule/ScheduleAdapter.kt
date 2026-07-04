@@ -8,6 +8,7 @@ import android.widget.PopupMenu
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import coil.Coil
+import coil.dispose
 import coil.request.ImageRequest
 import com.an0obis.comuginator.R
 import com.an0obis.comuginator.api.ScheduleItemDto
@@ -49,6 +50,7 @@ class ScheduleAdapter(
                 .build()
             Coil.imageLoader(holder.itemView.context).enqueue(request)
         } else {
+            holder.ivCard.dispose()
             holder.ivCard.setImageDrawable(null)
         }
 
