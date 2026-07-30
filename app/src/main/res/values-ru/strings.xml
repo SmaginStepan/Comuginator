@@ -285,6 +285,9 @@
     <string name="timer_minutes_unit">мин.</string>
     <string name="wait_timer_remaining">⏱ Ждать: %1$d с</string>
     <string name="sequence_completed">Последовательность завершена</string>
+    <string name="sequence_terminated">Последовательность остановлена</string>
+    <string name="stop_sequence">Остановить последовательность</string>
+    <string name="stop_sequence_confirm">Остановить эту последовательность? Отправитель увидит, что она не была завершена.</string>
 
     <string name="never_seen">Никогда не был онлайн</string>
     <string name="seen_today_at">Сегодня в %1$s</string>

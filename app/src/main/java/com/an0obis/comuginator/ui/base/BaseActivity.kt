@@ -221,7 +221,7 @@ open class BaseActivity: AppCompatActivity() {
 
         val currentReplyId = msg.reply?.reply?.lastOrNull()?.id ?: return true
 
-        if (currentReplyId == "SEQUENCE_COMPLETED") {
+        if (currentReplyId == "SEQUENCE_COMPLETED" || currentReplyId == "SEQUENCE_TERMINATED") {
             return false
         }
 

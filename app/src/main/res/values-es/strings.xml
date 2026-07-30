@@ -280,6 +280,9 @@
     <string name="timer_minutes_unit">min.</string>
     <string name="wait_timer_remaining">⏱ Esperar: %1$d s</string>
     <string name="sequence_completed">Secuencia completada</string>
+    <string name="sequence_terminated">Secuencia detenida</string>
+    <string name="stop_sequence">Detener la secuencia</string>
+    <string name="stop_sequence_confirm">¿Detener esta secuencia? El remitente verá que no se completó.</string>
 
     <string name="never_seen">Nunca visto</string>
     <string name="seen_today_at">Hoy a las %1$s</string>

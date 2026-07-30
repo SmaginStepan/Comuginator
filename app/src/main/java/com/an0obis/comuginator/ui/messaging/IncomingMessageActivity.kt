@@ -58,6 +58,7 @@ class IncomingMessageActivity : BaseActivity() {
     private lateinit var tvMessageLabel: TextView
     private lateinit var tvCurrentReplyLabel: TextView
     private lateinit var btnClose: Button
+    private lateinit var btnMessageMore: Button
 
     private var sequenceStepIndex = 0
     private var isSequenceBlinking = false
@@ -91,6 +92,8 @@ class IncomingMessageActivity : BaseActivity() {
         commandId = intent.getStringExtra(EXTRA_COMMAND_ID).orEmpty()
         mode = intent.getStringExtra(EXTRA_MODE) ?: MODE_MESSAGE
         btnClose = findViewById(R.id.btnClose)
+        btnMessageMore = findViewById(R.id.btnMessageMore)
+        btnMessageMore.setOnClickListener { showMessageMenu(it) }
 
         btnClose.setOnClickListener {
             setResult(RESULT_OK)
@@ -331,6 +334,60 @@ class IncomingMessageActivity : BaseActivity() {
             }
         } catch (e: Exception) {
             // Не блокируем закрытие экрана, но логируем.
+            e.printStackTrace()
+        }
+
+        cancelCurrentNotification()
+        setResult(RESULT_OK)
+        finish()
+    }
+
+    private fun showMessageMenu(anchor: View) {
+        val popup = android.widget.PopupMenu(this, anchor)
+        val stopId = 1
+        popup.menu.add(0, stopId, 0, getString(R.string.stop_sequence))
+        popup.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                stopId -> {
+                    confirmStopSequence()
+                    true
+                }
+                else -> false
+            }
+        }
+        popup.show()
+    }
+
+    private fun confirmStopSequence() {
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle(getString(R.string.stop_sequence))
+            .setMessage(getString(R.string.stop_sequence_confirm))
+            .setNegativeButton(getString(R.string.cancel), null)
+            .setPositiveButton(getString(R.string.stop_sequence)) { _, _ ->
+                lifecycleScope.launch { terminateSequence() }
+            }
+            .show()
+    }
+
+    /**
+     * Ends the sequence early with a distinct system marker so the sender's
+     * history shows "stopped" rather than "completed".
+     */
+    private suspend fun terminateSequence() {
+        val terminationCard = AacCardDto(
+            id = "SEQUENCE_TERMINATED",
+            label = getString(R.string.sequence_terminated),
+            imageUrl = "",
+            source = "SYSTEM",
+            sourceRef = "SEQUENCE_TERMINATED"
+        )
+
+        try {
+            withContext(Dispatchers.IO) {
+                deliverReply(listOf(terminationCard))
+            }
+        } catch (e: Exception) {
+            // Closing the screen matters more than the delivery error.
             e.printStackTrace()
         }
 
@@ -665,6 +722,10 @@ class IncomingMessageActivity : BaseActivity() {
         } else {
             if (message.mode == "SEQUENCE") {
                 val currentReplyId = message.reply?.reply?.lastOrNull()?.id
+
+                btnMessageMore.isVisible =
+                    currentReplyId != "SEQUENCE_COMPLETED" &&
+                            currentReplyId != "SEQUENCE_TERMINATED"
 
                 sequenceStepIndex = if (currentReplyId == null) {
                     0

@@ -320,6 +320,9 @@
     <string name="timer_minutes_unit">min.</string>
     <string name="wait_timer_remaining">⏱ Wait: %1$d s</string>
     <string name="sequence_completed">Sequence completed</string>
+    <string name="sequence_terminated">Sequence stopped</string>
+    <string name="stop_sequence">Stop sequence</string>
+    <string name="stop_sequence_confirm">Stop this sequence? The sender will see that it was not finished.</string>
 
     <string name="never_seen">Never seen</string>
     <string name="seen_today_at">Today at %1$s</string>
