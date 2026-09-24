@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
 import androidx.core.os.LocaleListCompat
 import com.an0obis.comuginator.R
+import com.an0obis.comuginator.service.AdultMode
 import com.an0obis.comuginator.service.CommandSyncScheduler
 import com.an0obis.comuginator.service.FcmTokenSyncScheduler
 import com.an0obis.comuginator.service.OfflineSyncScheduler
@@ -52,7 +53,7 @@ open class BaseActivity: AppCompatActivity() {
 
         store = SessionStore(this)
 
-        if (store.role == "CHILD" && shouldForceChildHome()) {
+        if (mustReturnToChildHome()) {
             redirectedByRoleGuard = true
 
             startActivity(
@@ -119,7 +120,7 @@ open class BaseActivity: AppCompatActivity() {
 
             CommandSyncScheduler.enqueueImmediate(applicationContext, "app_start")
             OfflineSyncScheduler.enqueue(applicationContext)
-            if (store.role == "CHILD" && shouldForceChildHome()) {
+            if (mustReturnToChildHome()) {
                 startActivity(
                     Intent(this, ChildHomeActivity::class.java).apply {
                         putExtra(ChildHomeActivity.EXTRA_EDITOR_MODE, false)
@@ -141,6 +142,10 @@ open class BaseActivity: AppCompatActivity() {
                 this !is IncomingMessageActivity &&
                 this !is MainActivity
     }
+
+    /** CHILD devices stay on Child Home unless temporarily elevated (AdultMode). */
+    private fun mustReturnToChildHome(): Boolean =
+        store.role == "CHILD" && !AdultMode.active && shouldForceChildHome()
     open fun onInitialized() {
         // if session and token is ready
     }
@@ -403,6 +408,19 @@ open class BaseActivity: AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+
+        // Adult mode ends when the app goes to background; parent screens left
+        // on the back stack must not survive the return.
+        if (mustReturnToChildHome()) {
+            startActivity(
+                Intent(this, ChildHomeActivity::class.java).apply {
+                    putExtra(ChildHomeActivity.EXTRA_EDITOR_MODE, false)
+                    addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                }
+            )
+            finish()
+            return
+        }
 
         if (initialized) {
             checkPendingIncomingMessages()

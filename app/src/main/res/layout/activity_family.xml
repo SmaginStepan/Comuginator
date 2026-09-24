@@ -34,6 +34,16 @@
             android:text="@string/more" />
     </LinearLayout>
 
+    <!-- Message to self: shows a message on this very device -->
+    <Button
+        android:id="@+id/btnShowMessage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="8dp"
+        android:layout_marginTop="8dp"
+        style="@style/ComuginatorButton"
+        android:text="@string/show_message" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -320,6 +320,17 @@
     <string name="force_show_nodes">Mostrar nodos</string>
     <string name="force_hide_nodes">Ocultar nodos</string>
     <string name="time">Hora</string>
+    <string name="show_message">Mostrar mensaje</string>
+    <string name="adult_mode">Modo adulto</string>
+    <string name="enter_pin">Introduce el PIN</string>
+    <string name="unlock">Desbloquear</string>
+    <string name="adult_mode_active">El modo adulto está activo mientras la app esté abierta</string>
+    <string name="adult_mode_failed">PIN incorrecto o el modo adulto no está configurado para esta familia</string>
+    <string name="adult_pin_title">PIN del modo adulto</string>
+    <string name="adult_pin_explanation">Con este PIN, un padre puede cambiar temporalmente un dispositivo infantil al modo adulto desde la pantalla infantil. Elimina el PIN para desactivarlo.</string>
+    <string name="adult_pin_invalid">El PIN debe tener de 4 a 8 dígitos</string>
+    <string name="adult_pin_saved">PIN guardado</string>
+    <string name="adult_pin_removed">PIN eliminado</string>
     <string name="offline_mode">Modo sin conexión</string>
     <string name="connection_trouble_message">Parece que hay problemas con la conexión a Internet.</string>
     <string name="try_again">Reintentar</string>

@@ -30,10 +30,18 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import androidx.core.content.ContextCompat
+import android.text.InputType
+import androidx.core.view.isVisible
+import com.an0obis.comuginator.api.ApiClient
+import com.an0obis.comuginator.api.ElevateRequest
 import com.an0obis.comuginator.service.ACTION_BACK_ONLINE
 import com.an0obis.comuginator.service.ACTION_CHILD_HOME_SCHEDULE_APPLIED
+import com.an0obis.comuginator.service.AdultMode
 import com.an0obis.comuginator.service.OfflineAutoRecovery
 import com.an0obis.comuginator.storage.SettingsStore
+import com.an0obis.comuginator.ui.family.FamilyActivity
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class ChildHomeActivity : BaseActivity() {
 
@@ -125,6 +133,7 @@ class ChildHomeActivity : BaseActivity() {
         super.onStop()
     }
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -179,6 +188,11 @@ class ChildHomeActivity : BaseActivity() {
 
         OfflineBanner.setup(this) { viewModel.loadNodes() }
 
+        // Discreet parent unlock on the child's device (PIN-gated, temporary).
+        val btnAdultMode = findViewById<Button>(R.id.btnAdultMode)
+        btnAdultMode.isVisible = !viewModel.isEditorMode && viewModel.store.role == "CHILD"
+        btnAdultMode.setOnClickListener { showAdultModeDialog() }
+
         viewModel.ensureRootPath(getString(R.string.home))
         bindState()
         viewModel.loadNodes()
@@ -195,6 +209,21 @@ class ChildHomeActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
+
+        // ChildHomeActivity is exempt from the role guard, so an editor
+        // (or preview) instance opened during adult mode would survive the
+        // elevation ending. Drop back to viewer mode in that case.
+        if (viewModel.isEditorMode && viewModel.store.role == "CHILD" && !AdultMode.active) {
+            startActivity(
+                Intent(this, ChildHomeActivity::class.java).apply {
+                    putExtra(EXTRA_EDITOR_MODE, false)
+                    addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                }
+            )
+            finish()
+            return
+        }
+
         if (!redirectedByRoleGuard) {
             viewModel.loadNodes()
         }
@@ -241,6 +270,57 @@ class ChildHomeActivity : BaseActivity() {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    // ── Adult mode ────────────────────────────────────────────────────────────
+
+    private fun showAdultModeDialog() {
+        if (SettingsStore(this).offlineMode) {
+            Toast.makeText(this, getString(R.string.unavailable_offline), Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val input = EditText(this).apply {
+            hint = getString(R.string.enter_pin)
+            inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_VARIATION_PASSWORD
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.adult_mode))
+            .setView(input)
+            .setNegativeButton(getString(R.string.cancel), null)
+            .setPositiveButton(getString(R.string.unlock)) { _, _ ->
+                val pin = input.text?.toString()?.trim().orEmpty()
+                if (pin.isNotEmpty()) elevateToAdult(pin)
+            }
+            .show()
+    }
+
+    private fun elevateToAdult(pin: String) {
+        lifecycleScope.launch {
+            try {
+                val response = withContext(Dispatchers.IO) {
+                    ApiClient.api.elevateToAdult(
+                        auth = viewModel.store.authHeaderOrThrow(),
+                        body = ElevateRequest(pin = pin)
+                    )
+                }
+                AdultMode.begin(response.elevationToken)
+                Toast.makeText(
+                    this@ChildHomeActivity,
+                    getString(R.string.adult_mode_active),
+                    Toast.LENGTH_LONG
+                ).show()
+                // The role guard lets parent screens through while elevated.
+                startActivity(Intent(this@ChildHomeActivity, FamilyActivity::class.java))
+            } catch (_: Exception) {
+                Toast.makeText(
+                    this@ChildHomeActivity,
+                    getString(R.string.adult_mode_failed),
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
     }

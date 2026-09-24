@@ -22,24 +22,27 @@ object ApiClient {
         level = HttpLoggingInterceptor.Level.BODY
     }
 
-    /** Set this once in BaseActivity so every request carries the active family context. */
+    /** Set once at app start so every request carries the active family context. */
     var familyIdProvider: (() -> String?)? = null
+
+    /** Temporary adult-mode elevation on a child device (see AdultMode). */
+    var elevationTokenProvider: (() -> String?)? = null
 
     private val familyHeaderInterceptor = Interceptor { chain ->
         val original = chain.request()
+        val builder = original.newBuilder()
+
         // An explicitly set X-Family-Id (e.g. cross-family probing) wins over
         // the active-family default.
-        val request = if (original.header("X-Family-Id") == null) {
+        if (original.header("X-Family-Id") == null) {
             val familyId = familyIdProvider?.invoke()
-            if (!familyId.isNullOrBlank()) {
-                original.newBuilder().header("X-Family-Id", familyId).build()
-            } else {
-                original
-            }
-        } else {
-            original
+            if (!familyId.isNullOrBlank()) builder.header("X-Family-Id", familyId)
         }
-        chain.proceed(request)
+
+        val elevation = elevationTokenProvider?.invoke()
+        if (!elevation.isNullOrBlank()) builder.header("X-Elevation", elevation)
+
+        chain.proceed(builder.build())
     }
 
     // Network failures are retried transparently: 3 attempts with a short

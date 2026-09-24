@@ -324,6 +324,17 @@
     <string name="force_show_nodes">Показать узлы</string>
     <string name="force_hide_nodes">Скрыть узлы</string>
     <string name="time">Время</string>
+    <string name="show_message">Показать сообщение</string>
+    <string name="adult_mode">Режим взрослого</string>
+    <string name="enter_pin">Введите PIN-код</string>
+    <string name="unlock">Разблокировать</string>
+    <string name="adult_mode_active">Режим взрослого включён, пока приложение открыто</string>
+    <string name="adult_mode_failed">Неверный PIN-код или режим взрослого не настроен для этой семьи</string>
+    <string name="adult_pin_title">PIN-код режима взрослого</string>
+    <string name="adult_pin_explanation">С этим PIN-кодом родитель может временно переключить детское устройство в режим взрослого с детского экрана. Удалите PIN-код, чтобы отключить эту возможность.</string>
+    <string name="adult_pin_invalid">PIN-код должен содержать от 4 до 8 цифр</string>
+    <string name="adult_pin_saved">PIN-код сохранён</string>
+    <string name="adult_pin_removed">PIN-код удалён</string>
     <string name="offline_mode">Офлайн-режим</string>
     <string name="connection_trouble_message">Похоже, возникли проблемы с подключением к интернету.</string>
     <string name="try_again">Попробовать снова</string>

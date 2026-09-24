@@ -14,8 +14,8 @@ android {
         applicationId = "com.an0obis.comuginator.app"
         minSdk = 24
         targetSdk = 36
-        versionCode = 9
-        versionName = "1.1.2"
+        versionCode = 10
+        versionName = "1.1.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

@@ -294,7 +294,19 @@ data class UpdateNameRequest(
 
 data class UpdateFamilyRequest(
     val name: String? = null,
-    val timezone: String? = null
+    val timezone: String? = null,
+    /** 4–8 digits sets the adult-mode PIN; "" removes it (null = unchanged). */
+    val adultPin: String? = null
+)
+
+data class ElevateRequest(
+    val pin: String
+)
+
+data class ElevateResponse(
+    val ok: Boolean,
+    val elevationToken: String,
+    val expiresAt: String
 )
 
 data class UpdateFamilyResponse(

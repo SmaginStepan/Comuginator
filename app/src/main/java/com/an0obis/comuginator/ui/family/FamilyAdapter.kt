@@ -14,6 +14,7 @@ import coil.dispose
 import coil.imageLoader
 import coil.request.ImageRequest
 import com.an0obis.comuginator.R
+import com.an0obis.comuginator.service.AdultMode
 import com.an0obis.comuginator.ui.base.BaseAdapter
 import com.an0obis.comuginator.util.TimeFormat
 import java.text.DateFormat
@@ -117,7 +118,10 @@ class FamilyAdapter(
                 val deleteUserId = 3
                 popup.menu.add(0, renameId, 0, view.context.getString(R.string.rename))
                 popup.menu.add(0, avatarId, 1,view.context.getString(R.string.avatar))
-                popup.menu.add(0, deleteUserId, 2,view.context.getString(R.string.delete_user))
+                // Deleting users needs a real parent device (not adult mode).
+                if (!AdultMode.active) {
+                    popup.menu.add(0, deleteUserId, 2, view.context.getString(R.string.delete_user))
+                }
 
                 popup.setOnMenuItemClickListener { btn ->
                     when (btn.itemId) {
@@ -247,7 +251,10 @@ class FamilyAdapter(
                 val deleteId = 2
 
                 popup.menu.add(0, renameId, 0, view.context.getString(R.string.rename))
-                popup.menu.add(0, deleteId, 1, view.context.getString(R.string.delete))
+                // Deleting devices needs a real parent device (not adult mode).
+                if (!AdultMode.active) {
+                    popup.menu.add(0, deleteId, 1, view.context.getString(R.string.delete))
+                }
 
                 popup.setOnMenuItemClickListener { btn ->
                     when (btn.itemId) {

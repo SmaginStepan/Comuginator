@@ -41,6 +41,17 @@ interface ApiService {
         @Header("Authorization") auth: String
     ): MyFamiliesResponse
 
+    @POST("/v1/families/me/elevate")
+    suspend fun elevateToAdult(
+        @Header("Authorization") auth: String,
+        @Body body: ElevateRequest
+    ): ElevateResponse
+
+    @DELETE("/v1/families/me/elevate")
+    suspend fun endElevation(
+        @Header("Authorization") auth: String
+    ): OkResponse
+
     @POST("/v1/devices/heartbeat")
     suspend fun heartbeat(
         @Header("Authorization") auth: String,

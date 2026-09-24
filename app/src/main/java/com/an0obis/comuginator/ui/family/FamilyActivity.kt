@@ -37,6 +37,7 @@ import com.an0obis.comuginator.ui.childhome.ChildHomeActivity
 import com.an0obis.comuginator.ui.library.LibraryActivity
 import com.an0obis.comuginator.ui.library.LibraryItemPickerActivity
 import com.an0obis.comuginator.ui.schedule.ScheduleActivity
+import com.an0obis.comuginator.service.AdultMode
 import com.an0obis.comuginator.storage.SettingsStore
 import com.an0obis.comuginator.ui.ConnectionErrorHelper
 import com.an0obis.comuginator.ui.OfflineBanner
@@ -112,6 +113,16 @@ class FamilyActivity : BaseActivity() {
         tvInvite.visibility = View.GONE
         ivInviteQr.visibility = View.GONE
 
+        // Compose a message to self — it is delivered to this same device.
+        // Works both for real parents and for a child device in adult mode.
+        findViewById<Button>(R.id.btnShowMessage).setOnClickListener {
+            val myUserId = store.userId ?: return@setOnClickListener
+            val myName = viewModel.uiState.value.familyResponse?.users
+                ?.firstOrNull { it.id == myUserId }?.name
+                ?: store.userName.orEmpty()
+            openComposeMessageScreen(myUserId, myName)
+        }
+
         findViewById<Button>(R.id.btnLibrary).setOnClickListener {
             startActivity(Intent(this, LibraryActivity::class.java))
         }
@@ -146,17 +157,22 @@ class FamilyActivity : BaseActivity() {
         btnFamilyMore.setOnClickListener { view ->
             val renameId = 1; val refreshId = 2; val heartBeatId = 3
             val settingsId = 4; val deleteFamilyId = 5
-            val joinAnotherId = 6; val switchFamilyId = 7
+            val joinAnotherId = 6; val switchFamilyId = 7; val adultPinId = 8
             PopupMenu(view.context, view).apply {
                 menu.add(0, renameId,       0, getString(R.string.rename))
                 menu.add(0, refreshId,      1, getString(R.string.refresh))
                 menu.add(0, heartBeatId,    2, getString(R.string.send_heartbeat))
                 menu.add(0, settingsId,     3, getString(R.string.settings))
-                menu.add(0, joinAnotherId,  4, getString(R.string.join_another_family))
+                menu.add(0, adultPinId,     4, getString(R.string.adult_pin_title))
+                menu.add(0, joinAnotherId,  5, getString(R.string.join_another_family))
                 if (viewModel.getFamilies().size > 1) {
-                    menu.add(0, switchFamilyId, 5, getString(R.string.switch_family))
+                    menu.add(0, switchFamilyId, 6, getString(R.string.switch_family))
                 }
-                menu.add(0, deleteFamilyId, 6, getString(R.string.delete_family))
+                // Deleting the family needs a real parent device, not a
+                // temporarily elevated child device (server enforces it too).
+                if (!AdultMode.active) {
+                    menu.add(0, deleteFamilyId, 7, getString(R.string.delete_family))
+                }
                 setOnMenuItemClickListener { btn ->
                     when (btn.itemId) {
                         renameId -> {
@@ -174,6 +190,7 @@ class FamilyActivity : BaseActivity() {
                             startActivity(Intent(this@FamilyActivity, SettingsActivity::class.java))
                             true
                         }
+                        adultPinId     -> { showAdultPinDialog();            true }
                         joinAnotherId  -> { showJoinAnotherFamilyDialog();   true }
                         switchFamilyId -> { showSwitchFamilyDialog();        true }
                         deleteFamilyId -> { confirmDeleteFamily();            true }
@@ -461,6 +478,35 @@ class FamilyActivity : BaseActivity() {
             .setMessage(R.string.delete_family_confirm)
             .setNegativeButton(R.string.cancel, null)
             .setPositiveButton(R.string.delete) { _, _ -> viewModel.deleteFamily() }
+            .show()
+    }
+
+    // ── Adult mode PIN ────────────────────────────────────────────────────────
+
+    private fun showAdultPinDialog() {
+        val input = EditText(this).apply {
+            hint = getString(R.string.enter_pin)
+            inputType = android.text.InputType.TYPE_CLASS_NUMBER or
+                    android.text.InputType.TYPE_NUMBER_VARIATION_PASSWORD
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.adult_pin_title))
+            .setMessage(getString(R.string.adult_pin_explanation))
+            .setView(input)
+            .setNegativeButton(getString(R.string.cancel), null)
+            .setNeutralButton(getString(R.string.delete)) { _, _ ->
+                viewModel.updateAdultPin("")
+            }
+            .setPositiveButton(getString(R.string.save)) { _, _ ->
+                val pin = input.text?.toString()?.trim().orEmpty()
+                if (pin.matches(Regex("\\d{4,8}"))) {
+                    viewModel.updateAdultPin(pin)
+                } else {
+                    Toast.makeText(this, getString(R.string.adult_pin_invalid), Toast.LENGTH_SHORT)
+                        .show()
+                }
+            }
             .show()
     }
 

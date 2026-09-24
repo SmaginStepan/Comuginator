@@ -360,6 +360,18 @@
     <string name="force_show_nodes">Show nodes</string>
     <string name="force_hide_nodes">Hide nodes</string>
     <string name="time">Time</string>
+    <string name="show_message">Show message</string>
+    <string name="adult_mode">Adult mode</string>
+    <string name="adult_mode_button" translatable="false">🔑</string>
+    <string name="enter_pin">Enter PIN</string>
+    <string name="unlock">Unlock</string>
+    <string name="adult_mode_active">Adult mode is on until you leave the app</string>
+    <string name="adult_mode_failed">Wrong PIN, or adult mode is not set up for this family</string>
+    <string name="adult_pin_title">Adult mode PIN</string>
+    <string name="adult_pin_explanation">With this PIN a parent can temporarily switch a child device to adult mode from the child home screen. Remove the PIN to disable this.</string>
+    <string name="adult_pin_invalid">PIN must be 4–8 digits</string>
+    <string name="adult_pin_saved">Adult mode PIN saved</string>
+    <string name="adult_pin_removed">Adult mode PIN removed</string>
     <string name="offline_mode">Offline mode</string>
     <string name="connection_trouble_message">It looks like you\'re having trouble connecting to the Internet.</string>
     <string name="try_again">Try again</string>

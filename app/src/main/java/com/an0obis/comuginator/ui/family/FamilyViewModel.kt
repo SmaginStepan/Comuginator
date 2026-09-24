@@ -16,6 +16,7 @@ import com.an0obis.comuginator.api.UpdateMyAvatarRequest
 import com.an0obis.comuginator.api.UpdateFamilyRequest
 import com.an0obis.comuginator.api.UpdateNameRequest
 import com.an0obis.comuginator.api.UserDto
+import com.an0obis.comuginator.service.AdultMode
 import com.an0obis.comuginator.service.CommandSyncScheduler
 import com.an0obis.comuginator.storage.SessionStore
 import kotlinx.coroutines.Dispatchers
@@ -122,10 +123,14 @@ class FamilyViewModel(application: Application) : AndroidViewModel(application) 
                 val response = withContext(Dispatchers.IO) {
                     ApiClient.api.getMyFamily(store.authHeaderOrThrow())
                 }
-                store.role = response.me.role
                 cache.saveFamily(response.family.id, response)
-                syncFamilyList(response)
-                syncFamilyTimezone(response.family.id, response.me.role)
+                // While a child device is temporarily elevated the server reports
+                // PARENT; persisting that would make the elevation permanent.
+                if (!AdultMode.active) {
+                    store.role = response.me.role
+                    syncFamilyList(response)
+                    syncFamilyTimezone(response.family.id, response.me.role)
+                }
                 _uiState.update { current ->
                     val newVolumes = current.optimisticVolumes.toMutableMap()
                     response.users.flatMap { it.devices }.forEach { device ->
@@ -273,6 +278,30 @@ class FamilyViewModel(application: Application) : AndroidViewModel(application) 
                 if (handleUnauthorized(e)) return@launch
                 connectionTrouble(e)
                 _statusText.value = str(R.string.update_family_failed, e.message)
+                _isLoading.value = false
+            }
+        }
+    }
+
+    /** Sets the adult-mode PIN for the family; an empty string removes it. */
+    fun updateAdultPin(pin: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                withContext(Dispatchers.IO) {
+                    ApiClient.api.updateMyFamily(
+                        auth = store.authHeaderOrThrow(),
+                        body = UpdateFamilyRequest(adultPin = pin)
+                    )
+                }
+                _statusText.value = str(
+                    if (pin.isEmpty()) R.string.adult_pin_removed else R.string.adult_pin_saved
+                )
+            } catch (e: Exception) {
+                if (handleUnauthorized(e)) return@launch
+                connectionTrouble(e)
+                _statusText.value = str(R.string.update_family_failed, e.message)
+            } finally {
                 _isLoading.value = false
             }
         }
