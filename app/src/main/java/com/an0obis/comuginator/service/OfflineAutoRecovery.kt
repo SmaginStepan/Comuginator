@@ -50,6 +50,7 @@ object OfflineAutoRecovery {
                     ApiClient.api.getMyFamilies(auth)
                     settings.offlineMode = false
                     OfflineSyncScheduler.enqueue(appContext)
+                    OfflinePrefetchScheduler.enqueueIfDue(appContext, force = true)
                     appContext.sendBroadcast(
                         Intent(ACTION_BACK_ONLINE).setPackage(appContext.packageName)
                     )

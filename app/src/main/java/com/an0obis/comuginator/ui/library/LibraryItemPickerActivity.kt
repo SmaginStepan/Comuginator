@@ -268,25 +268,49 @@ class LibraryItemPickerActivity : BaseActivity() {
 
     private fun openLibraryBrowse() {
         lifecycleScope.launch {
+            val cache = OfflineCache(this@LibraryItemPickerActivity)
+            val familyId = sessionStore.familyId
+            var offline = isOffline()
+
             try {
                 tvStatus.text = getString(R.string.loading_library)
 
-                val auth = authHeaderOrThrow()
+                if (!offline) {
+                    try {
+                        val auth = authHeaderOrThrow()
 
-                val itemsResponse = ApiClient.api.getLibraryItems(auth = auth, source = null)
-                val setsResponse = ApiClient.api.getLibrarySets(auth = auth)
+                        val itemsResponse = ApiClient.api.getLibraryItems(auth = auth, source = null)
+                        val setsResponse = ApiClient.api.getLibrarySets(auth = auth)
 
-                allLibraryItems = itemsResponse.items
-                allSets = setsResponse.sets
+                        // Merged so photos added offline (not uploaded yet) stay pickable.
+                        cache.saveLibraryItemsMerged(familyId, itemsResponse.items)
+                        cache.saveLibrarySets(familyId, setsResponse.sets)
 
-                allSetItems = buildMap {
-                    for (set in allSets) {
-                        try {
-                            val details = ApiClient.api.getLibrarySet(auth, set.id)
-                            put(set.id, details.set.items)
-                        } catch (_: Exception) {
-                            put(set.id, emptyList())
+                        allLibraryItems = cache.loadLibraryItems(familyId) ?: itemsResponse.items
+                        allSets = setsResponse.sets
+
+                        allSetItems = buildMap {
+                            for (set in allSets) {
+                                try {
+                                    val details = ApiClient.api.getLibrarySet(auth, set.id)
+                                    cache.saveSetDetails(familyId, details.set)
+                                    put(set.id, details.set.items)
+                                } catch (_: Exception) {
+                                    put(set.id, cache.loadSetDetails(familyId, set.id)?.items.orEmpty())
+                                }
+                            }
                         }
+                    } catch (e: java.io.IOException) {
+                        // No connection: fall back to the offline snapshot.
+                        offline = true
+                    }
+                }
+
+                if (offline) {
+                    allLibraryItems = cache.loadLibraryItems(familyId).orEmpty()
+                    allSets = cache.loadLibrarySets(familyId).orEmpty()
+                    allSetItems = allSets.associate { set ->
+                        set.id to cache.loadSetDetails(familyId, set.id)?.items.orEmpty()
                     }
                 }
 
@@ -296,7 +320,7 @@ class LibraryItemPickerActivity : BaseActivity() {
                 libraryFiltersBlock.visibility = LinearLayout.VISIBLE
                 rvItems.visibility = RecyclerView.VISIBLE
                 confirmBlock.visibility = LinearLayout.GONE
-                tvStatus.text = ""
+                tvStatus.text = if (offline) getString(R.string.offline) else ""
             } catch (e: Exception) {
                 tvStatus.text = getString(R.string.load_library_failed, e.message)
             }
@@ -613,7 +637,8 @@ class LibraryItemPickerActivity : BaseActivity() {
                 id = id,
                 filePath = destFile.absolutePath,
                 label = label,
-                createdAt = System.currentTimeMillis()
+                createdAt = System.currentTimeMillis(),
+                mimeType = contentResolver.getType(uri)
             )
         )
 

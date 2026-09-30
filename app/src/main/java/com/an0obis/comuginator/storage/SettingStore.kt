@@ -26,6 +26,13 @@ class SettingsStore(context: Context) {
             prefs.edit { putBoolean("open_incoming_fullscreen", value) }
         }
 
+    /** When the full offline snapshot (library, child home, images) last completed. */
+    var offlinePrefetchedAt: Long
+        get() = prefs.getLong("offline_prefetched_at", 0L)
+        set(value) {
+            prefs.edit { putLong("offline_prefetched_at", value) }
+        }
+
     /** Manual "work offline" switch: the app uses local data only while set. */
     var offlineMode: Boolean
         get() = prefs.getBoolean("offline_mode", false)

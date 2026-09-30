@@ -18,6 +18,7 @@ import com.an0obis.comuginator.api.UpdateNameRequest
 import com.an0obis.comuginator.api.UserDto
 import com.an0obis.comuginator.service.AdultMode
 import com.an0obis.comuginator.service.CommandSyncScheduler
+import com.an0obis.comuginator.service.OfflinePrefetchScheduler
 import com.an0obis.comuginator.storage.SessionStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -435,6 +436,7 @@ class FamilyViewModel(application: Application) : AndroidViewModel(application) 
 
     fun setActiveFamily(familyId: String) {
         store.setActiveFamily(familyId)
+        OfflinePrefetchScheduler.enqueueIfDue(getApplication(), force = true)
         _uiState.value = FamilyUiState()
         _inviteDisplay.value = null
         viewModelScope.launch { _events.emit(FamilyEvent.FamilySwitched) }
@@ -470,6 +472,7 @@ class FamilyViewModel(application: Application) : AndroidViewModel(application) 
                     _events.emit(FamilyEvent.ShowToast(msg))
                 } else {
                     store.setActiveFamily(response.familyId)
+                    OfflinePrefetchScheduler.enqueueIfDue(getApplication(), force = true)
                     _uiState.value = FamilyUiState()
                     _inviteDisplay.value = null
                     val successMsg = str(R.string.switch_family_success)

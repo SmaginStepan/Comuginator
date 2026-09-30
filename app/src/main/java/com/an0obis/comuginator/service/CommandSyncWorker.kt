@@ -5,6 +5,7 @@ import android.content.Intent
 import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.an0obis.comuginator.api.AacMessageDetailsDto
 import com.an0obis.comuginator.api.ApiClient
 import com.an0obis.comuginator.api.CommandDto
 import com.an0obis.comuginator.storage.SessionStore
@@ -99,6 +100,37 @@ class CommandSyncWorker(
         audioManager.setStreamVolume(stream, targetVolume, 0)
     }
 
+    /**
+     * Loads a message for notification purposes. The message may belong to
+     * another family this device is in, so the other memberships are probed
+     * (no context switch from a background worker). Null if it can't be loaded.
+     */
+    private fun fetchMessage(messageId: String, authHeader: String): AacMessageDetailsDto? {
+        val sessionStore = SessionStore(applicationContext)
+        return try {
+            ApiClient.getAacMessageWithAuthHeader(authHeader = authHeader, messageId = messageId)
+        } catch (e: Exception) {
+            sessionStore.getFamilies()
+                .filter { it.familyId != sessionStore.familyId }
+                .firstNotNullOfOrNull { family ->
+                    try {
+                        ApiClient.getAacMessageWithAuthHeader(
+                            authHeader = authHeader,
+                            messageId = messageId,
+                            familyId = family.familyId
+                        )
+                    } catch (_: Exception) {
+                        null
+                    }
+                }
+        }
+    }
+
+    // A message a user sent to themselves (e.g. "Show message") must never
+    // produce a notification — neither the message itself nor its reply.
+    private fun isSelfMessage(message: AacMessageDetailsDto): Boolean =
+        message.fromUser.id == message.toUser.id
+
     private fun handleNewMessageCommand(command: CommandDto) {
         val messageId = command.payload["messageId"] as? String
 
@@ -107,34 +139,17 @@ class CommandSyncWorker(
 
         try {
             if (messageId != null) {
-                val sessionStore = SessionStore(applicationContext)
-                val authHeader = sessionStore.authHeader() ?: return
+                val authHeader = SessionStore(applicationContext).authHeader() ?: return
+                val message = fetchMessage(messageId, authHeader)
 
-                val message = try {
-                    ApiClient.getAacMessageWithAuthHeader(
-                        authHeader = authHeader,
-                        messageId = messageId
-                    )
-                } catch (e: Exception) {
-                    // The message may belong to another family this device is in —
-                    // probe them for the notification details (no context switch).
-                    sessionStore.getFamilies()
-                        .filter { it.familyId != sessionStore.familyId }
-                        .firstNotNullOfOrNull { family ->
-                            try {
-                                ApiClient.getAacMessageWithAuthHeader(
-                                    authHeader = authHeader,
-                                    messageId = messageId,
-                                    familyId = family.familyId
-                                )
-                            } catch (_: Exception) {
-                                null
-                            }
-                        } ?: throw e
+                if (message != null) {
+                    if (isSelfMessage(message)) {
+                        Log.d("CommandSyncWorker", "no notification: message $messageId is to self")
+                        return
+                    }
+                    senderName = message.fromUser.name
+                    senderAvatar = ApiClient.loadBitmap(message.fromUser.avatarImageUrl, authHeader)
                 }
-
-                senderName = message.fromUser.name
-                senderAvatar = ApiClient.loadBitmap(message.fromUser.avatarImageUrl, authHeader)
             }
         } catch (e: Exception) {
             Log.w("CommandSyncWorker", "failed to load notification details", e)
@@ -150,9 +165,24 @@ class CommandSyncWorker(
     }
 
     private fun handleNewReplyCommand(command: CommandDto) {
+        val messageId = command.payload["messageId"] as? String
+
+        if (messageId != null) {
+            try {
+                val authHeader = SessionStore(applicationContext).authHeader()
+                val message = authHeader?.let { fetchMessage(messageId, it) }
+                if (message != null && isSelfMessage(message)) {
+                    Log.d("CommandSyncWorker", "no notification: reply to self message $messageId")
+                    return
+                }
+            } catch (e: Exception) {
+                Log.w("CommandSyncWorker", "failed to check reply message", e)
+            }
+        }
+
         NotificationHelper.showNewReplyNotification(
             context = applicationContext,
-            messageId = command.payload["messageId"] as? String,
+            messageId = messageId,
             commandId = command.id
         )
     }

@@ -81,7 +81,7 @@ object ApiClient {
     // Protected images (FAMILY_PHOTO) need the token, but never send it to
     // third-party hosts like ARASAAC. The server may build image URLs with a
     // host that differs from BASE_URL, so also match the protected path.
-    private fun isProtectedImageUrl(url: String): Boolean = try {
+    fun isProtectedImageUrl(url: String): Boolean = try {
         val target = url.toHttpUrl()
         target.host == BASE_URL.toHttpUrl().host ||
                 target.encodedPath.startsWith("/v1/library/")
@@ -136,8 +136,11 @@ object ApiClient {
             return gson.fromJson(body, AacMessageDetailsDto::class.java)
         }
     }
-    /** Replays a message request that was serialized while offline. */
-    fun sendAacMessageRaw(authHeader: String, requestJson: String) {
+    /**
+     * Replays a message request that was serialized while offline and returns
+     * the id the server gave the new message.
+     */
+    fun sendAacMessageRaw(authHeader: String, requestJson: String): String {
         val body = requestJson.toRequestBody("application/json".toMediaType())
         val request = Request.Builder()
             .url("${BASE_URL}v1/messages/aac")
@@ -147,8 +150,10 @@ object ApiClient {
 
         client.newCall(request).execute().use { response ->
             if (!response.isSuccessful) {
-                throw IOException("sendAacMessageRaw failed: ${response.code}")
+                throw RawHttpException(response.code, "sendAacMessageRaw failed: ${response.code}")
             }
+            val raw = response.body.string()
+            return gson.fromJson(raw, SendAacMessageResponse::class.java).messageId
         }
     }
 
@@ -168,7 +173,7 @@ object ApiClient {
 
         client.newCall(request).execute().use { response ->
             if (!response.isSuccessful) {
-                throw IOException("replyToAacMessage failed: ${response.code}")
+                throw RawHttpException(response.code, "replyToAacMessage failed: ${response.code}")
             }
 
             val raw = response.body.string()
@@ -176,3 +181,10 @@ object ApiClient {
         }
     }
 }
+
+/**
+ * A raw (non-Retrofit) request that the server answered with an error status.
+ * Still an IOException so existing callers keep treating it as before; the
+ * offline sync inspects [code] to tell "server said no" from "no connection".
+ */
+class RawHttpException(val code: Int, message: String) : IOException(message)

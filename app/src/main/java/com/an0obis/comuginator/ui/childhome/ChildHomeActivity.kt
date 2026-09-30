@@ -65,8 +65,10 @@ class ChildHomeActivity : BaseActivity() {
 
     private val backOnlineReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            OfflineBanner.refresh(this@ChildHomeActivity)
             viewModel.loadNodes()
+            // The node list may be unchanged (no emission), but the offline
+            // gating of Add / ⋮ / drag still has to be re-evaluated.
+            updateUi()
         }
     }
     private lateinit var adapter: ChildHomeAdapter
@@ -186,7 +188,10 @@ class ChildHomeActivity : BaseActivity() {
             if (viewModel.previewMode.value) stopPreview() else startPreview()
         }
 
-        OfflineBanner.setup(this) { viewModel.loadNodes() }
+        OfflineBanner.setup(this) {
+            viewModel.loadNodes()
+            updateUi()
+        }
 
         // Discreet parent unlock on the child's device (PIN-gated, temporary).
         val btnAdultMode = findViewById<Button>(R.id.btnAdultMode)
@@ -334,8 +339,14 @@ class ChildHomeActivity : BaseActivity() {
         val hasHidden = (viewModel.lastLoadedNodesSize ?: 0) > items.size
         val hasInvisibleInList = items.any { !it.isVisible }
 
+        // Offline the editor is limited to show/hide: no adding, editing,
+        // deleting or reordering (all of those need the server).
+        val offline = isOffline()
+        adapter.setOfflineMode(offline)
+
         if (effectiveEditorMode) {
             btnAdd.visibility = View.VISIBLE
+            btnAdd.isEnabled = !offline
             if (hasHidden) {
                 btnHideInvisible.visibility = if (hasInvisibleInList) View.VISIBLE else View.GONE
                 btnHideInvisible.isEnabled = true
@@ -430,14 +441,14 @@ class ChildHomeActivity : BaseActivity() {
                     ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT, 0
         ) {
             override fun isLongPressDragEnabled() =
-                viewModel.isEditorMode && !viewModel.previewMode.value
+                viewModel.isEditorMode && !viewModel.previewMode.value && !isOffline()
 
             override fun onMove(
                 recyclerView: RecyclerView,
                 viewHolder: RecyclerView.ViewHolder,
                 target: RecyclerView.ViewHolder
             ): Boolean {
-                if (!viewModel.isEditorMode || viewModel.previewMode.value) return false
+                if (!viewModel.isEditorMode || viewModel.previewMode.value || isOffline()) return false
                 val from = viewHolder.bindingAdapterPosition
                 val to = target.bindingAdapterPosition
                 if (from == RecyclerView.NO_POSITION || to == RecyclerView.NO_POSITION || from == to) return false
@@ -449,7 +460,7 @@ class ChildHomeActivity : BaseActivity() {
 
             override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
                 super.clearView(recyclerView, viewHolder)
-                if (viewModel.isEditorMode && !viewModel.previewMode.value) {
+                if (viewModel.isEditorMode && !viewModel.previewMode.value && !isOffline()) {
                     viewModel.persistCurrentNodeOrder(adapter.readItems())
                 }
             }
@@ -470,7 +481,17 @@ class ChildHomeActivity : BaseActivity() {
         if (viewModel.isEditorMode) finish()
     }
 
+    private fun isOffline(): Boolean = SettingsStore(this).offlineMode
+
+    private fun showOfflineToast() {
+        Toast.makeText(this, getString(R.string.unavailable_offline), Toast.LENGTH_SHORT).show()
+    }
+
     private fun openAddNode() {
+        if (isOffline()) {
+            showOfflineToast()
+            return
+        }
         viewModel.pendingEditNodeId = null
         viewModel.pendingEditNodeType = null
         pickItemLauncher.launch(
@@ -479,6 +500,10 @@ class ChildHomeActivity : BaseActivity() {
     }
 
     private fun openEditNode(node: ChildHomeNodeDto) {
+        if (isOffline()) {
+            showOfflineToast()
+            return
+        }
         viewModel.pendingEditNodeId = node.id
         viewModel.pendingEditNodeType = node.type
         pickItemLauncher.launch(

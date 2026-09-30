@@ -19,6 +19,7 @@ import com.an0obis.comuginator.R
 import com.an0obis.comuginator.service.AdultMode
 import com.an0obis.comuginator.service.CommandSyncScheduler
 import com.an0obis.comuginator.service.FcmTokenSyncScheduler
+import com.an0obis.comuginator.service.OfflinePrefetchScheduler
 import com.an0obis.comuginator.service.OfflineSyncScheduler
 import com.an0obis.comuginator.service.PowerConnectionReceiver
 import com.an0obis.comuginator.service.TelemetryScheduler
@@ -120,6 +121,7 @@ open class BaseActivity: AppCompatActivity() {
 
             CommandSyncScheduler.enqueueImmediate(applicationContext, "app_start")
             OfflineSyncScheduler.enqueue(applicationContext)
+            OfflinePrefetchScheduler.enqueueIfDue(applicationContext)
             if (mustReturnToChildHome()) {
                 startActivity(
                     Intent(this, ChildHomeActivity::class.java).apply {
@@ -278,6 +280,7 @@ open class BaseActivity: AppCompatActivity() {
                     val repliedToMyMessage = allMessages.items
                         .filter { msg ->
                             msg.fromUserId == store.userId &&
+                                    msg.toUserId != msg.fromUserId && // replies to self aren't news
                                     msg.reply != null &&
                                     pendingReplyMap.containsKey(msg.id)
                         }
@@ -368,6 +371,7 @@ open class BaseActivity: AppCompatActivity() {
             val replied = messages
                 .filter {
                     it.fromUserId == family.userId &&
+                            it.toUserId != it.fromUserId &&
                             it.reply != null &&
                             pendingReplyMap.containsKey(it.id)
                 }

@@ -72,6 +72,9 @@ class ComuginatorApp : Application(), ImageLoaderFactory {
 
         return ImageLoader.Builder(this)
             .okHttpClient(okHttpClient)
+            // Serve disk-cached images without asking the server: images are
+            // immutable per URL, and this is what lets pictures show offline.
+            .respectCacheHeaders(false)
             .build()
     }
 }

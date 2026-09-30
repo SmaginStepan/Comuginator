@@ -22,6 +22,7 @@ import android.widget.TextView
 import android.widget.Toast
 import com.an0obis.comuginator.R
 import com.an0obis.comuginator.service.NotificationPolicy
+import com.an0obis.comuginator.service.OfflinePrefetchScheduler
 import com.an0obis.comuginator.service.OfflineSyncScheduler
 import com.an0obis.comuginator.storage.NotificationRule
 import com.an0obis.comuginator.storage.SessionStore
@@ -107,6 +108,7 @@ class SettingsActivity : BaseActivity() {
             if (!isChecked) {
                 // Back online: push everything created while offline.
                 OfflineSyncScheduler.enqueue(applicationContext)
+                OfflinePrefetchScheduler.enqueueIfDue(applicationContext, force = true)
             }
         }
 

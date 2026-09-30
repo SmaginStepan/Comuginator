@@ -28,9 +28,21 @@ class ChildHomeAdapter(
 
     private var onlyVisibleNodeId: String? = null
 
+    /**
+     * Offline, the editor only allows show/hide: the ⋮ menu (rename, edit,
+     * delete) is disabled. Browsing into folders keeps working.
+     */
+    private var offlineMode = false
+
     fun setEditorMode(value: Boolean) {
         if (isEditorMode == value) return
         isEditorMode = value
+        notifyItemRangeChanged(0, itemCount)
+    }
+
+    fun setOfflineMode(value: Boolean) {
+        if (offlineMode == value) return
+        offlineMode = value
         notifyItemRangeChanged(0, itemCount)
     }
 
@@ -71,6 +83,7 @@ class ChildHomeAdapter(
         holder.tvNodeLabel.text =
             node.labelOverride ?: node.item?.label ?: node.type
         holder.btnChildMore.visibility = if (isEditorMode) View.VISIBLE else View.GONE
+        holder.btnChildMore.isEnabled = !offlineMode
         val shouldHideByBlink = onlyVisibleNodeId != null && onlyVisibleNodeId != node.id
         val nodeAlpha = if (isEditorMode && !node.isVisible) 0.35f else 1f
         Log.d("ChildHomeAdapter", "onBindViewHolder: $position $nodeAlpha")

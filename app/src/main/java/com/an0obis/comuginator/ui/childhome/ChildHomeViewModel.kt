@@ -10,6 +10,7 @@ import com.an0obis.comuginator.api.CreateChildHomeNodeRequest
 import com.an0obis.comuginator.api.UpdateChildHomeNodeRequest
 import com.an0obis.comuginator.storage.OfflineCache
 import com.an0obis.comuginator.storage.PendingNodeAction
+import com.an0obis.comuginator.storage.PendingVisibilityChange
 import com.an0obis.comuginator.storage.SessionStore
 import com.an0obis.comuginator.storage.SettingsStore
 import kotlinx.coroutines.Dispatchers
@@ -139,7 +140,9 @@ class ChildHomeViewModel(application: Application) : AndroidViewModel(applicatio
 
             val items: List<ChildHomeNodeDto>? =
                 if (SettingsStore(getApplication<Application>()).offlineMode) {
-                    cache.loadChildHomeNodes(familyId, parentId) ?: emptyList()
+                    cache.applyPendingVisibility(
+                        cache.loadChildHomeNodes(familyId, parentId) ?: emptyList()
+                    )
                 } else {
                     try {
                         val response = withContext(Dispatchers.IO) {
@@ -148,8 +151,11 @@ class ChildHomeViewModel(application: Application) : AndroidViewModel(applicatio
                                 parentId = parentId
                             )
                         }
-                        cache.saveChildHomeNodes(familyId, parentId, response.items)
-                        response.items
+                        // Show/hide changes made offline that haven't synced yet
+                        // still win over what the server says.
+                        val merged = cache.applyPendingVisibility(response.items)
+                        cache.saveChildHomeNodes(familyId, parentId, merged)
+                        merged
                     } catch (e: Exception) {
                         if (e is java.io.IOException) {
                             _events.emit(Event.ConnectionTrouble)
@@ -198,17 +204,43 @@ class ChildHomeViewModel(application: Application) : AndroidViewModel(applicatio
     }
 
     fun toggleNodeVisibility(node: ChildHomeNodeDto) {
+        val newVisible = !node.isVisible
+        val cache = OfflineCache(getApplication())
+        val familyId = store.familyId
+        val parentId = currentParentId
+
         _isLoading.value = true
         viewModelScope.launch {
+            // Show/hide is the one editor action that works offline: it is applied
+            // locally right away and sent when the connection is back.
+            suspend fun applyOffline() {
+                cache.setCachedNodeVisibility(familyId, parentId, node.id, newVisible)
+                cache.queueVisibilityChange(
+                    PendingVisibilityChange(node.id, newVisible, System.currentTimeMillis())
+                )
+                _events.emit(Event.NodeVisibilityUpdated(node.id, newVisible))
+                _events.emit(Event.ShowToast(str(R.string.action_queued_offline)))
+            }
+
             try {
-                withContext(Dispatchers.IO) {
-                    ApiClient.api.updateChildHomeNode(
-                        auth = store.authHeaderOrThrow(),
-                        nodeId = node.id,
-                        body = UpdateChildHomeNodeRequest(isVisible = !node.isVisible)
-                    )
+                if (SettingsStore(getApplication<Application>()).offlineMode) {
+                    applyOffline()
+                } else {
+                    try {
+                        withContext(Dispatchers.IO) {
+                            ApiClient.api.updateChildHomeNode(
+                                auth = store.authHeaderOrThrow(),
+                                nodeId = node.id,
+                                body = UpdateChildHomeNodeRequest(isVisible = newVisible)
+                            )
+                        }
+                        cache.setCachedNodeVisibility(familyId, parentId, node.id, newVisible)
+                        _events.emit(Event.NodeVisibilityUpdated(node.id, newVisible))
+                    } catch (e: java.io.IOException) {
+                        // Connection dropped mid-request: keep the change for later.
+                        applyOffline()
+                    }
                 }
-                _events.emit(Event.NodeVisibilityUpdated(node.id, !node.isVisible))
             } catch (e: Exception) {
                 _events.emit(Event.ShowToast(str(R.string.child_home_update_failed, e.message)))
             } finally {

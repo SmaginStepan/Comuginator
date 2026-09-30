@@ -73,6 +73,7 @@ object NotificationHelper {
         try {
             NotificationManagerCompat.from(context)
                 .notify(notificationId, notification)
+            Log.d("NotificationHelper", "posted message notification for $messageId")
         } catch (_: SecurityException) {
             Log.d("NotificationHelper", "can't show notification")
         }
@@ -125,6 +126,7 @@ object NotificationHelper {
         try {
             NotificationManagerCompat.from(context)
                 .notify(notificationId, notification)
+            Log.d("NotificationHelper", "posted reply notification for $messageId")
         } catch (_: SecurityException) {
             Log.d("NotificationHelper", "can't show notification")
         }

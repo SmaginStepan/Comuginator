@@ -1,6 +1,7 @@
 package com.an0obis.comuginator.ui.messaging
 
 import android.app.AlertDialog
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.PopupMenu
@@ -22,7 +23,6 @@ import com.an0obis.comuginator.api.ApiClient
 import com.an0obis.comuginator.api.SendAacMessageRequest
 import com.an0obis.comuginator.api.SuggestedReplyItem
 import com.an0obis.comuginator.api.WaitStepDto
-import com.an0obis.comuginator.service.NotificationHelper
 import com.an0obis.comuginator.storage.OfflineCache
 import com.an0obis.comuginator.storage.PendingSelfMessage
 import com.an0obis.comuginator.storage.SessionStore
@@ -360,13 +360,26 @@ class ComposeMessageActivity : BaseActivity() {
     private fun addLibraryItemById(itemId: String) {
         scope.launch {
             try {
-                val response = ApiClient.api.getLibraryItems(
-                    auth = store.authHeaderOrThrow(),
-                    source = null
-                )
+                val cache = OfflineCache(this@ComposeMessageActivity)
+                val familyId = store.familyId
+                fun cachedCard(): AacCardDto =
+                    cache.loadLibraryItems(familyId)?.firstOrNull { it.id == itemId }
+                        ?: error("Library item not found: $itemId")
 
-                val card = response.items.firstOrNull { it.id == itemId }
-                    ?: error("Library item not found: $itemId")
+                // Offline (or a photo added offline that the server doesn't know
+                // yet) resolves from the local library snapshot.
+                val card = if (SettingsStore(this@ComposeMessageActivity).offlineMode) {
+                    cachedCard()
+                } else {
+                    try {
+                        ApiClient.api.getLibraryItems(
+                            auth = store.authHeaderOrThrow(),
+                            source = null
+                        ).items.firstOrNull { it.id == itemId } ?: cachedCard()
+                    } catch (e: java.io.IOException) {
+                        cachedCard()
+                    }
+                }
 
                 runOnUiThread {
                     if (vm.replyCards.none { it.id == card.id }) {
@@ -613,16 +626,20 @@ class ComposeMessageActivity : BaseActivity() {
             listOf(localMessage) + (cache.loadMessages(familyId) ?: emptyList())
         )
 
-        NotificationHelper.showNewMessageNotification(
-            context = this,
-            messageId = localId,
-            commandId = ""
-        )
         ComuginatorWidgetProvider.requestUpdate(applicationContext)
 
         runOnUiThread {
             Toast.makeText(this, getString(R.string.message_saved_offline), Toast.LENGTH_LONG)
                 .show()
+            // Self-messages never produce a notification: show the message
+            // directly on this device instead.
+            startActivity(
+                Intent(this, IncomingMessageActivity::class.java).apply {
+                    putExtra(IncomingMessageActivity.EXTRA_MESSAGE_ID, localId)
+                    putExtra(IncomingMessageActivity.EXTRA_COMMAND_ID, "")
+                    putExtra(IncomingMessageActivity.EXTRA_MODE, IncomingMessageActivity.MODE_MESSAGE)
+                }
+            )
             finish()
         }
     }

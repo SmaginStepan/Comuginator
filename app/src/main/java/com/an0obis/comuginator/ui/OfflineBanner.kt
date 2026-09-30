@@ -4,6 +4,7 @@ import android.app.Activity
 import android.view.View
 import android.widget.Button
 import com.an0obis.comuginator.R
+import com.an0obis.comuginator.service.OfflinePrefetchScheduler
 import com.an0obis.comuginator.service.OfflineSyncScheduler
 import com.an0obis.comuginator.storage.SessionStore
 import com.an0obis.comuginator.storage.SettingsStore
@@ -22,6 +23,7 @@ object OfflineBanner {
         banner.findViewById<Button>(R.id.btnReconnect).setOnClickListener {
             SettingsStore(activity).offlineMode = false
             OfflineSyncScheduler.enqueue(activity.applicationContext)
+            OfflinePrefetchScheduler.enqueueIfDue(activity.applicationContext, force = true)
             refresh(activity)
             onReconnect()
         }

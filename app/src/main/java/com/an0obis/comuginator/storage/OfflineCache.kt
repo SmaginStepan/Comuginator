@@ -18,13 +18,26 @@ data class PendingPhoto(
     val id: String,
     val filePath: String,
     val label: String,
-    val createdAt: Long
+    val createdAt: Long,
+    val mimeType: String? = null
 )
 
-/** A message to self composed offline; the raw request JSON is replayed later. */
+/**
+ * A message to self composed offline; the raw request JSON is replayed later.
+ * [serverMessageId] is set once the message exists on the server, so a retry
+ * of a failed follow-up step (uploading the local reply) never creates it twice.
+ */
 data class PendingSelfMessage(
     val id: String,
     val requestJson: String,
+    val createdAt: Long,
+    val serverMessageId: String? = null
+)
+
+/** A show/hide change to a child-home node made offline; sent later. */
+data class PendingVisibilityChange(
+    val nodeId: String,
+    val isVisible: Boolean,
     val createdAt: Long
 )
 
@@ -86,6 +99,33 @@ class OfflineCache(context: Context) {
     fun loadLibraryItems(familyId: String?): List<AacCardDto>? =
         load("items_$familyId", object : TypeToken<List<AacCardDto>>() {}.type)
 
+    /** Photos added offline, shaped as library cards (file:// image, "local_" id). */
+    fun pendingPhotoCards(): List<AacCardDto> =
+        getPendingPhotos().map {
+            AacCardDto(
+                id = it.id,
+                label = it.label,
+                imageUrl = android.net.Uri.fromFile(File(it.filePath)).toString(),
+                source = "FAMILY_PHOTO"
+            )
+        }
+
+    /**
+     * Stores a fresh server library snapshot while keeping photos that were
+     * added offline and haven't been uploaded yet at the top of the list.
+     */
+    fun saveLibraryItemsMerged(familyId: String?, serverItems: List<AacCardDto>) {
+        val serverIds = serverItems.map { it.id }.toSet()
+        val local = pendingPhotoCards().filter { it.id !in serverIds }
+        saveLibraryItems(familyId, local + serverItems)
+    }
+
+    /** After an offline photo is uploaded, swap its local card for the real one. */
+    fun replaceLibraryItem(familyId: String?, localId: String, real: AacCardDto) {
+        val items = loadLibraryItems(familyId) ?: return
+        saveLibraryItems(familyId, items.map { if (it.id == localId) real else it })
+    }
+
     fun saveChildHomeNodes(familyId: String?, parentId: String?, nodes: List<ChildHomeNodeDto>) =
         save("childhome_${familyId}_${parentId ?: "root"}", nodes)
 
@@ -103,6 +143,14 @@ class OfflineCache(context: Context) {
 
     fun saveMessages(familyId: String?, messages: List<AacMessageListItemDto>) =
         save("messages_$familyId", messages)
+
+    fun findMessage(familyId: String?, id: String): AacMessageListItemDto? =
+        loadMessages(familyId)?.firstOrNull { it.id == id }
+
+    fun removeMessage(familyId: String?, id: String) {
+        val messages = loadMessages(familyId) ?: return
+        saveMessages(familyId, messages.filterNot { it.id == id })
+    }
 
     fun loadMessages(familyId: String?): List<AacMessageListItemDto>? =
         load("messages_$familyId", object : TypeToken<List<AacMessageListItemDto>>() {}.type)
@@ -124,6 +172,17 @@ class OfflineCache(context: Context) {
     fun removePendingPhoto(id: String) =
         save("pending_photos", getPendingPhotos().filterNot { it.id == id })
 
+    /**
+     * Local photo id → the real library card it became after upload. Persisted
+     * because a queued message may only be replayed on a later sync run than
+     * the one that uploaded its photo.
+     */
+    fun getPhotoIdMap(): Map<String, AacCardDto> =
+        load("photo_id_map", object : TypeToken<Map<String, AacCardDto>>() {}.type) ?: emptyMap()
+
+    fun putPhotoId(localId: String, real: AacCardDto) =
+        save("photo_id_map", getPhotoIdMap() + (localId to real))
+
     // ── Pending self-messages ───────────────────────────────────────────────
 
     fun getPendingSelfMessages(): List<PendingSelfMessage> =
@@ -133,8 +192,58 @@ class OfflineCache(context: Context) {
     fun addPendingSelfMessage(message: PendingSelfMessage) =
         save("pending_self_messages", getPendingSelfMessages() + message)
 
+    fun updatePendingSelfMessage(updated: PendingSelfMessage) =
+        save(
+            "pending_self_messages",
+            getPendingSelfMessages().map { if (it.id == updated.id) updated else it }
+        )
+
     fun removePendingSelfMessage(id: String) =
         save("pending_self_messages", getPendingSelfMessages().filterNot { it.id == id })
+
+    // ── Pending child-home visibility changes ──────────────────────────────
+
+    fun getPendingVisibilityChanges(): List<PendingVisibilityChange> =
+        load("pending_visibility", object : TypeToken<List<PendingVisibilityChange>>() {}.type)
+            ?: emptyList()
+
+    /** Only the latest change per node matters, so a new one replaces the old. */
+    fun queueVisibilityChange(change: PendingVisibilityChange) =
+        save(
+            "pending_visibility",
+            getPendingVisibilityChanges().filterNot { it.nodeId == change.nodeId } + change
+        )
+
+    /**
+     * Removes a change once it was sent. Matching on [createdAt] keeps a newer
+     * toggle of the same node (made while this one was being sent) queued.
+     */
+    fun removePendingVisibilityChange(nodeId: String, createdAt: Long) =
+        save(
+            "pending_visibility",
+            getPendingVisibilityChanges().filterNot {
+                it.nodeId == nodeId && it.createdAt == createdAt
+            }
+        )
+
+    /**
+     * Overlays not-yet-synced visibility changes on nodes freshly read from the
+     * server (or cache), so a reload never flashes the old state back.
+     */
+    fun applyPendingVisibility(nodes: List<ChildHomeNodeDto>): List<ChildHomeNodeDto> {
+        val pending = getPendingVisibilityChanges().associate { it.nodeId to it.isVisible }
+        if (pending.isEmpty()) return nodes
+        return nodes.map { node -> pending[node.id]?.let { node.copy(isVisible = it) } ?: node }
+    }
+
+    fun setCachedNodeVisibility(familyId: String?, parentId: String?, nodeId: String, visible: Boolean) {
+        val nodes = loadChildHomeNodes(familyId, parentId) ?: return
+        saveChildHomeNodes(
+            familyId,
+            parentId,
+            nodes.map { if (it.id == nodeId) it.copy(isVisible = visible) else it }
+        )
+    }
 
     // ── Pending child-home action requests ─────────────────────────────────
 
