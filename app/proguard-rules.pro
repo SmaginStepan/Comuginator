@@ -1,21 +1,34 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
+# R8 rules for the release build (minify + obfuscate + resource shrinking).
 #
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# Retrofit, OkHttp, Coil, WorkManager, Firebase, Material, Compose, zxing and
+# kotlinx.coroutines ship their own consumer rules, so only what THIS app
+# reaches through reflection needs to be kept here.
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Generic signatures and annotations are read at runtime by Retrofit (service
+# method return types, @GET/@POST/...) and Gson (TypeToken<List<...>>).
+-keepattributes Signature, InnerClasses, EnclosingMethod
+-keepattributes *Annotation*
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# Readable stack traces in Play Console / Crashlytics (mapping file is uploaded
+# with the bundle): keep line numbers, hide original source file names.
+-keepattributes SourceFile, LineNumberTable
+-renamesourcefileattribute SourceFile
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# ── Gson models ──────────────────────────────────────────────────────────────
+# Gson maps JSON keys to Kotlin property names via reflection (there are no
+# @SerializedName annotations), so field names must survive obfuscation. The
+# constructors are kept too so Gson keeps using the synthetic no-arg constructor
+# of all-default data classes (which applies the Kotlin default values).
+#
+# api:     every request/response DTO (also cached to disk as JSON, and passed
+#          between activities as JSON extras).
+# storage: FamilyEntry, NotificationRule and the Pending* offline-queue classes
+#          are persisted to SharedPreferences / files as JSON.
+-keep class com.an0obis.comuginator.api.** {
+    <init>(...);
+    <fields>;
+}
+-keep class com.an0obis.comuginator.storage.** {
+    <init>(...);
+    <fields>;
+}
