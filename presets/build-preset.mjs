@@ -111,8 +111,12 @@ for (const w of all) {
   w.pic = w.pin ? { id: w.pin, matched: "(pinned)", exact: true, kw: "(pinned)", cats: "" } : await lookup(w.query);
   if (++done % 50 === 0) { console.log(`looked up ${done}/${all.length + folders.length}`); writeFileSync(CACHE_FILE, JSON.stringify(cache)); }
 }
+// Folder pictograms the search could not find (or finds badly), pinned by ARASAAC id.
+const FOLDER_PIN = { describir: 32584, estados: 11476, tiempo: 3071 };
 for (const f of folders) {
-  f.pic = await lookup(FOLDER_QUERY[f.key] ?? f.query);
+  f.pic = FOLDER_PIN[f.key]
+    ? { id: FOLDER_PIN[f.key], matched: "(pinned)", exact: true, kw: "(pinned)", cats: "" }
+    : await lookup(FOLDER_QUERY[f.key] ?? f.query);
   done++;
 }
 writeFileSync(CACHE_FILE, JSON.stringify(cache));
@@ -144,7 +148,11 @@ const preset = {
 writeFileSync(`${OUT}/conversation-starter.json`, JSON.stringify(preset, null, 1));
 
 // ── review reports ─────────────────────────────────────────────────────────
-const missing = all.filter((w) => !w.pic?.id);
+const missing = [...all, ...folders].filter((w) => !w.pic?.id);
+if (missing.length) {
+  console.error("ERROR: cards without a pictogram:", missing.map((w) => w.es ?? w.label?.es).join(", "));
+  process.exitCode = 1;
+}
 const weak = all.filter((w) => w.pic?.id && !w.pic.exact);
 const stats = `cards: ${all.length + folders.length}  (core ${home.length}, folders ${folders.length}, in folders ${folders.reduce((n, f) => n + f.words.length, 0)})\nno pictogram: ${missing.length}\nnot an exact keyword match: ${weak.length}`;
 console.log(stats);

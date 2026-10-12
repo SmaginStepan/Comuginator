@@ -2500,7 +2500,7 @@
     "row": 5,
     "col": 5,
     "color": "FOLDER",
-    "arasaacId": null,
+    "arasaacId": 32584,
     "label": {
      "es": "Describir",
      "en": "Describe",
@@ -4186,7 +4186,7 @@
     "row": 6,
     "col": 0,
     "color": "FOLDER",
-    "arasaacId": null,
+    "arasaacId": 11476,
     "label": {
      "es": "Estados",
      "en": "Feelings",
@@ -4654,7 +4654,7 @@
     "row": 6,
     "col": 2,
     "color": "FOLDER",
-    "arasaacId": 7223,
+    "arasaacId": 3071,
     "label": {
      "es": "Tiempo",
      "en": "Time",
