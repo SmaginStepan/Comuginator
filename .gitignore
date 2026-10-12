@@ -13,3 +13,5 @@
 .externalNativeBuild
 .cxx
 local.properties
+# Signed release bundles are uploaded to Play Console; don't track them
+*.aab

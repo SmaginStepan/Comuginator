@@ -34,6 +34,15 @@ class ChildHomeAdapter(
      */
     private var offlineMode = false
 
+    /** The conversation library has no show/hide: the button and dimming go away. */
+    private var visibilityEnabled = true
+
+    fun setVisibilityEnabled(value: Boolean) {
+        if (visibilityEnabled == value) return
+        visibilityEnabled = value
+        notifyItemRangeChanged(0, itemCount)
+    }
+
     fun setEditorMode(value: Boolean) {
         if (isEditorMode == value) return
         isEditorMode = value
@@ -85,7 +94,7 @@ class ChildHomeAdapter(
         holder.btnChildMore.visibility = if (isEditorMode) View.VISIBLE else View.GONE
         holder.btnChildMore.isEnabled = !offlineMode
         val shouldHideByBlink = onlyVisibleNodeId != null && onlyVisibleNodeId != node.id
-        val nodeAlpha = if (isEditorMode && !node.isVisible) 0.35f else 1f
+        val nodeAlpha = if (isEditorMode && visibilityEnabled && !node.isVisible) 0.35f else 1f
         Log.d("ChildHomeAdapter", "onBindViewHolder: $position $nodeAlpha")
 
         holder.itemView.clearAnimation()
@@ -143,7 +152,7 @@ class ChildHomeAdapter(
             onNodeClick(node)
         }
         holder.btnToggleVisibility.visibility =
-            if (isEditorMode) View.VISIBLE else View.GONE
+            if (isEditorMode && visibilityEnabled) View.VISIBLE else View.GONE
 
         holder.btnToggleVisibility.text =
             holder.itemView.context.getString(

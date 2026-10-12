@@ -187,6 +187,7 @@
     </plurals>
     <string name="new_set">Новый набор</string>
     <string name="choose_user_avatar">Выбрать аватар пользователя</string>
+    <string name="choose_card">Выберите карточку</string>
     <string name="choose_set_cover">Выбрать обложку набора</string>
     <string name="add_item_to_set">Добавить элемент в набор</string>
     <string name="photo_number">Фото %1$s</string>
@@ -376,5 +377,24 @@
     <string name="exact_date">Конкретная дата</string>
     <string name="day_of_week">День недели</string>
     <string name="request">Просьба</string>
+
+    <!-- Режим общения (коммуникативная доска) -->
+    <string name="conversation_mode">Общение</string>
+    <string name="conversation_title">Общение</string>
+    <string name="conversation_library">Библиотека общения</string>
+    <string name="conversation_exit">Выйти</string>
+    <string name="conversation_line_hint">Нажимайте карточки, чтобы составить сообщение</string>
+    <string name="conversation_speak">Произнести</string>
+    <string name="conversation_backspace">Убрать последнюю карточку</string>
+    <string name="conversation_clear">Очистить</string>
+    <string name="conversation_search_hint">Поиск ARASAAC</string>
+    <string name="conversation_search_none">Ничего не найдено</string>
+    <string name="conversation_empty">Карточек пока нет. Родитель может добавить их в библиотеке общения.</string>
+    <string name="conversation_load_failed">Не удалось загрузить библиотеку общения.</string>
+    <string name="conversation_tts_unavailable">Синтез речи недоступен на этом устройстве.</string>
+    <string name="conversation_tts_language_missing">Голос для этого языка не установлен, поэтому карточки нельзя произнести.</string>
+    <string name="element_word">Слово</string>
+    <string name="breadcrumb_conversation">Comuginator > Библиотека общения > %1$s</string>
+    <string name="breadcrumb_conversation_root">Comuginator > Библиотека общения</string>
 
 </resources>

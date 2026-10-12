@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/conversationRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingHorizontal="8dp"
+    android:paddingTop="8dp">
+
+    <!-- TOP BAR: exit, where we are, one folder up -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnConvExit"
+            style="@style/ComuginatorButton.Secondary"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:minHeight="40dp"
+            android:text="@string/conversation_exit" />
+
+        <TextView
+            android:id="@+id/tvConvPath"
+            style="@style/ComuginatorText.Small"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:maxLines="1"
+            android:paddingHorizontal="8dp" />
+
+        <Button
+            android:id="@+id/btnConvUp"
+            style="@style/ComuginatorButton.Secondary"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:minHeight="40dp"
+            android:text="@string/back"
+            android:visibility="invisible" />
+    </LinearLayout>
+
+    <!-- THE LINE of cards composed so far, with its controls -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:orientation="horizontal">
+
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="112dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_conv_line">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvConvLine"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="2dp" />
+
+            <TextView
+                android:id="@+id/tvConvLineHint"
+                style="@style/ComuginatorText.Muted"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:padding="8dp"
+                android:text="@string/conversation_line_hint" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="112dp"
+            android:layout_marginStart="6dp"
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/btnConvSpeak"
+                style="@style/ComuginatorButton"
+                android:layout_width="104dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:contentDescription="@string/conversation_speak"
+                android:minHeight="0dp"
+                android:paddingHorizontal="0dp"
+                android:text="@string/conversation_speak_glyph"
+                android:textSize="22sp" />
+
+            <LinearLayout
+                android:layout_width="104dp"
+                android:layout_height="0dp"
+                android:layout_marginTop="4dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnConvBackspace"
+                    style="@style/ComuginatorButton.Secondary"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:contentDescription="@string/conversation_backspace"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:paddingHorizontal="0dp"
+                    android:text="@string/conversation_backspace_glyph"
+                    android:textSize="24sp" />
+
+                <Button
+                    android:id="@+id/btnConvClear"
+                    style="@style/ComuginatorButton.Secondary"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="2dp"
+                    android:layout_weight="1"
+                    android:contentDescription="@string/conversation_clear"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:paddingHorizontal="0dp"
+                    android:text="@string/conversation_clear_glyph"
+                    android:textSize="24sp" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- ARASAAC search: finds any pictogram and adds it to the line only -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/etConvSearch"
+            style="@style/ComuginatorEditText.Search"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_weight="1"
+            android:hint="@string/conversation_search_hint"
+            android:maxLines="1" />
+
+        <Button
+            android:id="@+id/btnConvSearch"
+            style="@style/ComuginatorButton.Secondary"
+            android:layout_width="wrap_content"
+            android:layout_height="44dp"
+            android:layout_marginStart="6dp"
+            android:minHeight="44dp"
+            android:text="@string/search" />
+    </LinearLayout>
+
+    <!-- THE LIBRARY: fills the rest of the screen and scrolls vertically -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="6dp"
+        android:layout_weight="1">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvConvLibrary"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingBottom="8dp" />
+
+        <TextView
+            android:id="@+id/tvConvEmpty"
+            style="@style/ComuginatorText.Muted"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:padding="24dp"
+            android:text="@string/conversation_empty"
+            android:visibility="gone" />
+
+        <ProgressBar
+            android:id="@+id/progressConv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone" />
+    </FrameLayout>
+
+    <include layout="@layout/view_offline_banner" />
+
+</LinearLayout>

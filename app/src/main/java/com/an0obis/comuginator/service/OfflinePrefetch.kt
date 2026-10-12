@@ -14,6 +14,8 @@ import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.an0obis.comuginator.api.ApiClient
 import com.an0obis.comuginator.storage.OfflineCache
+import com.an0obis.comuginator.storage.SECTION_CONVERSATION
+import com.an0obis.comuginator.storage.SECTION_HOME
 import com.an0obis.comuginator.storage.SessionStore
 import com.an0obis.comuginator.storage.SettingsStore
 import kotlinx.coroutines.async
@@ -64,23 +66,35 @@ object OfflinePrefetcher {
             ok = false
         }
 
-        // Child-home tree: MENU nodes are folders, so recurse into each one.
-        val visited = HashSet<String?>()
-        suspend fun visit(parentId: String?, depth: Int) {
-            if (depth > MAX_TREE_DEPTH || !visited.add(parentId)) return
-            val nodes = try {
-                ApiClient.api.getChildHomeNodes(auth, parentId).items
-            } catch (e: Exception) {
-                Log.w(TAG, "child home level $parentId failed", e)
-                ok = false
-                return
+        // Node trees: MENU nodes are folders, so recurse into each one. Two
+        // trees exist: the child home and the conversation mode library.
+        suspend fun walkTree(section: String) {
+            val visited = HashSet<String?>()
+            suspend fun visit(parentId: String?, depth: Int) {
+                if (depth > MAX_TREE_DEPTH || !visited.add(parentId)) return
+                val nodes = try {
+                    ApiClient.api.getChildHomeNodes(
+                        auth,
+                        parentId,
+                        section = if (section == SECTION_CONVERSATION) section else null
+                    ).items
+                } catch (e: Exception) {
+                    Log.w(TAG, "$section level $parentId failed", e)
+                    ok = false
+                    return
+                }
+                // Keep show/hide changes made offline that haven't synced yet
+                // (the conversation library has no show/hide).
+                val toSave =
+                    if (section == SECTION_CONVERSATION) nodes else cache.applyPendingVisibility(nodes)
+                cache.saveChildHomeNodes(familyId, parentId, toSave, section)
+                nodes.forEach { addImage(imageUrls, it.item?.imageUrl) }
+                nodes.filter { it.type == "MENU" }.forEach { visit(it.id, depth + 1) }
             }
-            // Keep show/hide changes made offline that haven't synced yet.
-            cache.saveChildHomeNodes(familyId, parentId, cache.applyPendingVisibility(nodes))
-            nodes.forEach { addImage(imageUrls, it.item?.imageUrl) }
-            nodes.filter { it.type == "MENU" }.forEach { visit(it.id, depth + 1) }
+            visit(null, 0)
         }
-        visit(null, 0)
+        walkTree(SECTION_HOME)
+        walkTree(SECTION_CONVERSATION)
 
         warmImages(app, auth, imageUrls)
 

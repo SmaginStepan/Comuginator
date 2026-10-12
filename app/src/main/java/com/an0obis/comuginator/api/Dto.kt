@@ -448,7 +448,9 @@ data class ChildHomeNodeDto(
     val labelOverride: String?,
     val isVisible: Boolean = true,
     val item: ChildHomeNodeItemDto?,
-    val targets: List<ChildHomeTargetDto> = emptyList()
+    val targets: List<ChildHomeTargetDto> = emptyList(),
+    /** "HOME" (child home) or "CONVERSATION" (conversation mode library). */
+    val section: String = "HOME"
 )
 
 data class ChildHomeNodesResponse(
@@ -471,7 +473,8 @@ data class CreateChildHomeNodeRequest(
     val targetMode: String = "ALL_PARENTS",
     val targetUserIds: List<String>? = null,
     val blinkEnabled: Boolean = true,
-    val blinkSeconds: Int = 60
+    val blinkSeconds: Int = 60,
+    val section: String? = null
 )
 
 data class UpdateChildHomeNodeRequest(

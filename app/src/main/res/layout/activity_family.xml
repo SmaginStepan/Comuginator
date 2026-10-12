@@ -34,6 +34,16 @@
             android:text="@string/more" />
     </LinearLayout>
 
+    <!-- Conversation mode: AAC board on this very device (above all other buttons) -->
+    <Button
+        android:id="@+id/btnConversation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="8dp"
+        android:layout_marginTop="8dp"
+        style="@style/ComuginatorButton"
+        android:text="@string/conversation_mode" />
+
     <!-- Message to self: shows a message on this very device -->
     <Button
         android:id="@+id/btnShowMessage"
@@ -76,6 +86,15 @@
             android:text="@string/schedule" />
 
     </LinearLayout>
+
+    <!-- Parents manage the conversation library (folders and word cards) here -->
+    <Button
+        android:id="@+id/btnConversationLibrary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="8dp"
+        style="@style/ComuginatorButton.Secondary"
+        android:text="@string/conversation_library" />
 
     <TextView
         android:id="@+id/tvInvite"

@@ -38,7 +38,9 @@ import com.an0obis.comuginator.ui.library.LibraryActivity
 import com.an0obis.comuginator.ui.library.LibraryItemPickerActivity
 import com.an0obis.comuginator.ui.schedule.ScheduleActivity
 import com.an0obis.comuginator.service.AdultMode
+import com.an0obis.comuginator.storage.SECTION_CONVERSATION
 import com.an0obis.comuginator.storage.SettingsStore
+import com.an0obis.comuginator.ui.conversation.ConversationActivity
 import com.an0obis.comuginator.ui.ConnectionErrorHelper
 import com.an0obis.comuginator.ui.OfflineBanner
 import com.an0obis.comuginator.util.TimeFormat
@@ -121,6 +123,26 @@ class FamilyActivity : BaseActivity() {
                 ?.firstOrNull { it.id == myUserId }?.name
                 ?: store.userName.orEmpty()
             openComposeMessageScreen(myUserId, myName)
+        }
+
+        // Conversation mode (AAC board). Needs no PIN, also on a child device.
+        findViewById<Button>(R.id.btnConversation).setOnClickListener {
+            ConversationActivity.start(this)
+        }
+
+        // The library of folders/word cards used by conversation mode. Editing
+        // needs the server, so it is unavailable offline.
+        findViewById<Button>(R.id.btnConversationLibrary).setOnClickListener {
+            if (isOfflineMode()) {
+                showOfflineToast()
+            } else {
+                startActivity(
+                    Intent(this, ChildHomeActivity::class.java).apply {
+                        putExtra(ChildHomeActivity.EXTRA_EDITOR_MODE, true)
+                        putExtra(ChildHomeActivity.EXTRA_SECTION, SECTION_CONVERSATION)
+                    }
+                )
+            }
         }
 
         findViewById<Button>(R.id.btnLibrary).setOnClickListener {
@@ -335,6 +357,7 @@ class FamilyActivity : BaseActivity() {
         OfflineBanner.refresh(this)
 
         btnSchedule.isVisible = meRole == "PARENT"
+        findViewById<Button>(R.id.btnConversationLibrary).isEnabled = !isOfflineMode()
 
         val offline = isOfflineMode()
         if (familyAdapter == null || adapterMeRole != meRole ||

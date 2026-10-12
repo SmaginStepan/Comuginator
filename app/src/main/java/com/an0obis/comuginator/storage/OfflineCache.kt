@@ -13,6 +13,10 @@ import com.google.gson.reflect.TypeToken
 import java.io.File
 import java.lang.reflect.Type
 
+/** Child-home node sections: the child's home grid vs the conversation mode library. */
+const val SECTION_HOME = "HOME"
+const val SECTION_CONVERSATION = "CONVERSATION"
+
 /** A photo added while offline, waiting to be uploaded to the library. */
 data class PendingPhoto(
     val id: String,
@@ -126,12 +130,25 @@ class OfflineCache(context: Context) {
         saveLibraryItems(familyId, items.map { if (it.id == localId) real else it })
     }
 
-    fun saveChildHomeNodes(familyId: String?, parentId: String?, nodes: List<ChildHomeNodeDto>) =
-        save("childhome_${familyId}_${parentId ?: "root"}", nodes)
+    /** The child home keeps its original keys; the conversation library gets its own. */
+    private fun nodesKey(familyId: String?, parentId: String?, section: String) =
+        (if (section == SECTION_CONVERSATION) "conversation" else "childhome") +
+                "_${familyId}_${parentId ?: "root"}"
 
-    fun loadChildHomeNodes(familyId: String?, parentId: String?): List<ChildHomeNodeDto>? =
+    fun saveChildHomeNodes(
+        familyId: String?,
+        parentId: String?,
+        nodes: List<ChildHomeNodeDto>,
+        section: String = SECTION_HOME
+    ) = save(nodesKey(familyId, parentId, section), nodes)
+
+    fun loadChildHomeNodes(
+        familyId: String?,
+        parentId: String?,
+        section: String = SECTION_HOME
+    ): List<ChildHomeNodeDto>? =
         load(
-            "childhome_${familyId}_${parentId ?: "root"}",
+            nodesKey(familyId, parentId, section),
             object : TypeToken<List<ChildHomeNodeDto>>() {}.type
         )
 

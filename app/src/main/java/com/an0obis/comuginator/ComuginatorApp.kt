@@ -5,6 +5,7 @@ import android.app.Application
 import android.os.Bundle
 import coil.ImageLoader
 import coil.ImageLoaderFactory
+import coil.disk.DiskCache
 import com.an0obis.comuginator.api.ApiClient
 import com.an0obis.comuginator.service.AdultMode
 import com.an0obis.comuginator.service.OfflineAutoRecovery
@@ -55,6 +56,11 @@ class ComuginatorApp : Application(), ImageLoaderFactory {
 
     // Global Coil loader: image requests must carry X-Family-Id, otherwise the
     // server resolves the device's oldest family and protected images 404.
+    private companion object {
+        /** Room for a few thousand pictograms and photos. */
+        const val IMAGE_CACHE_MAX_BYTES = 300L * 1024 * 1024
+    }
+
     override fun newImageLoader(): ImageLoader {
         val okHttpClient = OkHttpClient.Builder()
             .addInterceptor { chain ->
@@ -75,6 +81,15 @@ class ComuginatorApp : Application(), ImageLoaderFactory {
             // Serve disk-cached images without asking the server: images are
             // immutable per URL, and this is what lets pictures show offline.
             .respectCacheHeaders(false)
+            // Keep the pictures in filesDir, not cacheDir: Android empties
+            // cacheDir whenever storage runs low, which would make every card
+            // blank offline. Excluded from backups (see backup_rules.xml).
+            .diskCache {
+                DiskCache.Builder()
+                    .directory(filesDir.resolve("image_cache"))
+                    .maxSizeBytes(IMAGE_CACHE_MAX_BYTES)
+                    .build()
+            }
             .build()
     }
 }

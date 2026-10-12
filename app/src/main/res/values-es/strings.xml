@@ -183,6 +183,7 @@
     </plurals>
     <string name="new_set">Nuevo conjunto</string>
     <string name="choose_user_avatar">Elegir avatar de usuario</string>
+    <string name="choose_card">Elige una tarjeta</string>
     <string name="choose_set_cover">Elegir portada del conjunto</string>
     <string name="add_item_to_set">Añadir elemento al conjunto</string>
     <string name="photo_number">Foto %1$s</string>
@@ -372,4 +373,23 @@
     <string name="exact_date">Fecha exacta</string>
     <string name="day_of_week">Día de la semana</string>
     <string name="request">Petición</string>
+
+    <!-- Modo conversación (tablero de comunicación) -->
+    <string name="conversation_mode">Conversación</string>
+    <string name="conversation_title">Conversación</string>
+    <string name="conversation_library">Biblioteca de conversación</string>
+    <string name="conversation_exit">Salir</string>
+    <string name="conversation_line_hint">Toca las tarjetas para formar un mensaje</string>
+    <string name="conversation_speak">Decir</string>
+    <string name="conversation_backspace">Quitar la última tarjeta</string>
+    <string name="conversation_clear">Borrar</string>
+    <string name="conversation_search_hint">Buscar en ARASAAC</string>
+    <string name="conversation_search_none">No se encontró nada</string>
+    <string name="conversation_empty">Aún no hay tarjetas. Un adulto puede añadirlas en la biblioteca de conversación.</string>
+    <string name="conversation_load_failed">No se pudo cargar la biblioteca de conversación.</string>
+    <string name="conversation_tts_unavailable">La síntesis de voz no está disponible en este dispositivo.</string>
+    <string name="conversation_tts_language_missing">La voz de este idioma no está instalada, por lo que no se pueden pronunciar las tarjetas.</string>
+    <string name="element_word">Palabra</string>
+    <string name="breadcrumb_conversation">Comuginator > Biblioteca de conversación > %1$s</string>
+    <string name="breadcrumb_conversation_root">Comuginator > Biblioteca de conversación</string>
 </resources>

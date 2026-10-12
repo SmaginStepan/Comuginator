@@ -11,6 +11,8 @@ import com.an0obis.comuginator.api.UpdateChildHomeNodeRequest
 import com.an0obis.comuginator.storage.OfflineCache
 import com.an0obis.comuginator.storage.PendingNodeAction
 import com.an0obis.comuginator.storage.PendingVisibilityChange
+import com.an0obis.comuginator.storage.SECTION_CONVERSATION
+import com.an0obis.comuginator.storage.SECTION_HOME
 import com.an0obis.comuginator.storage.SessionStore
 import com.an0obis.comuginator.storage.SettingsStore
 import kotlinx.coroutines.Dispatchers
@@ -56,6 +58,12 @@ class ChildHomeViewModel(application: Application) : AndroidViewModel(applicatio
     var isEditorMode: Boolean = false
         private set
 
+    /** SECTION_HOME (child home) or SECTION_CONVERSATION (conversation library editor). */
+    var section: String = SECTION_HOME
+        private set
+
+    val isConversation: Boolean get() = section == SECTION_CONVERSATION
+
     var pendingEditNodeId: String? = null
     var pendingEditNodeType: String? = null
 
@@ -74,12 +82,14 @@ class ChildHomeViewModel(application: Application) : AndroidViewModel(applicatio
         savedPathIds: List<String>,
         savedPathTitles: List<String>,
         savedPendingEditNodeId: String?,
-        savedPendingEditNodeType: String?
+        savedPendingEditNodeType: String?,
+        section: String = SECTION_HOME
     ) {
         if (setupDone) return
         setupDone = true
 
         this.isEditorMode = isEditorMode
+        this.section = section
         pendingEditNodeId = savedPendingEditNodeId
         pendingEditNodeType = savedPendingEditNodeType
 
@@ -138,30 +148,34 @@ class ChildHomeViewModel(application: Application) : AndroidViewModel(applicatio
             val cache = OfflineCache(getApplication())
             val familyId = store.familyId
 
+            // The conversation library has no show/hide, so pending visibility
+            // changes (a child-home concept) must not be applied to it.
+            fun overlay(nodes: List<ChildHomeNodeDto>) =
+                if (isConversation) nodes else cache.applyPendingVisibility(nodes)
+
             val items: List<ChildHomeNodeDto>? =
                 if (SettingsStore(getApplication<Application>()).offlineMode) {
-                    cache.applyPendingVisibility(
-                        cache.loadChildHomeNodes(familyId, parentId) ?: emptyList()
-                    )
+                    overlay(cache.loadChildHomeNodes(familyId, parentId, section) ?: emptyList())
                 } else {
                     try {
                         val response = withContext(Dispatchers.IO) {
                             ApiClient.api.getChildHomeNodes(
                                 auth = store.authHeaderOrThrow(),
-                                parentId = parentId
+                                parentId = parentId,
+                                section = if (isConversation) section else null
                             )
                         }
                         // Show/hide changes made offline that haven't synced yet
                         // still win over what the server says.
-                        val merged = cache.applyPendingVisibility(response.items)
-                        cache.saveChildHomeNodes(familyId, parentId, merged)
+                        val merged = overlay(response.items)
+                        cache.saveChildHomeNodes(familyId, parentId, merged, section)
                         merged
                     } catch (e: Exception) {
                         if (e is java.io.IOException) {
                             _events.emit(Event.ConnectionTrouble)
                             null
                         } else {
-                            val cached = cache.loadChildHomeNodes(familyId, parentId)
+                            val cached = cache.loadChildHomeNodes(familyId, parentId, section)
                             if (cached == null) {
                                 _events.emit(
                                     Event.ShowToast(str(R.string.child_home_load_failed, e.message))
@@ -175,7 +189,8 @@ class ChildHomeViewModel(application: Application) : AndroidViewModel(applicatio
             if (items != null) {
                 val effectiveEditorMode = isEditorMode && !hideInvisible && !_previewMode.value
                 lastLoadedNodesSize = items.size
-                _nodes.value = if (effectiveEditorMode) items
+                // Conversation library: every node is always visible.
+                _nodes.value = if (effectiveEditorMode || isConversation) items
                                else items.filter { it.isVisible }
             }
             _isLoading.value = false
@@ -282,7 +297,8 @@ class ChildHomeViewModel(application: Application) : AndroidViewModel(applicatio
                             type = type,
                             targetMode = "ALL_PARENTS",
                             blinkEnabled = true,
-                            blinkSeconds = 10
+                            blinkSeconds = 10,
+                            section = if (isConversation) section else null
                         )
                     )
                 }

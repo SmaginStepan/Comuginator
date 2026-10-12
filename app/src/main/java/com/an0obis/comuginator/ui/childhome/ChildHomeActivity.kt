@@ -39,6 +39,8 @@ import com.an0obis.comuginator.service.ACTION_CHILD_HOME_SCHEDULE_APPLIED
 import com.an0obis.comuginator.service.AdultMode
 import com.an0obis.comuginator.service.OfflineAutoRecovery
 import com.an0obis.comuginator.storage.SettingsStore
+import com.an0obis.comuginator.storage.SECTION_HOME
+import com.an0obis.comuginator.ui.conversation.ConversationActivity
 import com.an0obis.comuginator.ui.family.FamilyActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -47,6 +49,9 @@ class ChildHomeActivity : BaseActivity() {
 
     companion object {
         const val EXTRA_EDITOR_MODE = "editor_mode"
+
+        /** SECTION_HOME (default) or SECTION_CONVERSATION: which node tree this screen edits. */
+        const val EXTRA_SECTION = "section"
         private const val STATE_PATH_IDS = "child_home_path_ids"
         private const val STATE_PATH_TITLES = "child_home_path_titles"
         private const val STATE_PENDING_EDIT_NODE_ID = "pending_edit_node_id"
@@ -144,7 +149,8 @@ class ChildHomeActivity : BaseActivity() {
             savedPathIds = savedInstanceState?.getStringArrayList(STATE_PATH_IDS).orEmpty(),
             savedPathTitles = savedInstanceState?.getStringArrayList(STATE_PATH_TITLES).orEmpty(),
             savedPendingEditNodeId = savedInstanceState?.getString(STATE_PENDING_EDIT_NODE_ID),
-            savedPendingEditNodeType = savedInstanceState?.getString(STATE_PENDING_EDIT_NODE_TYPE)
+            savedPendingEditNodeType = savedInstanceState?.getString(STATE_PENDING_EDIT_NODE_TYPE),
+            section = intent.getStringExtra(EXTRA_SECTION) ?: SECTION_HOME
         )
 
         ensureInitialized()
@@ -174,6 +180,8 @@ class ChildHomeActivity : BaseActivity() {
             onToggleVisibilityClick = viewModel::toggleNodeVisibility
         )
 
+        adapter.setVisibilityEnabled(!viewModel.isConversation)
+
         rv.layoutManager = GridLayoutManager(this, resources.getInteger(R.integer.child_home_span_count))
         rv.adapter = adapter
         rv.itemAnimator = null
@@ -197,6 +205,11 @@ class ChildHomeActivity : BaseActivity() {
         val btnAdultMode = findViewById<Button>(R.id.btnAdultMode)
         btnAdultMode.isVisible = !viewModel.isEditorMode && viewModel.store.role == "CHILD"
         btnAdultMode.setOnClickListener { showAdultModeDialog() }
+
+        // Conversation mode needs no PIN: the child can start it from here.
+        val btnConversation = findViewById<Button>(R.id.btnConversation)
+        btnConversation.isVisible = !viewModel.isEditorMode && viewModel.store.role == "CHILD"
+        btnConversation.setOnClickListener { ConversationActivity.start(this) }
 
         viewModel.ensureRootPath(getString(R.string.home))
         bindState()
@@ -338,13 +351,21 @@ class ChildHomeActivity : BaseActivity() {
         val items = adapter.readItems()
         val hasHidden = (viewModel.lastLoadedNodesSize ?: 0) > items.size
         val hasInvisibleInList = items.any { !it.isVisible }
+        val conversation = viewModel.isConversation
 
         // Offline the editor is limited to show/hide: no adding, editing,
         // deleting or reordering (all of those need the server).
         val offline = isOffline()
         adapter.setOfflineMode(offline)
 
-        if (effectiveEditorMode) {
+        if (conversation) {
+            // Everything in the conversation library is always visible: no
+            // preview, no hide/show controls.
+            btnAdd.visibility = View.VISIBLE
+            btnAdd.isEnabled = !offline
+            btnHideInvisible.visibility = View.GONE
+            btnShowHidden.visibility = View.GONE
+        } else if (effectiveEditorMode) {
             btnAdd.visibility = View.VISIBLE
             btnAdd.isEnabled = !offline
             if (hasHidden) {
@@ -363,7 +384,8 @@ class ChildHomeActivity : BaseActivity() {
         }
 
         val previewMode = viewModel.previewMode.value
-        btnPreview.visibility = if (viewModel.isEditorMode) View.VISIBLE else View.GONE
+        btnPreview.visibility =
+            if (viewModel.isEditorMode && !conversation) View.VISIBLE else View.GONE
         btnPreview.text = getString(if (previewMode) R.string.stop_preview else R.string.start_preview)
 
         btnBack.visibility =
@@ -372,10 +394,13 @@ class ChildHomeActivity : BaseActivity() {
         tvTitle.visibility = View.VISIBLE
         tvBreadcrumbs.visibility = if (previewMode) View.GONE else View.VISIBLE
         val pathSegments = viewModel.path.value.joinToString(" > ") { it.title }
-        tvBreadcrumbs.text = if (pathSegments.isNotEmpty())
-            getString(R.string.breadcrumb_child_home, pathSegments)
-        else
-            getString(R.string.breadcrumb_child_home_root)
+        tvBreadcrumbs.text = when {
+            conversation && pathSegments.isNotEmpty() ->
+                getString(R.string.breadcrumb_conversation, pathSegments)
+            conversation -> getString(R.string.breadcrumb_conversation_root)
+            pathSegments.isNotEmpty() -> getString(R.string.breadcrumb_child_home, pathSegments)
+            else -> getString(R.string.breadcrumb_child_home_root)
+        }
 
         adapter.setEditorMode(effectiveEditorMode)
     }
@@ -495,7 +520,7 @@ class ChildHomeActivity : BaseActivity() {
         viewModel.pendingEditNodeId = null
         viewModel.pendingEditNodeType = null
         pickItemLauncher.launch(
-            LibraryItemPickerActivity.createIntent(this, LibraryItemPickerActivity.TargetMode.USER_AVATAR)
+            LibraryItemPickerActivity.createIntent(this, LibraryItemPickerActivity.TargetMode.NODE_CARD)
         )
     }
 
@@ -507,7 +532,7 @@ class ChildHomeActivity : BaseActivity() {
         viewModel.pendingEditNodeId = node.id
         viewModel.pendingEditNodeType = node.type
         pickItemLauncher.launch(
-            LibraryItemPickerActivity.createIntent(this, LibraryItemPickerActivity.TargetMode.USER_AVATAR)
+            LibraryItemPickerActivity.createIntent(this, LibraryItemPickerActivity.TargetMode.NODE_CARD)
         )
     }
 
@@ -517,6 +542,8 @@ class ChildHomeActivity : BaseActivity() {
                 viewModel.pushPath(PathEntry(parentId = node.id, title = node.displayLabel()))
                 viewModel.loadNodes()
             }
+            // A word card of the conversation library: only the editor opens it.
+            "WORD" -> if (viewModel.isEditorMode) openEditNode(node)
             "ACTION" -> when {
                 viewModel.isEditorMode && !viewModel.previewMode.value -> openEditNode(node)
                 viewModel.previewMode.value -> {
@@ -545,9 +572,18 @@ class ChildHomeActivity : BaseActivity() {
             .show()
     }
 
+    /** Node types offered in the add/edit dialogs: sections hold a folder or a word, not a request. */
+    private fun nodeTypeLabels(): Array<String> = arrayOf(
+        getString(R.string.element_menu),
+        getString(if (viewModel.isConversation) R.string.element_word else R.string.element_action)
+    )
+
+    private fun nodeTypeValues(): Array<String> =
+        arrayOf("MENU", if (viewModel.isConversation) "WORD" else "ACTION")
+
     private fun showCreateNodeDialog(itemId: String) {
-        val labels = arrayOf(getString(R.string.element_menu), getString(R.string.element_action))
-        val values = arrayOf("MENU", "ACTION")
+        val labels = nodeTypeLabels()
+        val values = nodeTypeValues()
         AlertDialog.Builder(this)
             .setTitle(R.string.child_home_node_type_title)
             .setSingleChoiceItems(labels, 0) { dialog, which ->
@@ -558,9 +594,9 @@ class ChildHomeActivity : BaseActivity() {
     }
 
     private fun showEditNodeDialog(nodeId: String, currentType: String, newItemId: String) {
-        val labels = arrayOf(getString(R.string.element_menu), getString(R.string.element_action))
-        val values = arrayOf("MENU", "ACTION")
-        val checked = if (currentType == "ACTION") 1 else 0
+        val labels = nodeTypeLabels()
+        val values = nodeTypeValues()
+        val checked = if (currentType == values[1]) 1 else 0
         AlertDialog.Builder(this)
             .setTitle(R.string.child_home_node_type_title)
             .setSingleChoiceItems(labels, checked) { dialog, which ->

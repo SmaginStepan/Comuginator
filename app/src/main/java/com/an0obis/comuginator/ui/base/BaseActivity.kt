@@ -27,6 +27,7 @@ import com.an0obis.comuginator.storage.FcmTokenStore
 import com.an0obis.comuginator.storage.SessionStore
 import com.an0obis.comuginator.storage.SettingsStore
 import com.an0obis.comuginator.ui.childhome.ChildHomeActivity
+import com.an0obis.comuginator.ui.conversation.ConversationActivity
 import com.an0obis.comuginator.ui.messaging.IncomingMessageActivity
 import com.an0obis.comuginator.ui.MainActivity
 import com.google.firebase.messaging.FirebaseMessaging
@@ -53,6 +54,21 @@ open class BaseActivity: AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         store = SessionStore(this)
+
+        // Conversation mode is sticky: every other screen hands over to it
+        // until Exit is pressed (this also covers restarting the app).
+        if (mustShowConversation()) {
+            redirectedByRoleGuard = true
+
+            startActivity(
+                Intent(this, ConversationActivity::class.java).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                }
+            )
+
+            finish()
+            return
+        }
 
         if (mustReturnToChildHome()) {
             redirectedByRoleGuard = true
@@ -141,9 +157,21 @@ open class BaseActivity: AppCompatActivity() {
 
     private fun shouldForceChildHome(): Boolean {
         return this !is ChildHomeActivity &&
+                this !is ConversationActivity &&
                 this !is IncomingMessageActivity &&
                 this !is MainActivity
     }
+
+    /**
+     * True while conversation mode is on and this is not the conversation
+     * screen. Incoming-message popups and login still work on top of it.
+     */
+    private fun mustShowConversation(): Boolean =
+        this !is ConversationActivity &&
+                this !is IncomingMessageActivity &&
+                this !is MainActivity &&
+                !store.token.isNullOrBlank() &&
+                SettingsStore(this).conversationMode
 
     /** CHILD devices stay on Child Home unless temporarily elevated (AdultMode). */
     private fun mustReturnToChildHome(): Boolean =

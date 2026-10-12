@@ -40,6 +40,16 @@ class SettingsStore(context: Context) {
             prefs.edit { putBoolean("offline_mode", value) }
         }
 
+    /**
+     * Conversation mode (AAC): while set, the app shows only the conversation
+     * screen until the user presses Exit. Survives leaving and restarting the app.
+     */
+    var conversationMode: Boolean
+        get() = prefs.getBoolean("conversation_mode", false)
+        set(value) {
+            prefs.edit { putBoolean("conversation_mode", value) }
+        }
+
     // ── Notifications on/off ────────────────────────────────────────────────
     // The manual toggle is an event with a timestamp so scheduled rules and
     // the manual switch can compete on "last event wins".

@@ -207,6 +207,7 @@
 
     <!-- LibraryItemPickerActivity -->
     <string name="choose_user_avatar">Choose user avatar</string>
+    <string name="choose_card">Choose a card</string>
     <string name="choose_set_cover">Choose set cover</string>
     <string name="add_item_to_set">Add item to set</string>
     <string name="photo_number">Photo %1$s</string>
@@ -416,4 +417,27 @@
     <string name="exact_date">Exact date</string>
     <string name="day_of_week">Day of week</string>
     <string name="request">Request</string>
+
+    <!-- Conversation mode (AAC board) -->
+    <string name="conversation_mode">Conversation</string>
+    <string name="conversation_title">Conversation</string>
+    <string name="conversation_library">Conversation library</string>
+    <string name="conversation_button" translatable="false">💬</string>
+    <string name="conversation_exit">Exit</string>
+    <string name="conversation_line_hint">Tap cards to build a message</string>
+    <string name="conversation_speak">Speak</string>
+    <string name="conversation_speak_glyph" translatable="false">🔊</string>
+    <string name="conversation_backspace">Remove last card</string>
+    <string name="conversation_backspace_glyph" translatable="false">←</string>
+    <string name="conversation_clear">Clear</string>
+    <string name="conversation_clear_glyph" translatable="false">×</string>
+    <string name="conversation_search_hint">Search ARASAAC</string>
+    <string name="conversation_search_none">Nothing found</string>
+    <string name="conversation_empty">No cards yet. A parent can add them in the Conversation library.</string>
+    <string name="conversation_load_failed">Couldn\'t load the conversation library.</string>
+    <string name="conversation_tts_unavailable">Text to speech is not available on this device.</string>
+    <string name="conversation_tts_language_missing">The voice for this language is not installed, so cards can\'t be spoken.</string>
+    <string name="element_word">Word</string>
+    <string name="breadcrumb_conversation">Comuginator > Conversation library > %1$s</string>
+    <string name="breadcrumb_conversation_root">Comuginator > Conversation library</string>
 </resources>

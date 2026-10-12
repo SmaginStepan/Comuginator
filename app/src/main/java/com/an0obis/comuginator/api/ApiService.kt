@@ -240,7 +240,8 @@ interface ApiService {
     @GET("/v1/child-home/nodes")
     suspend fun getChildHomeNodes(
         @Header("Authorization") auth: String,
-        @Query("parentId") parentId: String? = null
+        @Query("parentId") parentId: String? = null,
+        @Query("section") section: String? = null
     ): ChildHomeNodesResponse
 
     @POST("/v1/child-home/actions/{nodeId}/request")

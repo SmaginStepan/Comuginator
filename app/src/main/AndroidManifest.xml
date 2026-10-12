@@ -6,6 +6,14 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 
+    <!-- Conversation mode speaks cards with the device's text-to-speech engine
+         (Android 11+ package visibility). -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE" />
+        </intent>
+    </queries>
+
     <application
         android:name=".ComuginatorApp"
         android:allowBackup="true"
@@ -30,6 +38,9 @@
             android:name=".ui.ConnectionTroubleActivity"
             android:exported="false" />
         <activity android:name=".ui.childhome.ChildHomeActivity" />
+        <activity
+            android:name=".ui.conversation.ConversationActivity"
+            android:exported="false" />
         <activity
             android:name=".ui.schedule.ScheduleActivity"
             android:exported="false" />

@@ -59,6 +59,8 @@ class LibraryItemPickerActivity : BaseActivity() {
 
     enum class TargetMode {
         USER_AVATAR,
+        /** Picture for a node of the child home or the conversation library. */
+        NODE_CARD,
         SET_COVER,
         ADD_TO_SET,
         PICK_SINGLE
@@ -210,6 +212,7 @@ class LibraryItemPickerActivity : BaseActivity() {
     private fun setupUi() {
         tvTitle.text = when (targetMode) {
             TargetMode.USER_AVATAR -> getString(R.string.choose_user_avatar)
+            TargetMode.NODE_CARD -> getString(R.string.choose_card)
             TargetMode.SET_COVER -> getString(R.string.choose_set_cover)
             TargetMode.ADD_TO_SET -> getString(R.string.add_item_to_set)
             TargetMode.PICK_SINGLE -> getString(R.string.add_item_to_set)
