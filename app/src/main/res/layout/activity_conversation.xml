@@ -34,6 +34,18 @@
             android:paddingHorizontal="8dp" />
 
         <Button
+            android:id="@+id/btnConvHome"
+            style="@style/ComuginatorButton.Secondary"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginEnd="6dp"
+            android:contentDescription="@string/conversation_home"
+            android:minWidth="0dp"
+            android:minHeight="40dp"
+            android:text="@string/conversation_home_glyph"
+            android:visibility="invisible" />
+
+        <Button
             android:id="@+id/btnConvUp"
             style="@style/ComuginatorButton.Secondary"
             android:layout_width="wrap_content"
@@ -161,12 +173,26 @@
         android:layout_marginTop="6dp"
         android:layout_weight="1">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvConvLibrary"
+        <!-- The board: fixed grid, scaled to fit, scrolls both ways when too big -->
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/boardScroll"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipToPadding="false"
-            android:paddingBottom="8dp" />
+            android:paddingBottom="8dp">
+
+            <HorizontalScrollView
+                android:id="@+id/boardScrollH"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:scrollbars="none">
+
+                <com.an0obis.comuginator.ui.conversation.FixedGridLayout
+                    android:id="@+id/boardGrid"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </HorizontalScrollView>
+        </androidx.core.widget.NestedScrollView>
 
         <TextView
             android:id="@+id/tvConvEmpty"

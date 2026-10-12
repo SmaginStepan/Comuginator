@@ -450,7 +450,12 @@ data class ChildHomeNodeDto(
     val item: ChildHomeNodeItemDto?,
     val targets: List<ChildHomeTargetDto> = emptyList(),
     /** "HOME" (child home) or "CONVERSATION" (conversation mode library). */
-    val section: String = "HOME"
+    val section: String = "HOME",
+    /** Fixed cell in the page grid (conversation library only), or null when unplaced. */
+    val gridRow: Int? = null,
+    val gridCol: Int? = null,
+    /** Word-class colour key (PRONOUN, VERB, ...) or null for the default. */
+    val color: String? = null
 )
 
 data class ChildHomeNodesResponse(
@@ -474,7 +479,10 @@ data class CreateChildHomeNodeRequest(
     val targetUserIds: List<String>? = null,
     val blinkEnabled: Boolean = true,
     val blinkSeconds: Int = 60,
-    val section: String? = null
+    val section: String? = null,
+    val gridRow: Int? = null,
+    val gridCol: Int? = null,
+    val color: String? = null
 )
 
 data class UpdateChildHomeNodeRequest(
@@ -487,7 +495,38 @@ data class UpdateChildHomeNodeRequest(
     val blinkEnabled: Boolean? = null,
     val blinkSeconds: Int? = null,
     val labelOverride: String? = null,
-    val isVisible: Boolean? = null
+    val isVisible: Boolean? = null,
+    val gridRow: Int? = null,
+    val gridCol: Int? = null,
+    val color: String? = null
+)
+
+// ── Conversation presets (starter vocabulary) ────────────────────────────────
+
+data class ConversationPresetDto(
+    val id: String,
+    val name: Map<String, String> = emptyMap(),
+    val languages: List<String> = emptyList(),
+    val cardCount: Int = 0,
+    val license: String? = null
+)
+
+data class ConversationPresetsResponse(
+    val ok: Boolean,
+    val items: List<ConversationPresetDto> = emptyList()
+)
+
+data class InstallPresetRequest(
+    val language: String,
+    /** "EMPTY_ONLY" (default) or "REPLACE". */
+    val mode: String? = null
+)
+
+data class InstallPresetResponse(
+    val ok: Boolean,
+    val nodesCreated: Int = 0,
+    val itemsCreated: Int = 0,
+    val itemsReused: Int = 0
 )
 
 data class ChildHomeNodeResponse(

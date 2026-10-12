@@ -42,6 +42,9 @@
             android:name=".ui.conversation.ConversationActivity"
             android:exported="false" />
         <activity
+            android:name=".ui.conversation.ConversationEditorActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.schedule.ScheduleActivity"
             android:exported="false" />
         <activity

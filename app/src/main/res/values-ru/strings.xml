@@ -397,4 +397,34 @@
     <string name="breadcrumb_conversation">Comuginator > Библиотека общения > %1$s</string>
     <string name="breadcrumb_conversation_root">Comuginator > Библиотека общения</string>
 
+    <!-- Доска общения и её редактор -->
+    <string name="conversation_home">Домой</string>
+    <string name="add_card_here">Добавить карточку сюда</string>
+    <string name="starter_vocabulary">Стартовый словарь</string>
+    <string name="starter_install_title">Установить стартовый словарь?</string>
+    <string name="starter_message">Будет добавлена готовая доска примерно из 570 карточек с картинками (основные слова и 20 папок). Потом всё можно изменить.</string>
+    <string name="starter_replace_message">Текущая библиотека общения будет заменена стартовым словарём. Добавленные вами карточки будут удалены.</string>
+    <string name="install">Установить</string>
+    <string name="starter_done">Добавлено карточек: %1$d.</string>
+    <string name="starter_failed">Не удалось установить: %1$s</string>
+    <string name="conversation_edit_failed">Не удалось сохранить изменение: %1$s</string>
+    <string name="change_picture">Сменить картинку</string>
+    <string name="change_color">Сменить цвет</string>
+    <string name="open_folder">Открыть</string>
+    <string name="choose_color">Выберите цвет</string>
+    <string name="no_color">Без цвета</string>
+    <string name="color_pronoun">Люди и местоимения</string>
+    <string name="color_verb">Глаголы</string>
+    <string name="color_noun">Предметы</string>
+    <string name="color_descriptor">Описательные слова</string>
+    <string name="color_adverb">Где и когда</string>
+    <string name="color_preposition">Слова места</string>
+    <string name="color_question">Вопросы</string>
+    <string name="color_negation">Нет и стоп</string>
+    <string name="color_social">Социальные слова</string>
+    <string name="color_misc">Другое</string>
+    <string name="delete_folder_confirm">Удалить эту папку и все карточки в ней?</string>
+    <string name="delete_card_confirm">Удалить эту карточку?</string>
+    <string name="pictograms_attribution">Пиктограммы: ARASAAC (Gobierno de Aragón), CC BY-NC-SA 4.0, arasaac.org</string>
+
 </resources>

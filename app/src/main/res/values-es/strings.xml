@@ -392,4 +392,34 @@
     <string name="element_word">Palabra</string>
     <string name="breadcrumb_conversation">Comuginator > Biblioteca de conversación > %1$s</string>
     <string name="breadcrumb_conversation_root">Comuginator > Biblioteca de conversación</string>
+
+    <!-- Tablero de conversación y su editor -->
+    <string name="conversation_home">Inicio</string>
+    <string name="add_card_here">Añadir una tarjeta aquí</string>
+    <string name="starter_vocabulary">Vocabulario inicial</string>
+    <string name="starter_install_title">¿Instalar el vocabulario inicial?</string>
+    <string name="starter_message">Se añadirá un tablero listo con unas 570 tarjetas con imágenes (palabras básicas y 20 carpetas). Después puedes editarlo todo.</string>
+    <string name="starter_replace_message">Esto sustituye tu biblioteca de conversación actual por el vocabulario inicial. Las tarjetas que hayas añadido se eliminarán.</string>
+    <string name="install">Instalar</string>
+    <string name="starter_done">Tarjetas instaladas: %1$d.</string>
+    <string name="starter_failed">No se pudo instalar: %1$s</string>
+    <string name="conversation_edit_failed">No se pudo guardar el cambio: %1$s</string>
+    <string name="change_picture">Cambiar imagen</string>
+    <string name="change_color">Cambiar color</string>
+    <string name="open_folder">Abrir</string>
+    <string name="choose_color">Elige un color</string>
+    <string name="no_color">Sin color</string>
+    <string name="color_pronoun">Personas y pronombres</string>
+    <string name="color_verb">Verbos</string>
+    <string name="color_noun">Cosas</string>
+    <string name="color_descriptor">Palabras descriptivas</string>
+    <string name="color_adverb">Dónde y cuándo</string>
+    <string name="color_preposition">Palabras de posición</string>
+    <string name="color_question">Preguntas</string>
+    <string name="color_negation">No y parar</string>
+    <string name="color_social">Palabras sociales</string>
+    <string name="color_misc">Otras</string>
+    <string name="delete_folder_confirm">¿Eliminar esta carpeta y todas las tarjetas que contiene?</string>
+    <string name="delete_card_confirm">¿Eliminar esta tarjeta?</string>
+    <string name="pictograms_attribution">Pictogramas: ARASAAC (Gobierno de Aragón), CC BY-NC-SA 4.0, arasaac.org</string>
 </resources>

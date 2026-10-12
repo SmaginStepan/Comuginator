@@ -244,6 +244,18 @@ interface ApiService {
         @Query("section") section: String? = null
     ): ChildHomeNodesResponse
 
+    @GET("/v1/conversation/presets")
+    suspend fun getConversationPresets(
+        @Header("Authorization") auth: String
+    ): ConversationPresetsResponse
+
+    @POST("/v1/conversation/presets/{id}/install")
+    suspend fun installConversationPreset(
+        @Header("Authorization") auth: String,
+        @Path("id") presetId: String,
+        @Body body: InstallPresetRequest
+    ): InstallPresetResponse
+
     @POST("/v1/child-home/actions/{nodeId}/request")
     suspend fun requestChildHomeAction(
         @Header("Authorization") auth: String,

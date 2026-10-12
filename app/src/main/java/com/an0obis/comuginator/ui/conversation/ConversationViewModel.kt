@@ -27,7 +27,11 @@ data class ConvCell(
     val id: String,
     val label: String,
     val imageUrl: String?,
-    val isFolder: Boolean = false
+    val isFolder: Boolean = false,
+    /** Fixed cell on the page (null = not placed yet), and the word-class colour key. */
+    val row: Int? = null,
+    val col: Int? = null,
+    val color: String? = null
 )
 
 /**
@@ -46,8 +50,15 @@ class ConversationViewModel(application: Application) : AndroidViewModel(applica
 
     val store = SessionStore(application)
 
-    private val _cells = MutableStateFlow<List<ConvCell>>(emptyList())
-    val cells: StateFlow<List<ConvCell>> = _cells.asStateFlow()
+    private val _page = MutableStateFlow(BoardPage.EMPTY)
+    /** The board page of the folder we are in. */
+    val page: StateFlow<BoardPage> = _page.asStateFlow()
+
+    /** Size of the home page; every page uses the card size derived from it. */
+    var homeCols: Int = 0
+        private set
+    var homeRows: Int = 0
+        private set
 
     private val _line = MutableStateFlow<List<ConvCell>>(emptyList())
     val line: StateFlow<List<ConvCell>> = _line.asStateFlow()
@@ -92,8 +103,18 @@ class ConversationViewModel(application: Application) : AndroidViewModel(applica
      * until the server answers.
      */
     private fun showLevelChange() {
-        _cells.value = emptyList()
+        _page.value = BoardPage.EMPTY
         _loaded.value = false
+    }
+
+    private fun showCells(nodes: List<ChildHomeNodeDto>) {
+        val page = BoardLayout.build(nodes.map { it.toCell() })
+        if (_path.value.size == 1) {
+            homeCols = page.cols
+            homeRows = page.rows
+        }
+        _page.value = page
+        _loaded.value = true
     }
 
     fun loadNodes() {
@@ -108,10 +129,7 @@ class ConversationViewModel(application: Application) : AndroidViewModel(applica
             // Show the saved copy of this level right away; the server's
             // answer (below) replaces it if anything changed.
             if (!forcedOffline && !_loaded.value) {
-                cache.loadChildHomeNodes(familyId, parentId, SECTION_CONVERSATION)?.let {
-                    _cells.value = it.map { node -> node.toCell() }
-                    _loaded.value = true
-                }
+                cache.loadChildHomeNodes(familyId, parentId, SECTION_CONVERSATION)?.let { showCells(it) }
             }
 
             val nodes: List<ChildHomeNodeDto>? =
@@ -148,10 +166,7 @@ class ConversationViewModel(application: Application) : AndroidViewModel(applica
                     }
                 }
 
-            if (nodes != null) {
-                _cells.value = nodes.map { it.toCell() }
-                _loaded.value = true
-            }
+            if (nodes != null) showCells(nodes)
             _isLoading.value = false
         }
     }
@@ -160,8 +175,19 @@ class ConversationViewModel(application: Application) : AndroidViewModel(applica
         id = id,
         label = displayLabel(),
         imageUrl = item?.imageUrl,
-        isFolder = type == "MENU"
+        isFolder = type == "MENU",
+        row = gridRow,
+        col = gridCol,
+        color = color
     )
+
+    /** Jumps back to the home page. */
+    fun goHome() {
+        if (_path.value.size <= 1) return
+        _path.value = _path.value.take(1)
+        showLevelChange()
+        loadNodes()
+    }
 
     // ── The line of composed cards ───────────────────────────────────────────
 

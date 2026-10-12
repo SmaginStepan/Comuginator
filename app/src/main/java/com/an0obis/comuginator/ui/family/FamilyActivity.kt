@@ -38,9 +38,9 @@ import com.an0obis.comuginator.ui.library.LibraryActivity
 import com.an0obis.comuginator.ui.library.LibraryItemPickerActivity
 import com.an0obis.comuginator.ui.schedule.ScheduleActivity
 import com.an0obis.comuginator.service.AdultMode
-import com.an0obis.comuginator.storage.SECTION_CONVERSATION
 import com.an0obis.comuginator.storage.SettingsStore
 import com.an0obis.comuginator.ui.conversation.ConversationActivity
+import com.an0obis.comuginator.ui.conversation.ConversationEditorActivity
 import com.an0obis.comuginator.ui.ConnectionErrorHelper
 import com.an0obis.comuginator.ui.OfflineBanner
 import com.an0obis.comuginator.util.TimeFormat
@@ -136,12 +136,7 @@ class FamilyActivity : BaseActivity() {
             if (isOfflineMode()) {
                 showOfflineToast()
             } else {
-                startActivity(
-                    Intent(this, ChildHomeActivity::class.java).apply {
-                        putExtra(ChildHomeActivity.EXTRA_EDITOR_MODE, true)
-                        putExtra(ChildHomeActivity.EXTRA_SECTION, SECTION_CONVERSATION)
-                    }
-                )
+                startActivity(Intent(this, ConversationEditorActivity::class.java))
             }
         }
 

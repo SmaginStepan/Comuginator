@@ -55,11 +55,6 @@ class ConversationActivity : BaseActivity(), TextToSpeech.OnInitListener {
                 }
             )
         }
-
-        /** Width of one library cell, used to decide how many columns fit. */
-        private const val CELL_WIDTH_DP = 96
-        private const val MIN_COLUMNS = 3
-        private const val MAX_COLUMNS = 12
     }
 
     private val viewModel: ConversationViewModel by viewModels()
@@ -68,8 +63,9 @@ class ConversationActivity : BaseActivity(), TextToSpeech.OnInitListener {
     private var ttsReady = false
     private var resumedOnce = false
 
-    private lateinit var libraryAdapter: ConversationCardAdapter
+    private lateinit var board: BoardController
     private lateinit var lineAdapter: ConversationCardAdapter
+    private lateinit var btnHome: Button
     private lateinit var rvLine: RecyclerView
     private lateinit var tvPath: TextView
     private lateinit var tvLineHint: TextView
@@ -111,20 +107,24 @@ class ConversationActivity : BaseActivity(), TextToSpeech.OnInitListener {
         etSearch = findViewById(R.id.etConvSearch)
         progress = findViewById(R.id.progressConv)
         rvLine = findViewById(R.id.rvConvLine)
-        val rvLibrary = findViewById<RecyclerView>(R.id.rvConvLibrary)
+        btnHome = findViewById(R.id.btnConvHome)
 
-        // Library: a folder opens, a word is spoken and added to the line.
-        libraryAdapter = ConversationCardAdapter(token, R.layout.item_conversation_card) { cell, _ ->
-            if (cell.isFolder) {
-                viewModel.openFolder(cell)
-            } else {
-                viewModel.addToLine(cell)
-                speak(cell.label)
+        // The board: a folder opens, a word is spoken and added to the line.
+        board = BoardController(
+            context = this,
+            container = findViewById(R.id.boardScroll),
+            grid = findViewById(R.id.boardGrid),
+            authToken = token,
+            editor = false,
+            onCellClick = { cell ->
+                if (cell.isFolder) {
+                    viewModel.openFolder(cell)
+                } else {
+                    viewModel.addToLine(cell)
+                    speak(cell.label)
+                }
             }
-        }
-        rvLibrary.layoutManager = GridLayoutManager(this, columnCount())
-        rvLibrary.adapter = libraryAdapter
-        rvLibrary.itemAnimator = null
+        )
 
         // Line: tapping a card takes it out of the message again.
         lineAdapter = ConversationCardAdapter(token, R.layout.item_conversation_line) { _, position ->
@@ -136,6 +136,7 @@ class ConversationActivity : BaseActivity(), TextToSpeech.OnInitListener {
 
         findViewById<Button>(R.id.btnConvExit).setOnClickListener { exitConversation() }
         btnUp.setOnClickListener { viewModel.goUp() }
+        btnHome.setOnClickListener { viewModel.goHome() }
         findViewById<Button>(R.id.btnConvSpeak).setOnClickListener {
             val text = viewModel.lineText()
             if (text.isNotBlank()) speak(text)
@@ -168,7 +169,7 @@ class ConversationActivity : BaseActivity(), TextToSpeech.OnInitListener {
     override fun onResume() {
         super.onResume()
         // The parent may have changed the library meanwhile.
-        if (resumedOnce && ::libraryAdapter.isInitialized) viewModel.loadNodes()
+        if (resumedOnce && ::board.isInitialized) viewModel.loadNodes()
         resumedOnce = true
     }
 
@@ -206,8 +207,8 @@ class ConversationActivity : BaseActivity(), TextToSpeech.OnInitListener {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
-                    viewModel.cells.collect { cells ->
-                        libraryAdapter.submit(cells)
+                    viewModel.page.collect { page ->
+                        board.show(page, viewModel.homeCols, viewModel.homeRows)
                         updateEmptyHint()
                     }
                 }
@@ -225,6 +226,7 @@ class ConversationActivity : BaseActivity(), TextToSpeech.OnInitListener {
                     viewModel.path.collect { path ->
                         val inFolder = path.size > 1
                         btnUp.visibility = if (inFolder) View.VISIBLE else View.INVISIBLE
+                        btnHome.visibility = if (inFolder) View.VISIBLE else View.INVISIBLE
                         tvPath.text = if (inFolder) {
                             path.drop(1).joinToString(" > ") { it.title }
                         } else {
@@ -251,14 +253,7 @@ class ConversationActivity : BaseActivity(), TextToSpeech.OnInitListener {
 
     private fun updateEmptyHint() {
         tvEmpty.visibility =
-            if (viewModel.loaded.value && viewModel.cells.value.isEmpty()) View.VISIBLE else View.GONE
-    }
-
-    /** Cards stay a fixed small size; bigger screens simply fit more columns. */
-    private fun columnCount(): Int {
-        val metrics = resources.displayMetrics
-        val widthDp = metrics.widthPixels / metrics.density
-        return (widthDp / CELL_WIDTH_DP).toInt().coerceIn(MIN_COLUMNS, MAX_COLUMNS)
+            if (viewModel.loaded.value && viewModel.page.value.placed.isEmpty()) View.VISIBLE else View.GONE
     }
 
     // ── ARASAAC search (adds to the line only, never to the library) ─────────

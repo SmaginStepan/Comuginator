@@ -440,4 +440,35 @@
     <string name="element_word">Word</string>
     <string name="breadcrumb_conversation">Comuginator > Conversation library > %1$s</string>
     <string name="breadcrumb_conversation_root">Comuginator > Conversation library</string>
+
+    <!-- Conversation board and its editor -->
+    <string name="conversation_home">Home</string>
+    <string name="conversation_home_glyph" translatable="false">🏠</string>
+    <string name="add_card_here">Add a card here</string>
+    <string name="starter_vocabulary">Starter vocabulary</string>
+    <string name="starter_install_title">Install the starter vocabulary?</string>
+    <string name="starter_message">A ready-made board with about 570 picture cards (core words and 20 folders) will be added. You can edit everything afterwards.</string>
+    <string name="starter_replace_message">This replaces your current conversation library with the starter vocabulary. Cards you added will be removed.</string>
+    <string name="install">Install</string>
+    <string name="starter_done">Installed %1$d cards.</string>
+    <string name="starter_failed">Couldn\'t install: %1$s</string>
+    <string name="conversation_edit_failed">Couldn\'t save the change: %1$s</string>
+    <string name="change_picture">Change picture</string>
+    <string name="change_color">Change color</string>
+    <string name="open_folder">Open</string>
+    <string name="choose_color">Choose a color</string>
+    <string name="no_color">No color</string>
+    <string name="color_pronoun">People and pronouns</string>
+    <string name="color_verb">Verbs</string>
+    <string name="color_noun">Things</string>
+    <string name="color_descriptor">Describing words</string>
+    <string name="color_adverb">Where and when</string>
+    <string name="color_preposition">Position words</string>
+    <string name="color_question">Questions</string>
+    <string name="color_negation">No and stop</string>
+    <string name="color_social">Social words</string>
+    <string name="color_misc">Other</string>
+    <string name="delete_folder_confirm">Delete this folder and every card in it?</string>
+    <string name="delete_card_confirm">Delete this card?</string>
+    <string name="pictograms_attribution">Pictograms: ARASAAC (Gobierno de Aragón), CC BY-NC-SA 4.0, arasaac.org</string>
 </resources>
